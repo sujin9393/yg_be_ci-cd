@@ -3,9 +3,13 @@ package com.moogsan.moongsan_backend.domain.groupbuy.entity;
 import com.moogsan.moongsan_backend.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name="role")
