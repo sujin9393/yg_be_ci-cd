@@ -1,4 +1,4 @@
-package com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.main;
+package com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyMain;
 
 import lombok.Builder;
 import lombok.Getter;

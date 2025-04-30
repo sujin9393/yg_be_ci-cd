@@ -9,10 +9,10 @@ import java.util.List;
 @Builder
 public class PagedResponse<T> {
 
-    private long totalCount;     // 공구 게시글 개수
+    private long count;     // 공구 게시글 개수
     private List<T> posts;       // 공구 게시글 리스트
 
     private Integer nextCursor;  // 현재 응답의 마지막 postId. null 여부를 표현하기 위해 Integer 사용
-    private boolean hasNext;     // 다음 페이지 존재 여부
+    private boolean hasMore;     // 다음 페이지 존재 여부
 
 }

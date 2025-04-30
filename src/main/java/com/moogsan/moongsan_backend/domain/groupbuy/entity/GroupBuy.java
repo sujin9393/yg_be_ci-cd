@@ -3,15 +3,15 @@ package com.moogsan.moongsan_backend.domain.groupbuy.entity;
 import com.moogsan.moongsan_backend.domain.BaseEntity;
 import com.moogsan.moongsan_backend.domain.user.entity.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -30,19 +30,19 @@ public class GroupBuy extends BaseEntity {
     private String url;
 
     @Column(nullable = false)
-    private long price;
+    private int price;
 
     @Column(nullable = false)
-    private long unitPrice;
+    private int unitPrice;
 
     @Column(nullable = false)
-    private long totalAmount;
+    private int totalAmount;
 
     @Column(nullable = false)
-    private long leftAmount;
+    private int leftAmount;
 
     @Column(nullable = false)
-    private long unitAmount;
+    private int unitAmount;
 
     @Column(nullable = false, length = 500)
     private String description;
@@ -84,6 +84,9 @@ public class GroupBuy extends BaseEntity {
     @JoinColumn(name="user_id", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "groupBuy", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "groupBuy",
+               cascade = CascadeType.ALL,
+               orphanRemoval = true)
+    @OrderBy("imageSeqNo ASC")
     private List<Image> images = new ArrayList<>();
 }
