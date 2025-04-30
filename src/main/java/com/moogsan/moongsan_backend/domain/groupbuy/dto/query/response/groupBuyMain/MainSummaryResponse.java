@@ -1,15 +1,16 @@
-package com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.main;
+package com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyMain;
 
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 @Builder
-public class GroupBuySummaryResponse {
+public class MainSummaryResponse {
 
     // 식별/메타
     private Long postId;        // 공구 게시글 아이디
     private String title;       // 제목
+    private String name;
     private String postStatus;  // 공구 진행 상태
 
     // 본문

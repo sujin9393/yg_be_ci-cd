@@ -8,7 +8,7 @@ import lombok.Getter;
 public class ParticipatedListResponse {
 
     // 식별/메타
-    private String postId;         // 공구 게시글 아이디
+    private Long postId;         // 공구 게시글 아이디
     private String title;          // 공구 게시글 제목
     private String postStatus;     // 공구 진행 상태(OPEN, CLOSED, ENDED)
 
