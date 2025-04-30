@@ -4,58 +4,62 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
 
+/**
+ * User 엔티티 클래스.
+ * 'users' 테이블과 매핑되며, 회원 정보를 관리한다.
+ */
 @Entity
-@Table(name = "users")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Table(name = "users") // 매핑될 테이블 이름을 지정
+@Getter // 모든 필드에 대한 Getter 메서드를 자동 생성
+@Setter // 모든 필드에 대한 Setter 메서드를 자동 생성
+@NoArgsConstructor // 파라미터가 없는 기본 생성자 자동 생성
+@AllArgsConstructor // 모든 필드를 인자로 받는 생성자 자동 생성
+@Builder // 빌더 패턴을 통한 객체 생성 지원
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // DB에서 자동 증가
+    private Long id; // 사용자 고유 식별자 (PK)
 
     @Column(nullable = false, length = 255)
-    private String email;
+    private String email; // 사용자 이메일 (로그인 ID 역할 가능)
 
     @Column(length = 60)
-    private String nickname;
+    private String nickname; // 사용자 닉네임
 
     @Column(length = 36)
-    private String name;
+    private String name; // 사용자 실명
 
     @Column(name = "phone_number", length = 11)
-    private String phoneNumber;
+    private String phoneNumber; // 사용자 전화번호 (하이픈 제외)
 
     @Column(length = 60)
-    private String password;
+    private String password; // 비밀번호 (암호화 저장)
 
     @Column(name = "account_bank", length = 30)
-    private String accountBank;
+    private String accountBank; // 계좌 은행명
 
     @Column(name = "account_number", length = 32)
-    private String accountNumber;
+    private String accountNumber; // 계좌 번호
 
     @Column(name = "image_url", length = 512)
-    private String imageUrl;
+    private String imageUrl; // 프로필 이미지 URL
 
     @Column(nullable = false, length = 30)
-    private String type; // USER, ADMIN
+    private String type; // 사용자 타입 (예: USER, ADMIN)
 
     @Column(nullable = false, length = 30)
-    private String status; // ACTIVE, SUSPENDED, DEACTIVATED
+    private String status; // 사용자 상태 (예: ACTIVE, SUSPENDED, DEACTIVATED)
 
     @Column(name = "joined_at", nullable = false)
-    private LocalDateTime joinedAt;
+    private LocalDateTime joinedAt; // 가입 시각
 
     @Column(name = "modified_at")
-    private LocalDateTime modifiedAt;
+    private LocalDateTime modifiedAt; // 마지막 정보 수정 시각
 
     @Column(name = "logout_at")
-    private LocalDateTime logoutAt;
+    private LocalDateTime logoutAt; // 마지막 로그아웃 시각
 
     @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
+    private LocalDateTime deletedAt; // 탈퇴(삭제) 시각
 }

@@ -1,8 +1,10 @@
-package com.moogsan.moongsan_backend.domain.user.signup.service;
+package com.moogsan.moongsan_backend.domain.user.service;
 
-import com.moogsan.moongsan_backend.domain.user.signup.dto.SignUpRequest;
+import com.moogsan.moongsan_backend.domain.user.dto.request.SignUpRequest;
+import com.moogsan.moongsan_backend.domain.user.dto.response.LoginResponse;
 import com.moogsan.moongsan_backend.domain.user.entity.User;
 import com.moogsan.moongsan_backend.domain.user.repository.UserRepository;
+import com.moogsan.moongsan_backend.global.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ public class SignUpService {
 
     private final UserRepository userRepository; // 사용자 데이터베이스 접근 객체
     private final PasswordEncoder passwordEncoder; // 비밀번호 암호화기
+    private final JwtUtil jwtUtil;
 
     /**
      * 회원가입 요청을 처리하는 메서드.
@@ -27,26 +30,39 @@ public class SignUpService {
      * @param request 회원가입 요청 DTO
      * @return 저장된 User 엔티티
      */
-    public User signUp(SignUpRequest request) {
-        validateDuplicateUser(request); // 이메일, 닉네임, 전화번호 중복 검사
+    public LoginResponse signUp(SignUpRequest request) {
+        validateDuplicateUser(request);
 
-        // 요청 데이터를 바탕으로 User 엔티티 생성
         User user = User.builder()
                 .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword())) // 비밀번호 암호화
+                .password(passwordEncoder.encode(request.getPassword()))
                 .nickname(request.getNickname())
                 .name(request.getName())
                 .phoneNumber(request.getPhoneNumber())
                 .accountBank(request.getAccountBank())
                 .accountNumber(request.getAccountNumber())
-                .imageUrl(request.getImageUrl()) // 가입 시 이미지 설정
-                .type("USER") // 기본 사용자 타입 설정
-                .status("ACTIVE") // 기본 상태 설정
-                .joinedAt(java.time.LocalDateTime.now()) // 가입 시각 저장
+                .imageUrl(request.getImageUrl())
+                .type("USER")
+                .status("ACTIVE")
+                .joinedAt(java.time.LocalDateTime.now())
                 .build();
 
-        // 사용자 정보 저장 및 반환
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        // JWT 유틸은 추후 구현 필요
+        String accessToken = jwtUtil.generateAccessToken(savedUser);
+        String refreshToken = jwtUtil.generateRefreshToken(savedUser);
+        Long accessTokenExpireAt = jwtUtil.getAccessTokenExpireAt();
+
+        return new LoginResponse(
+                "회원가입이 완료되었습니다.",
+                savedUser.getId(),
+                savedUser.getNickname(),
+                accessToken,
+                refreshToken,
+                accessTokenExpireAt,
+                "https://example.com/home"
+        );
     }
 
     /**

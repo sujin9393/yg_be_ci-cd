@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
  * 컨트롤러 단에서 발생하는 예외를 일관된 형식으로 응답한다.
  */
 @RestControllerAdvice // 전역적으로 모든 컨트롤러의 예외를 가로채서 처리하는 어노테이션
-public class SignUpExceptionHandler {
+public class UserExceptionHandler {
 
     /**
      * IllegalArgumentException이 발생할 경우 409 Conflict 상태로 응답하는 메서드.

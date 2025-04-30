@@ -1,6 +1,6 @@
-package com.moogsan.moongsan_backend.unit.user.controller;
+package com.moogsan.moongsan_backend.unit.user.signup.controller;
 
-import com.moogsan.moongsan_backend.domain.user.signup.service.SignUpService;
+import com.moogsan.moongsan_backend.domain.user.service.SignUpService;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
  * 테스트 컨텍스트를 완성합니다.
  */
 @Configuration
-public class UserControllerTestConfig {
+public class SignUpControllerTestConfig {
 
     /**
      * UserService에 대한 Mockito Mock 객체를 Spring Bean으로 등록합니다.
@@ -20,7 +20,7 @@ public class UserControllerTestConfig {
      * @return UserService의 Mockito Mock 인스턴스
      */
     @Bean
-    public SignUpService userService() {
+    public SignUpService signUpService() {
         return Mockito.mock(SignUpService.class);
     }
 }

@@ -1,9 +1,9 @@
-package com.moogsan.moongsan_backend.unit.user.controller;
+package com.moogsan.moongsan_backend.unit.user.signup.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.moogsan.moongsan_backend.domain.user.signup.controller.SignUpController;
-import com.moogsan.moongsan_backend.domain.user.signup.dto.SignUpRequest;
-import com.moogsan.moongsan_backend.domain.user.signup.service.SignUpService;
+import com.moogsan.moongsan_backend.domain.user.controller.SignUpController;
+import com.moogsan.moongsan_backend.domain.user.dto.request.SignUpRequest;
+import com.moogsan.moongsan_backend.domain.user.service.SignUpService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -19,7 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = SignUpController.class) // UserController만 로드하여 테스트
 @AutoConfigureMockMvc(addFilters = false) // Spring Security 필터 제거 (403 방지)
-@Import(UserControllerTestConfig.class) // 테스트용 UserService Bean을 직접 등록
+@Import(SignUpControllerTestConfig.class) // 테스트용 UserService Bean을 직접 등록
 class SignUpControllerTest {
 
     @Autowired
@@ -45,7 +45,7 @@ class SignUpControllerTest {
                 .thenReturn(null);
 
         // when & then - 정상 요청 시 201 Created 반환 기대
-        mockMvc.perform(post("/api/users/signup")
+        mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated());
@@ -61,7 +61,7 @@ class SignUpControllerTest {
         );
 
         // when & then - 유효성 검사 실패로 400 기대
-        mockMvc.perform(post("/api/users/signup")
+        mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -77,7 +77,7 @@ class SignUpControllerTest {
         );
 
         // when & then - 유효성 검사 실패로 400 기대
-        mockMvc.perform(post("/api/users/signup")
+        mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -93,7 +93,7 @@ class SignUpControllerTest {
         );
 
         // when & then - 유효성 검사 실패로 400 기대
-        mockMvc.perform(post("/api/users/signup")
+        mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -109,7 +109,7 @@ class SignUpControllerTest {
         );
 
         // when & then - 유효성 검사 실패로 400 기대
-        mockMvc.perform(post("/api/users/signup")
+        mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -129,7 +129,7 @@ class SignUpControllerTest {
                 .thenThrow(new IllegalArgumentException("이미 등록된 이메일입니다."));
 
         // when & then - 409 Conflict 기대
-        mockMvc.perform(post("/api/users/signup")
+        mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict());
@@ -149,7 +149,7 @@ class SignUpControllerTest {
                 .thenThrow(new IllegalArgumentException("이미 등록된 닉네임입니다."));
 
         // when & then - 409 Conflict 기대
-        mockMvc.perform(post("/api/users/signup")
+        mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict());
@@ -169,7 +169,7 @@ class SignUpControllerTest {
                 .thenThrow(new IllegalArgumentException("이미 등록된 전화번호입니다."));
 
         // when & then - 409 Conflict 기대
-        mockMvc.perform(post("/api/users/signup")
+        mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict());

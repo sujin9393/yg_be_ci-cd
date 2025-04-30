@@ -1,6 +1,6 @@
-package com.moogsan.moongsan_backend.unit.user.dto;
+package com.moogsan.moongsan_backend.unit.user.signup.dto;
 
-import com.moogsan.moongsan_backend.domain.user.signup.dto.SignUpRequest;
+import com.moogsan.moongsan_backend.domain.user.dto.request.SignUpRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
