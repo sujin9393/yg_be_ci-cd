@@ -8,7 +8,7 @@ import lombok.Getter;
 public class ParticipantResponse {
 
     // 식별/메타
-    private String participantId;  // 참여자 아이디
+    private Long participantId;  // 참여자 아이디
     private String nickname;       // 참여자 닉네임
     private String orderName;      // 입금자명
 

@@ -1,4 +1,4 @@
-package com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.wishList;
+package com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.WishList;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -8,7 +8,7 @@ import lombok.Getter;
 public class WishListResponse {
 
     // 식별/메타
-    private String postId;         // 공구 게시글 아이디
+    private Long postId;         // 공구 게시글 아이디
     private String title;          // 공구 게시글 제목
     private String postStatus;     // 공구 진행 상태
 
