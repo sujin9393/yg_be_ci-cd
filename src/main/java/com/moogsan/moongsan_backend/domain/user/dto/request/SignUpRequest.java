@@ -9,10 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 
-/**
- * 회원가입 요청 시 클라이언트로부터 전달받는 데이터를 담는 DTO 클래스.
- * 각 필드에 대해 유효성 검증이 적용되어 있다.
- */
+
 @Getter // 모든 필드에 대해 Getter 메서드를 자동 생성
 @NoArgsConstructor // 기본 생성자 자동 생성
 @AllArgsConstructor
@@ -51,10 +48,7 @@ public class SignUpRequest {
 
     private String imageUrl; // 프로필 이미지 URL (회원가입 시에는 null)
 
-    /**
-     * 회원가입 시 필수 입력값을 받는 생성자.
-     * imageUrl은 회원가입 시 null로 초기화된다.
-     */
+
     public SignUpRequest(String email, String password, String nickname, String name, String phoneNumber, String accountBank, String accountNumber) {
         this.email = email;
         this.password = password;

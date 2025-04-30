@@ -9,12 +9,12 @@ import java.time.LocalDateTime;
  * 'users' 테이블과 매핑되며, 회원 정보를 관리한다.
  */
 @Entity
-@Table(name = "users") // 매핑될 테이블 이름을 지정
-@Getter // 모든 필드에 대한 Getter 메서드를 자동 생성
-@Setter // 모든 필드에 대한 Setter 메서드를 자동 생성
-@NoArgsConstructor // 파라미터가 없는 기본 생성자 자동 생성
-@AllArgsConstructor // 모든 필드를 인자로 받는 생성자 자동 생성
-@Builder // 빌더 패턴을 통한 객체 생성 지원
+@Table(name = "users")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class User {
 
     @Id
