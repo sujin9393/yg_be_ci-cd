@@ -30,7 +30,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return user.getEmail(); // 로그인 식별자로 이메일 반환
+        return user.getEmail(); // 로그인 ID로 이메일을 사용
     }
 
     @Override
@@ -43,5 +43,7 @@ public class CustomUserDetails implements UserDetails {
     public boolean isCredentialsNonExpired() { return true; }
 
     @Override
-    public boolean isEnabled() { return true; }
+    public boolean isEnabled() {
+        return !"DELETED".equalsIgnoreCase(user.getStatus());
+    }
 }

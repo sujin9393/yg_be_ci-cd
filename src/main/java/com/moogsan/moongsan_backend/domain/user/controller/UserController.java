@@ -92,8 +92,9 @@ public class UserController {
         logoutService.logout(userDetails.getUser().getId());
         return ResponseEntity.ok(
             WrapperResponse.<Void>builder()
-                .message("로그아웃이 성공적으로 처리되었습니다.")
-                .build()
+                    .message("로그아웃이 성공적으로 처리되었습니다.")
+                    .data(null)
+                    .build()
         );
     }
 
@@ -103,6 +104,7 @@ public class UserController {
         return ResponseEntity.ok(
                 WrapperResponse.<Void>builder()
                         .message("회원탈퇴가 완료되었습니다.")
+                        .data(null)
                         .build()
         );
     }
