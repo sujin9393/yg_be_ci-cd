@@ -1,4 +1,4 @@
-package com.moogsan.moongsan_backend.domain.groupbuy.exception;
+package com.moogsan.moongsan_backend.domain.groupbuy.exception.specific;
 
 import com.moogsan.moongsan_backend.domain.groupbuy.exception.base.GroupBuyException;
 import com.moogsan.moongsan_backend.domain.groupbuy.exception.code.GroupBuyErrorCode;

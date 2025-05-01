@@ -1,6 +1,6 @@
-package com.moogsan.moongsan_backend.domain.groupbuy.exception;
+package com.moogsan.moongsan_backend.domain.groupbuy.exception.code;
 
-import com.moogsan.moongsan_backend.global.exception.ErrorCodeType;
+import com.moogsan.moongsan_backend.global.exception.code.ErrorCodeType;
 import org.springframework.http.HttpStatus;
 
 public enum GroupBuyErrorCode implements ErrorCodeType {

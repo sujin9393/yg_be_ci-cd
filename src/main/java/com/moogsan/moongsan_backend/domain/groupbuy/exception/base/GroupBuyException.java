@@ -1,7 +1,7 @@
-package com.moogsan.moongsan_backend.domain.groupbuy.exception;
+package com.moogsan.moongsan_backend.domain.groupbuy.exception.base;
 
 import com.moogsan.moongsan_backend.domain.groupbuy.exception.code.GroupBuyErrorCode;
-import com.moogsan.moongsan_backend.global.exception.BusinessException;
+import com.moogsan.moongsan_backend.global.exception.base.BusinessException;
 
 import java.util.Map;
 
