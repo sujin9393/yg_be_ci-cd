@@ -12,10 +12,10 @@ public class LoginRequest {
 
     @NotBlank(message = "이메일은 필수 입력 값입니다.")
     @Email(message = "올바른 이메일 형식이어야 합니다.")
-    private String email; // 로그인할 사용자 이메일
+    private String email;
 
     @NotBlank(message = "비밀번호는 필수 입력 값입니다.")
-    private String password; // 로그인할 사용자 비밀번호
+    private String password;
 
     public LoginRequest(String email, String password) {
         this.email = email;
