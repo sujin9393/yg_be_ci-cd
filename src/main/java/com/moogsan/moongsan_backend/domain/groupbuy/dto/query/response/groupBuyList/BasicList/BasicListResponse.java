@@ -1,6 +1,7 @@
 package com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.BasicList;
 
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.ImageResponse;
+import com.moogsan.moongsan_backend.domain.groupbuy.entity.GroupBuy;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -33,5 +34,11 @@ public class BasicListResponse {
 
     // 날짜
     private LocalDateTime createdAt; // 생성 일시
+
+    public BasicListResponse of(GroupBuy groupBuy) {
+        return BasicListResponse.builder()
+                .
+                .build();
+    }
 
 }

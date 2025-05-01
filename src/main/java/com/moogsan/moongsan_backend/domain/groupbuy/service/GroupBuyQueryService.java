@@ -59,7 +59,7 @@ public class GroupBuyQueryService {
                 .build();
     }
 
-    /// 메인 페이지 조회
+    /// 메인 페이지 조회 -> 얘는 과연 분리하는게 좋은가 합치는게 좋은가(프론트)?
     public MainPageResponse getGroupBuyMainInfo() {
 
         // 섹션 별 조회
@@ -95,7 +95,7 @@ public class GroupBuyQueryService {
                                       String displayName,
                                       List<GroupBuy> posts) {
         List<MainSummaryResponse> dtoList = posts.stream()
-                .map(p -> MainSummaryResponse.builder()
+                .map(p -> MainSummaryResponse.builder()  // MainSummaryResponse 내부 of 함수로 넣기
                         .postId(p.getId())
                         .title(p.getTitle())
                         .name(p.getName())
@@ -236,13 +236,13 @@ public class GroupBuyQueryService {
 
     /// 관심 공구 리스트 조회
     public PagedResponse getGroupBuyWishList(Long cursor, Integer limit) {
-        // TODO: implement hosted list
+        // TODO V2
         return null;
     }
 
     /// 주최 공구 리스트 조회
     public PagedResponse getGroupBuyHostedList(String sort, Long cursor, Integer limit) {
-        // TODO: implement hosted list
+        // TODO V2
         return null;
     }
 
@@ -318,7 +318,7 @@ public class GroupBuyQueryService {
 
     /// 공구 참여자 조회
     public ParticipantListResponse getGroupBuyParticipantsInfo(Long postId) {
-        // TODO: implement participants info
+        // TODO V2
         return null;
     }
 }

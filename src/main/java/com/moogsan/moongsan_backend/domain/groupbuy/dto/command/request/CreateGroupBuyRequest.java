@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.URL;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -36,6 +37,10 @@ public class CreateGroupBuyRequest {
     @Size(min = 1, message = "상품 전체 수량은 1 이상이어야 합니다.")
     private int totalAmount;
 
+    @NotBlank(message = "상품 남은 수량은 필수 입력 항목입니다.")
+    @Size(min = 1, message = "상품 남은 수량은 1 이상이어야 합니다.")
+    private int leftAmount;
+
     @NotBlank(message = "상품 주문 단위는 필수 입력 항목입니다.")
     @Size(min = 1, message = "상품 주문 단위는 1 이상이어야 합니다.")
     private int unitAmount;
@@ -63,7 +68,6 @@ public class CreateGroupBuyRequest {
             @Pattern(
                 regexp = "(?i).+\\.(jpe?g|png|webp)$",
                 message = "이미지 파일은 JPG, JPEG, PNG, WEBP 확장자만 허용됩니다."
-            )
-            String> imageList;
+            ) MultipartFile> imageList;
 
 }
