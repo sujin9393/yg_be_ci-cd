@@ -7,8 +7,10 @@ import com.moogsan.moongsan_backend.domain.user.dto.response.CheckNicknameRespon
 import com.moogsan.moongsan_backend.domain.user.dto.response.UserProfileResponse;
 import com.moogsan.moongsan_backend.domain.user.service.CheckNicknameService;
 import com.moogsan.moongsan_backend.domain.user.service.LoginService;
+import com.moogsan.moongsan_backend.domain.user.service.LogoutService;
 import com.moogsan.moongsan_backend.domain.user.service.SignUpService;
 import com.moogsan.moongsan_backend.domain.user.service.UserProfileService;
+import com.moogsan.moongsan_backend.domain.user.service.WithdrawService;
 import com.moogsan.moongsan_backend.domain.user.entity.CustomUserDetails;
 import com.moogsan.moongsan_backend.domain.WrapperResponse;
 import jakarta.validation.Valid;
@@ -27,6 +29,8 @@ public class UserController {
     private final SignUpService signUpService;
     private final UserProfileService userProfileService;
     private final CheckNicknameService nicknameService;
+    private final LogoutService logoutService;
+    private final WithdrawService withdrawService;
 
     @PostMapping("/users")
     public ResponseEntity<WrapperResponse<LoginResponse>> signUp(@Valid @RequestBody SignUpRequest request) {
@@ -81,5 +85,25 @@ public class UserController {
                 .message("유저 정보 조회에 성공했습니다")
                 .data(profile)
                 .build());
+    }
+
+    @DeleteMapping("/users/token")
+    public ResponseEntity<WrapperResponse<Void>> logout(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        logoutService.logout(userDetails.getUser().getId());
+        return ResponseEntity.ok(
+            WrapperResponse.<Void>builder()
+                .message("로그아웃이 성공적으로 처리되었습니다.")
+                .build()
+        );
+    }
+
+    @DeleteMapping("/users")
+    public ResponseEntity<WrapperResponse<Void>> withdraw(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        withdrawService.withdraw(userDetails.getUser().getId());
+        return ResponseEntity.ok(
+                WrapperResponse.<Void>builder()
+                        .message("회원탈퇴가 완료되었습니다.")
+                        .build()
+        );
     }
 }

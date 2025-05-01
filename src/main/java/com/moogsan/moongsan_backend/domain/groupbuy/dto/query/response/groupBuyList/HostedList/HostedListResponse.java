@@ -3,9 +3,6 @@ package com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuy
 import lombok.Builder;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 @Getter
 @Builder
 public class HostedListResponse {

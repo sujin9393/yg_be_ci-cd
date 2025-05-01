@@ -10,6 +10,7 @@ import com.moogsan.moongsan_backend.global.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -22,6 +23,7 @@ public class LoginService {
     private final JwtUtil jwtUtil;
     private final TokenRepository refreshTokenRepository;
 
+    @Transactional
     public LoginResponse login(LoginRequest request) {
         // 1. 이메일로 사용자 조회
         User user = userRepository.findByEmail(request.getEmail())
@@ -32,11 +34,16 @@ public class LoginService {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
+        // 추가. 탈퇴 복구 처리
+        if (user.getDeletedAt() != null) {
+            user.setDeletedAt(null);
+        }
+
         // 3. JWT 토큰 발급
         String accessToken = jwtUtil.generateAccessToken(user);
         String refreshToken = jwtUtil.generateRefreshToken(user);
         Long accessTokenExpireAt = jwtUtil.getAccessTokenExpireAt(); // 만료 시간 (millis)
-        Long refreshTokenExpireMillis = jwtUtil.getTokenExpireMillis(); // 리프레시 토큰 만료 기간 (millis)
+        Long refreshTokenExpireMillis = jwtUtil.getRefreshTokenExpireMillis(); // 리프레시 토큰 만료 기간 (millis)
 
         // 4. 기존 리프레시 토큰 제거 (동일 유저 기준)
         refreshTokenRepository.deleteByUserId(user.getId());

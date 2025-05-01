@@ -1,0 +1,28 @@
+package com.moogsan.moongsan_backend.domain.user.service;
+
+import com.moogsan.moongsan_backend.domain.user.entity.User;
+import com.moogsan.moongsan_backend.domain.user.repository.UserRepository;
+import com.moogsan.moongsan_backend.domain.user.repository.TokenRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+
+@Service
+@RequiredArgsConstructor
+public class WithdrawService {
+
+    private final UserRepository userRepository;
+    private final TokenRepository tokenRepository;
+
+    @Transactional
+    public void withdraw(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+        user.setDeletedAt(LocalDateTime.now());
+
+        tokenRepository.deleteByUserId(userId); // 리프레시 토큰 삭제
+    }
+}

@@ -8,6 +8,7 @@ import com.moogsan.moongsan_backend.global.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service // 비즈니스 로직을 담당하는 서비스 계층 컴포넌트
 @RequiredArgsConstructor // final 필드를 매개변수로 받는 생성자 자동 생성
@@ -17,6 +18,7 @@ public class SignUpService {
     private final PasswordEncoder passwordEncoder; // 비밀번호 암호화기
     private final JwtUtil jwtUtil;
 
+    @Transactional
     public LoginResponse signUp(SignUpRequest request) {
         validateDuplicateUser(request);
 
