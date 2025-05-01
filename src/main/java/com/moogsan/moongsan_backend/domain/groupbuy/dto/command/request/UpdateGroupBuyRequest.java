@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.URL;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -46,7 +47,6 @@ public class UpdateGroupBuyRequest {
             @Pattern(
                     regexp = "(?i).+\\.(jpe?g|png|webp)$",
                     message = "이미지 파일은 JPG, JPEG, PNG, WEBP 확장자만 허용됩니다."
-            )
-                    String> imageList;
+            ) MultipartFile> imageList;
 
 }
