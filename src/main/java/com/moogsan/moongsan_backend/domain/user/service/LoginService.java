@@ -30,7 +30,6 @@ public class LoginService {
         Long accessTokenExpireAt = jwtUtil.getAccessTokenExpireAt();
 
         return new LoginResponse(
-                "로그인에 성공하였습니다.",
                 user.getId(),
                 user.getNickname(),
                 accessToken,

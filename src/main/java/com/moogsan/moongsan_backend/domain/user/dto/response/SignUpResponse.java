@@ -6,17 +6,10 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class SignUpResponse {
-    private String message;
-    private Data data;
-
-    @Getter
-    @AllArgsConstructor
-    public static class Data {
-        private Long userId;
-        private String nickname;
-        private String accessToken;
-        private String refreshToken;
-        private Long accessTokenExpireAt;
-        private String redirectUrl;
-    }
+    private Long userId;
+    private String nickname;
+    private String accessToken;
+    private String refreshToken;
+    private Long accessTokenExpireAt;
+    private String redirectUrl;
 }
