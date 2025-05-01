@@ -1,6 +1,7 @@
 package com.moogsan.moongsan_backend.domain.groupbuy.entity;
 
 import com.moogsan.moongsan_backend.domain.BaseEntity;
+import com.moogsan.moongsan_backend.domain.groupbuy.dto.command.request.CreateGroupBuyRequest;
 import com.moogsan.moongsan_backend.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -75,8 +76,9 @@ public class GroupBuy extends BaseEntity {
     @Column(nullable = false)
     private int participantCount = 0;
 
+    @Builder.Default
     @Column(nullable = false, length = 10)
-    private String postStatus;
+    private String postStatus = "OPEN";
 
     private String pickupChangeReason;
 
@@ -89,4 +91,37 @@ public class GroupBuy extends BaseEntity {
                orphanRemoval = true)
     @OrderBy("imageSeqNo ASC")
     private List<Image> images = new ArrayList<>();
+
+    // 공구 게시글 생성 팩토리 메서드
+    public static GroupBuy create(CreateGroupBuyRequest req, User host) {
+        GroupBuy gb = new GroupBuy();
+        gb.title = req.getTitle();
+        gb.name = req.getName();
+        gb.url = req.getUrl();
+        gb.price = req.getPrice();
+        gb.unitPrice =  (req.getPrice() / req.getTotalAmount()) * req.getUnitAmount();
+        gb.totalAmount = req.getTotalAmount();
+        gb.leftAmount = req.getLeftAmount();
+        gb.unitAmount = req.getUnitAmount();
+        gb.description = req.getDescription();
+        gb.dueDate = LocalDateTime.parse(req.getDueDate());
+        gb.location = req.getLocation();
+        gb.pickupDate = LocalDateTime.parse(req.getPickupDate());
+
+        gb.user = host;
+
+        return gb;
+    }
+
+    // 공구 게시글 이미지 저장 로직
+    public void addImage(String url, String imageUrlResized, int seqNo, boolean thumbnail) {
+        Image img = Image.builder()
+                .imageUrl(url)
+                .imageUrlResized(imageUrlResized)
+                .imageSeqNo(seqNo)
+                .thumbnail(thumbnail)
+                .groupBuy(this)
+                .build();
+        this.images.add(img);
+    }
 }
