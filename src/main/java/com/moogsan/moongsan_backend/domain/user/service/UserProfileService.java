@@ -1,0 +1,29 @@
+package com.moogsan.moongsan_backend.domain.user.service;
+
+import com.moogsan.moongsan_backend.domain.user.dto.response.UserProfileResponse;
+import com.moogsan.moongsan_backend.domain.user.entity.User;
+import com.moogsan.moongsan_backend.domain.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class UserProfileService {
+
+    private final UserRepository userRepository;
+
+    public UserProfileResponse getUserProfile(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        return UserProfileResponse.builder()
+                .imageUrl(user.getImageUrl())
+                .nickname(user.getNickname())
+                .name(user.getName())
+                .email(user.getEmail())
+                .phoneNumber(user.getPhoneNumber())
+                .accountBank(user.getAccountBank())
+                .accountNumber(user.getAccountNumber())
+                .build();
+    }
+}

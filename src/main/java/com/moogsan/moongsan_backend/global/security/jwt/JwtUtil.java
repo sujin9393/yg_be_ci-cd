@@ -64,4 +64,8 @@ public class JwtUtil {
     public Long getAccessTokenExpireAt() {
         return System.currentTimeMillis() + accessTokenExpireMs;
     }
+
+    public long getRefreshTokenExpireMillis() {
+        return refreshTokenExpireMs;
+    }
 }

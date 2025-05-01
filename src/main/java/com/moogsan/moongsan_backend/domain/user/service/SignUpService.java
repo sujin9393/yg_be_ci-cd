@@ -8,11 +8,8 @@ import com.moogsan.moongsan_backend.global.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-/**
- * 사용자 관련 비즈니스 로직을 처리하는 서비스 클래스.
- * 회원가입 기능을 제공한다.
- */
 @Service // 비즈니스 로직을 담당하는 서비스 계층 컴포넌트
 @RequiredArgsConstructor // final 필드를 매개변수로 받는 생성자 자동 생성
 public class SignUpService {
@@ -21,15 +18,7 @@ public class SignUpService {
     private final PasswordEncoder passwordEncoder; // 비밀번호 암호화기
     private final JwtUtil jwtUtil;
 
-    /**
-     * 회원가입 요청을 처리하는 메서드.
-     * - 중복 검사
-     * - 비밀번호 암호화
-     * - User 엔티티 생성 및 저장
-     *
-     * @param request 회원가입 요청 DTO
-     * @return 저장된 User 엔티티
-     */
+    @Transactional
     public LoginResponse signUp(SignUpRequest request) {
         validateDuplicateUser(request);
 
@@ -48,14 +37,11 @@ public class SignUpService {
                 .build();
 
         User savedUser = userRepository.save(user);
-
-        // JWT 유틸은 추후 구현 필요
         String accessToken = jwtUtil.generateAccessToken(savedUser);
         String refreshToken = jwtUtil.generateRefreshToken(savedUser);
         Long accessTokenExpireAt = jwtUtil.getAccessTokenExpireAt();
 
         return new LoginResponse(
-                "회원가입이 완료되었습니다.",
                 savedUser.getId(),
                 savedUser.getNickname(),
                 accessToken,
@@ -65,12 +51,6 @@ public class SignUpService {
         );
     }
 
-    /**
-     * 회원가입 시 이메일, 닉네임, 전화번호의 중복 여부를 검증하는 메서드.
-     * 중복이 발견되면 IllegalArgumentException을 던진다.
-     *
-     * @param request 회원가입 요청 DTO
-     */
     private void validateDuplicateUser(SignUpRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("이미 등록된 이메일입니다.");
