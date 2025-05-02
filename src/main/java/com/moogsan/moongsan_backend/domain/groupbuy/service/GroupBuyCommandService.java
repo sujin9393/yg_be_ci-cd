@@ -2,15 +2,8 @@ package com.moogsan.moongsan_backend.domain.groupbuy.service;
 
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.command.request.CreateGroupBuyRequest;
 import com.moogsan.moongsan_backend.domain.groupbuy.entity.GroupBuy;
-import com.moogsan.moongsan_backend.domain.groupbuy.exception.specific.GroupBuyInvalidStateException;
-import com.moogsan.moongsan_backend.domain.groupbuy.exception.specific.GroupBuyNotFoundException;
-import com.moogsan.moongsan_backend.domain.groupbuy.exception.specific.GroupBuyNotHostException;
-import com.moogsan.moongsan_backend.domain.order.exception.specific.*;
 import com.moogsan.moongsan_backend.domain.groupbuy.repository.GroupBuyRepository;
-import com.moogsan.moongsan_backend.domain.order.repository.OrderRepository;
 import com.moogsan.moongsan_backend.domain.user.entity.User;
-import com.moogsan.moongsan_backend.domain.order.entity.Order;
-import com.moogsan.moongsan_backend.global.util.ImageUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -102,16 +95,16 @@ public class GroupBuyCommandService {
         }
 
         // 해당 공구의 주문 테이블에 해당 유저의 주문이 존재하는지 조회 -> 아니면 404
-        Order order = orderRepository.findByUserIdAndGroupBuyId(currentUser.getId(), postId)
+        Order order = orderRepository.findByUserId(currentUser.getId())
                 .orElseThrow(OrderNotFoundException::new);
 
         // 해당 주문의 상태가 canceled가 아닌지 조회 -> 아니면 409
-        if (order.getStatus().equals("CANCELED")) {
+        if (order.getOrderStatus().equals("CANCELED")) {
             throw new OrderInvalidStateException("이미 취소된 주문입니다.");
         }
 
         // 해당 주문의 상태가 paid인지 조회
-        if (order.getStatus().equals("PAID")) {
+        if (order.getOrderStatus().equals("PAID")) {
             // 별도의 환불 로직 처리 필요
         }
 
@@ -121,7 +114,7 @@ public class GroupBuyCommandService {
         groupBuy.setParticipantCount(groupBuy.getParticipantCount() - 1);
 
         // 해당 유저의 주문을 취소
-        order.setStatus("CANCELED");
+        order.setOrderStatus("CANCELED");
 
     }
 

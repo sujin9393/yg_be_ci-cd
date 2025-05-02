@@ -7,15 +7,23 @@ import com.moogsan.moongsan_backend.domain.groupbuy.dto.command.response.Command
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyUpdate.GroupBuyForUpdateResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.service.GroupBuyCommandService;
 import com.moogsan.moongsan_backend.domain.groupbuy.service.GroupBuyQueryService;
+import com.moogsan.moongsan_backend.domain.user.entity.CustomUserDetails;
 import com.moogsan.moongsan_backend.domain.user.entity.User;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,27 +32,35 @@ public class GroupBuyCommandController {
 
     private final GroupBuyCommandService groupBuyService;
 
-    // 공구 게시글 작성
+    /// 공구 게시글 작성 SUCCESS
     @PostMapping
     public ResponseEntity<WrapperResponse<CommandGroupBuyResponse>> createGroupBuy(
-            @AuthenticationPrincipal User currentUser,
-            @Valid @ModelAttribute CreateGroupBuyRequest createGroupBuyRequest) {
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody CreateGroupBuyRequest request) {
 
-        Long postId = groupBuyService.createGroupBuy(currentUser, createGroupBuyRequest);
+        // 인증 정보가 없으면 바로 401 응답
+        if (userDetails == null) {
+            WrapperResponse<CommandGroupBuyResponse> unauthorized = WrapperResponse.<CommandGroupBuyResponse>builder()
+                    .message("로그인이 필요합니다")
+                    .data(null)
+                    .build();
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(unauthorized);
+        }
 
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest()
+        Long postId = groupBuyService.createGroupBuy(userDetails.getUser(), request);
+
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(postId)
                 .toUri();
 
-        CommandGroupBuyResponse commandGroupBuy = new CommandGroupBuyResponse(postId);
-
-        return ResponseEntity
-                .created(location)
+        CommandGroupBuyResponse response = new CommandGroupBuyResponse(postId);
+        return ResponseEntity.created(location)
                 .body(WrapperResponse.<CommandGroupBuyResponse>builder()
                         .message("공구 게시글이 성공적으로 업로드되었습니다.")
-                        .data(commandGroupBuy)
+                        .data(response)
                         .build());
     }
 
@@ -54,6 +70,7 @@ public class GroupBuyCommandController {
     // 공구 게시글 삭제
     //  TODO V2
 
+    /*
     // 공구 참여 취소
     @DeleteMapping("/{postId}/participants")
     public ResponseEntity<WrapperResponse<EmptyResponse>> leaveGroupBuy(
@@ -67,6 +84,7 @@ public class GroupBuyCommandController {
                         .build()
         );
     }
+     */
 
     // 관심 공구 추가
     //  TODO V2
@@ -74,6 +92,7 @@ public class GroupBuyCommandController {
     // 관심 공구 취소
     //  TODO V2
 
+    /*
     // 공구 게시글 공구 종료
     @PatchMapping("/{postId}/participants")
     public ResponseEntity<WrapperResponse<EmptyResponse>> endGroupBuy(
@@ -87,6 +106,8 @@ public class GroupBuyCommandController {
                         .build()
         );
     }
+
+     */
 
     // 검색 -> post가 아니라 get이어야 하지 않나?
     //  TODO V2

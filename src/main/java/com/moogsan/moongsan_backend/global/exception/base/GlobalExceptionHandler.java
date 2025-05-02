@@ -1,24 +1,27 @@
 package com.moogsan.moongsan_backend.global.exception.base;
 
+import com.moogsan.moongsan_backend.domain.WrapperResponse;
 import com.moogsan.moongsan_backend.global.dto.ErrorResponse;
 import com.moogsan.moongsan_backend.global.exception.code.ErrorCode;
 import com.moogsan.moongsan_backend.global.exception.code.ErrorCodeType;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
-import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.validation.BindException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.context.request.WebRequest;
-import org.springframework.validation.BindingResult;
 import java.time.ZonedDateTime;
-import java.util.Map;
+
+import jakarta.persistence.EntityNotFoundException;
 import java.util.stream.Collectors;
 
 // 글로벌 예외 처리기
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -53,30 +56,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, ErrorCode.INVALID_JSON.getStatus());
     }
 
-    // @Valid 검증 실패
-    @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class})
-    public ResponseEntity<ErrorResponse> handleValidation(Exception ex) {
-        BindingResult result = (ex instanceof MethodArgumentNotValidException manv)
-                ? manv.getBindingResult()
-                : ((BindException) ex).getBindingResult();
-
-        Map<String, String> fieldErrors = result.getFieldErrors().stream()
-                .collect(Collectors.toMap(
-                        fe -> fe.getField(),
-                        fe -> fe.getDefaultMessage(),
-                        (existing, replacement) -> existing
-                ));
-
-        ErrorResponse body = new ErrorResponse(
-                ErrorCode.VALIDATION_FAILED.getCode(),
-                "입력 값 검증에 실패했습니다.",
-                ZonedDateTime.now(),
-                Map.of("fields", fieldErrors),
-                getTraceId()
-        );
-        return new ResponseEntity<>(body, ErrorCode.VALIDATION_FAILED.getStatus());
-    }
-
     // 지원하지 않는 HTTP 메서드
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ErrorResponse> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
@@ -90,30 +69,56 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, ErrorCode.METHOD_NOT_ALLOWED.getStatus());
     }
 
-    // 핸들러 미매핑 (404)
-    @ExceptionHandler(NoHandlerFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNotFound(NoHandlerFoundException ex) {
-        ErrorResponse body = new ErrorResponse(
-                ErrorCode.NOT_FOUND.getCode(),
-                "해당 리소스를 찾을 수 없습니다.",
-                ZonedDateTime.now(),
-                null,
-                getTraceId()
-        );
-        return new ResponseEntity<>(body, ErrorCode.NOT_FOUND.getStatus());
+    // 검증 에러
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<WrapperResponse<Void>> handleValidation(MethodArgumentNotValidException ex) {
+        String msg = ex.getBindingResult().getAllErrors().stream()
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .collect(Collectors.joining("; "));
+        return ResponseEntity
+                .badRequest()
+                .body(WrapperResponse.<Void>builder().message(msg).data(null).build());
     }
 
-    // 기타 예외 (500)
+    // 데이터 무결성 위반 (예: NOT NULL 제약)
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<WrapperResponse<Void>> handleDataIntegrity(DataIntegrityViolationException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(WrapperResponse.<Void>builder()
+                        .message("요청 데이터에 제약 위반이 발생했습니다.")
+                        .data(null)
+                        .build());
+    }
+
+    // 엔티티를 못 찾았을 때
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<WrapperResponse<Void>> handleNotFound(EntityNotFoundException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(WrapperResponse.<Void>builder()
+                        .message(ex.getMessage())
+                        .data(null)
+                        .build());
+    }
+
+    /*
+
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleAll(Exception ex, WebRequest request) {
-        // log.error("Unhandled exception", ex);
+    public ResponseEntity<ErrorResponse> handleAll(Exception ex) {
+        // 예외 스택트레이스 로깅
+        log.error("Unhandled exception caught in GlobalExceptionHandler", ex);
+
+        // INTERNAL_SERVER_ERROR 코드 및 메시지, 스택트레이스는 details 에 담아서 반환
         ErrorResponse body = new ErrorResponse(
-                ErrorCode.INTERNAL_SERVER_ERROR.getCode(),
+                ErrorCode.INTERNAL_SERVER_ERROR.getCode(),       // "INTERNAL_SERVER_ERROR"
                 "서버에서 알 수 없는 오류가 발생했습니다.",
                 ZonedDateTime.now(),
-                null,
+                Map.of("stackTrace", Arrays.toString(ex.getStackTrace())),
                 getTraceId()
         );
+
         return new ResponseEntity<>(body, ErrorCode.INTERNAL_SERVER_ERROR.getStatus());
     }
+     */
 }
