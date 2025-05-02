@@ -2,15 +2,18 @@ package com.moogsan.moongsan_backend.domain.groupbuy.service;
 
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.command.request.CreateGroupBuyRequest;
 import com.moogsan.moongsan_backend.domain.groupbuy.entity.GroupBuy;
-import com.moogsan.moongsan_backend.domain.groupbuy.mapper.ImageMapper;
 import com.moogsan.moongsan_backend.domain.groupbuy.repository.GroupBuyRepository;
-import com.moogsan.moongsan_backend.domain.user.entity.CustomUserDetails;
 import com.moogsan.moongsan_backend.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @Transactional
@@ -18,18 +21,55 @@ import java.nio.file.Path;
 public class GroupBuyCommandService {
 
     private final GroupBuyRepository groupBuyRepository;
+    private final ImageUtils imageUtils;
     private final Path uploadDir;         // 업로드 디렉토리(application.yml에 설정 필요)
     private final String publicBaseUrl;   // 외부에 공개되는 베이스 URL (https://cdn.example.com/uploads 등등)
-    private final ImageMapper imageMapper;
-    //private final OrderRepository orderRepository;
+    private final OrderRepository orderRepository;
 
     /// 공구 게시글 작성
     public Long createGroupBuy(User currentUser, CreateGroupBuyRequest createGroupBuyRequest) {
 
         // GroupBuy 기본 필드 매핑 (팩토리 메서드 사용)
-        GroupBuy gb = GroupBuy.of(createGroupBuyRequest, currentUser);
+        GroupBuy gb = GroupBuy.create(createGroupBuyRequest, currentUser);
 
-        imageMapper.mapImagesToGroupBuy(createGroupBuyRequest.getImageUrls(), gb);
+        // 이미지 파일 목록(MultipartFile)이 있다고 가정할 때,
+        //    CreateGroupBuyRequest 에서 List<MultipartFile>를 꺼내온다 가정
+        List<MultipartFile> files = createGroupBuyRequest.getImageList();
+
+        for (int i = 0; i < files.size(); i++) {
+            MultipartFile file = files.get(i);
+            // 확장자 체크
+            String ext = ImageUtils.getExtension(file.getOriginalFilename());
+            ImageUtils.validateExtension(ext);
+
+            // 원본 파일 저장
+            String origFilename = ImageUtils.generateFilename("gb_", ext);
+            Path origPath = uploadDir.resolve(origFilename);
+            try {
+                ImageUtils.createDirsIfNotExist(uploadDir);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            try {
+                ImageUtils.saveFile(file, origPath);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            String origUrl = publicBaseUrl + "/" + origFilename;
+
+            // 리사이즈 파일 저장
+            String resizedFilename = ImageUtils.generateFilename("gb_small_", ext);
+            Path resizedPath = uploadDir.resolve(resizedFilename);
+            try (InputStream in = file.getInputStream()) {
+                ImageUtils.resizeAndSave(in, resizedPath, 300);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            String resizedUrl = publicBaseUrl + "/" + resizedFilename;
+
+            // 도메인에 URL 메타데이터 등록
+            gb.addImage(origUrl, resizedUrl, i, i == 0);
+        }
 
         // 최종 저장
         return groupBuyRepository.save(gb).getId();
@@ -41,7 +81,6 @@ public class GroupBuyCommandService {
     /// 공구 게시글 삭제
     // TODO V2
 
-    /*
     /// 공구 참여 취소
     public void leaveGroupBuy(User currentUser, Long postId) {
 
@@ -78,7 +117,6 @@ public class GroupBuyCommandService {
         order.setOrderStatus("CANCELED");
 
     }
-     */
 
     /// 관심 공구 추가
     // TODO V2
@@ -86,7 +124,6 @@ public class GroupBuyCommandService {
     /// 관심 공구 취소
     // TODO V2
 
-    /*
     /// 공구 게시글 공구 종료
     public void endGroupBuy(User currentUser, Long postId) {
 
@@ -119,7 +156,6 @@ public class GroupBuyCommandService {
         // TODO V2, V3에서는 참여자 채팅방 해제, 익명 채팅방 즉시 해제
 
     }
-     */
 
     /// 검색
     // TODO V2
