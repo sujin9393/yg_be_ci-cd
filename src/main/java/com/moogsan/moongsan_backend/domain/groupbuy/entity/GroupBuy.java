@@ -104,22 +104,6 @@ public class GroupBuy extends BaseEntity {
                 .collect(Collectors.toList());
     }
 
-    public void increaseLeftAmount(int quantity) {
-        this.leftAmount += quantity;
-    }
-
-    public void decreaseLeftAmount(int quantity) {
-        this.leftAmount = Math.max(0, this.leftAmount - quantity);
-    }
-
-    public void increaseParticipantCount() {
-        this.participantCount++;
-    }
-
-    public void decreaseParticipantCount() {
-        this.participantCount = Math.max(0, this.participantCount - 1);
-    }
-
     @Transient
     public double getSoldRatio() {
         if (totalAmount == 0) return 0.0;
@@ -131,23 +115,4 @@ public class GroupBuy extends BaseEntity {
         return getSoldRatio() >= 0.8;
     }
 
-    // 공구 게시글 생성 팩토리 메서드
-    public static GroupBuy of(CreateGroupBuyRequest req, User host) {
-
-        return GroupBuy.builder()
-                .title(req.getTitle())
-                .name(req.getName())
-                .url(req.getUrl())
-                .price(req.getPrice())
-                .unitPrice(req.getPrice() / req.getTotalAmount()) // 정수로 치환 필요
-                .totalAmount(req.getTotalAmount())
-                .leftAmount(req.getLeftAmount())
-                .unitAmount(req.getUnitAmount())
-                .description(req.getDescription())
-                .dueDate(req.getDueDate())
-                .location(req.getLocation())
-                .pickupDate(req.getPickupDate())
-                .user(host)
-                .build();
-    }
 }

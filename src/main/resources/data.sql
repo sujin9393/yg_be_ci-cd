@@ -146,30 +146,5 @@ INSERT INTO group_buy_category (
   ( 14,  23, 1)
 ;
 
-INSERT INTO orders (
-    id,
-    user_id,
-    post_id,
-    status,
-    confirmation_status,
-    quantity,
-    name,
-    deleted_count,
-    created_at,
-    deleted_at
-) VALUES (
-    1,                  -- PK
-    2,                  -- 유저 아이디
-    4,                  -- 공구(post) 아이디
-    'PENDING',          -- 주문 상태 (기본값)
-    'UNCONFIRMED',      -- 확인 상태 (기본값)
-    8,                  -- 구매 개수
-    '박지은',             -- 실명
-    0,                  -- deleted_count (기본값)
-    '2025-06-05 11:00:00',  -- 생성 시각
-    NULL                -- 삭제 시각 (아직 삭제되지 않음)
-);
-
-
 -- 6) 외래키 제약 ON
 SET FOREIGN_KEY_CHECKS = 1;
