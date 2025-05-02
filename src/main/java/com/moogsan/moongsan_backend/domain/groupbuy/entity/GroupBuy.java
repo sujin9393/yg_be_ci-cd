@@ -9,10 +9,10 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -86,31 +86,47 @@ public class GroupBuy extends BaseEntity {
     @JoinColumn(name="user_id", nullable = false)
     private User user;
 
+    @Builder.Default
+    @OneToMany(mappedBy = "groupBuy", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<GroupBuyCategory> groupBuyCategories = new ArrayList<>();
+
+    @Builder.Default
     @OneToMany(mappedBy = "groupBuy",
                cascade = CascadeType.ALL,
                orphanRemoval = true)
     @OrderBy("imageSeqNo ASC")
     private List<Image> images = new ArrayList<>();
 
+
+    public List<Category> getCategories() {
+        return groupBuyCategories.stream()
+                .map(GroupBuyCategory::getCategory)
+                .collect(Collectors.toList());
+    }
+
+
+    ///  공구 게시글 마감 임박 여부 구현 로직 필요
+
     // 공구 게시글 생성 팩토리 메서드
-    public static GroupBuy create(CreateGroupBuyRequest req, User host) {
-        GroupBuy gb = new GroupBuy();
-        gb.title = req.getTitle();
-        gb.name = req.getName();
-        gb.url = req.getUrl();
-        gb.price = req.getPrice();
-        gb.unitPrice =  (req.getPrice() / req.getTotalAmount()) * req.getUnitAmount();
-        gb.totalAmount = req.getTotalAmount();
-        gb.leftAmount = req.getLeftAmount();
-        gb.unitAmount = req.getUnitAmount();
-        gb.description = req.getDescription();
-        gb.dueDate = LocalDateTime.parse(req.getDueDate());
-        gb.location = req.getLocation();
-        gb.pickupDate = LocalDateTime.parse(req.getPickupDate());
+    public static GroupBuy of(CreateGroupBuyRequest req, User host) {
+        System.out.println(">> DTO 이미지 리스트: " + req.getImageUrls());
+        System.out.println(">> DTO URL: " + req.getUrl());
+        System.out.println(">> 로그인 유저: " + host);
 
-        gb.user = host;
-
-        return gb;
+        return GroupBuy.builder()
+                .title(req.getTitle())
+                .name(req.getName())
+                .url(req.getUrl())
+                .price(req.getPrice())
+                .unitPrice(req.getPrice() / req.getTotalAmount()) // 정수로 치환 필요
+                .totalAmount(req.getTotalAmount())
+                .leftAmount(req.getLeftAmount())
+                .unitAmount(req.getUnitAmount())
+                .description(req.getDescription())
+                .dueDate(req.getDueDate())
+                .pickupDate(req.getPickupDate())
+                .user(host)
+                .build();
     }
 
     // 공구 게시글 이미지 저장 로직

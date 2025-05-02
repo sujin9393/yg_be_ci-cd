@@ -9,11 +9,15 @@ import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyL
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.ParticipatedList.ParticipatedListResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.WishList.WishListResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyUpdate.GroupBuyForUpdateResponse;
-import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyMain.MainPageResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.service.GroupBuyQueryService;
+import com.moogsan.moongsan_backend.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,44 +37,26 @@ public class GroupBuyQueryController {
         );
     }
 
-    // 메인 페이지 조회
-    @GetMapping("/main")
-    public ResponseEntity<WrapperResponse<MainPageResponse>> getGroupBuyMainInfo() {
-        MainPageResponse groupBuyMainPage = groupBuyService.getGroupBuyMainInfo();
-
-        return ResponseEntity.ok(
-                WrapperResponse.<MainPageResponse>builder()
-                        .message("메인 화면을 성공적으로 조회했습니다.")
-                        .data(groupBuyMainPage)
-                        .build()
-        );
-    }
-
     // 공구 리스트 조회
     @GetMapping
-    public ResponseEntity<WrapperResponse<PagedResponse<BasicListResponse>>> getGroupBuyBasicList(
+    public ResponseEntity<WrapperResponse<PagedResponse<BasicListResponse>>> getGroupBuyListByCursor(
             @RequestParam(value = "category", required = false) Long categoryId,
-            @RequestParam(value = "sort") String sort,
+            @RequestParam(value = "sort", defaultValue = "created") String sort,
             @RequestParam(value = "cursor", required = false) Long cursor,
+            // 커서 페이징용 추가 파라미터들
+            @RequestParam(value = "lastCreatedAt", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            LocalDateTime lastCreatedAt,
+            @RequestParam(value = "lastPrice", required = false) Integer lastPrice,
             @RequestParam(value = "limit", defaultValue = "10") Integer limit
     ) {
-        PagedResponse<BasicListResponse> pagedResponse = groupBuyService.getGroupBuyBasicList(categoryId, sort, cursor, limit);
+        PagedResponse<BasicListResponse> pagedResponse =
+                groupBuyService.getGroupBuyListByCursor(categoryId, sort, cursor, lastCreatedAt,
+                                                        lastPrice, limit);
         return ResponseEntity.ok(
                 WrapperResponse.<PagedResponse<BasicListResponse>>builder()
                         .message("전체 리스트를 성공적으로 조회했습니다.")
                         .data(pagedResponse)
-                        .build()
-        );
-    }
-
-    // 공구 게시글 상세 조회
-    @GetMapping("/{postId}")
-    public ResponseEntity<WrapperResponse<DetailResponse>> getGroupBuyDetailInfo(@PathVariable Long postId) {
-        DetailResponse detail = groupBuyService.getGroupBuyDetailInfo(postId);
-        return ResponseEntity.ok(
-                WrapperResponse.<DetailResponse>builder()
-                        .message("공구 게시글 상세 정보를 성공적으로 조회했습니다.")
-                        .data(detail)
                         .build()
         );
     }
@@ -106,15 +92,16 @@ public class GroupBuyQueryController {
         );
     }
 
-    // 참여 공구 리스트 조회
     /*
+    // 참여 공구 리스트 조회
     @GetMapping("/user/participants")
     public ResponseEntity<WrapperResponse<PagedResponse<ParticipatedListResponse>>> getGroupBuyParticipatedList(
+            @AuthenticationPrincipal User currentUser,
             @RequestParam(value = "sort") String sort,
             @RequestParam(value = "cursor", required = false) Long cursor,
             @RequestParam(value = "limit", defaultValue = "10") Integer limit
     ) {
-        PagedResponse<ParticipatedListResponse> pagedResponse = groupBuyService.getGroupBuyParticipatedList(sort, cursor, limit);
+        PagedResponse<ParticipatedListResponse> pagedResponse = groupBuyService.getGroupBuyParticipatedList(currentUser, sort, cursor, limit);
         return ResponseEntity.ok(
                 WrapperResponse.<PagedResponse<ParticipatedListResponse>>builder()
                         .message("참여 공구 리스트를 성공적으로 조회했습니다.")
@@ -122,11 +109,13 @@ public class GroupBuyQueryController {
                         .build()
         );
     }
-    */
+     */
 
     // 공구 참여자 조회
     @GetMapping("/{postId}/participants")
-    public ResponseEntity<WrapperResponse<ParticipantListResponse>> getGroupBuyParticipantsInfo(@PathVariable Long postId) {
+    public ResponseEntity<WrapperResponse<ParticipantListResponse>> getGroupBuyParticipantsInfo(
+            @AuthenticationPrincipal User currentUser,
+            @PathVariable Long postId) {
         ParticipantListResponse participantList = groupBuyService.getGroupBuyParticipantsInfo(postId);
         return ResponseEntity.ok(
                 WrapperResponse.<ParticipantListResponse>builder()

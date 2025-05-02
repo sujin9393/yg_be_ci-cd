@@ -3,6 +3,7 @@ package com.moogsan.moongsan_backend.global.security.jwt;
 import com.moogsan.moongsan_backend.domain.user.entity.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -12,14 +13,19 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    private final SecretKey key;
+    private final SecretKey secretKey;
     private final long accessTokenExpireMs;
     private final long refreshTokenExpireMs;
 
-    public JwtUtil(JwtProperties jwtProperties) {
-        this.key = Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8));
-        this.accessTokenExpireMs = jwtProperties.getAccessTokenExpireMs();
-        this.refreshTokenExpireMs = jwtProperties.getRefreshTokenExpireMs();
+    public JwtUtil(
+            @Value("${jwt.secret}") String jwtSecret,
+            @Value("${jwt.access-token-expire-ms}") long accessTokenExpireMs,
+            @Value("${jwt.refresh-token-expire-ms}") long refreshTokenExpireMs
+    ) {
+        // HS256 대칭키로 고정
+        this.secretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+        this.accessTokenExpireMs = accessTokenExpireMs;
+        this.refreshTokenExpireMs = refreshTokenExpireMs;
     }
 
     public String generateAccessToken(User user) {
@@ -27,7 +33,7 @@ public class JwtUtil {
                 .setSubject(String.valueOf(user.getId()))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpireMs))
-                .signWith(key, SignatureAlgorithm.HS256)
+                .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -36,25 +42,27 @@ public class JwtUtil {
                 .setSubject(String.valueOf(user.getId()))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + refreshTokenExpireMs))
-                .signWith(key, SignatureAlgorithm.HS256)
+                .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
-                    .setSigningKey(key)
+                    .setSigningKey(secretKey)
                     .build()
                     .parseClaimsJws(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
+            System.err.println("=== JWT 검증 실패: " + e.getClass().getSimpleName()
+                    + " / message=" + e.getMessage());
             return false;
         }
     }
 
     public Long getUserIdFromToken(String token) {
         Claims claims = Jwts.parserBuilder()
-                .setSigningKey(key)
+                .setSigningKey(secretKey)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();

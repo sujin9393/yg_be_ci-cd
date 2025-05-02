@@ -37,7 +37,6 @@ public class BasicListResponse {
 
     public BasicListResponse of(GroupBuy groupBuy) {
         return BasicListResponse.builder()
-                .
                 .build();
     }
 

@@ -1,4 +1,4 @@
-package com.moogsan.moongsan_backend.domain.user.service;
+package com.moogsan.moongsan_backend.global.security;
 
 import com.moogsan.moongsan_backend.domain.user.entity.CustomUserDetails;
 import com.moogsan.moongsan_backend.domain.user.entity.User;
