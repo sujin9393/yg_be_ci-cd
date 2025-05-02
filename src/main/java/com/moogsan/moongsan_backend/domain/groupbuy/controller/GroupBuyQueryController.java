@@ -50,7 +50,15 @@ public class GroupBuyQueryController {
         );
     }
 
-    /// 공구 리스트 조회 SUCCESS
+    /*
+    * Long categoryId,
+            String sort,
+            Long cursorId,
+            LocalDateTime cursorCreatedAt,
+            Integer cursorPrice,
+            Integer limit*/
+
+    // 공구 리스트 조회
     @GetMapping
     public ResponseEntity<WrapperResponse<PagedResponse<BasicListResponse>>> getGroupBuyListByCursor(
             @RequestParam(value = "category", required = false) Long categoryId,
