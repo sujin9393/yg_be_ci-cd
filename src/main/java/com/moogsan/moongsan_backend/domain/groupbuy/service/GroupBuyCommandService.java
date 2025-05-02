@@ -2,6 +2,7 @@ package com.moogsan.moongsan_backend.domain.groupbuy.service;
 
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.command.request.CreateGroupBuyRequest;
 import com.moogsan.moongsan_backend.domain.groupbuy.entity.GroupBuy;
+import com.moogsan.moongsan_backend.domain.groupbuy.mapper.ImageMapper;
 import com.moogsan.moongsan_backend.domain.groupbuy.repository.GroupBuyRepository;
 import com.moogsan.moongsan_backend.domain.user.entity.CustomUserDetails;
 import com.moogsan.moongsan_backend.domain.user.entity.User;
@@ -19,6 +20,7 @@ public class GroupBuyCommandService {
     private final GroupBuyRepository groupBuyRepository;
     private final Path uploadDir;         // 업로드 디렉토리(application.yml에 설정 필요)
     private final String publicBaseUrl;   // 외부에 공개되는 베이스 URL (https://cdn.example.com/uploads 등등)
+    private final ImageMapper imageMapper;
     //private final OrderRepository orderRepository;
 
     /// 공구 게시글 작성
@@ -26,6 +28,8 @@ public class GroupBuyCommandService {
 
         // GroupBuy 기본 필드 매핑 (팩토리 메서드 사용)
         GroupBuy gb = GroupBuy.of(createGroupBuyRequest, currentUser);
+
+        imageMapper.mapImagesToGroupBuy(createGroupBuyRequest.getImageUrls(), gb);
 
         // 최종 저장
         return groupBuyRepository.save(gb).getId();

@@ -25,14 +25,26 @@ import java.time.LocalDateTime;
 public class GroupBuyQueryController {
     private final GroupBuyQueryService groupBuyService;
 
-    // 공구 게시글 수정 전 정보 조회
-    @GetMapping("/{postId}/for-edit")
+    /// 공구 게시글 수정 전 정보 조회 SUCCESS
+    @GetMapping("/{postId}/edit")
     public ResponseEntity<WrapperResponse<GroupBuyForUpdateResponse>> getGroupBuyEditInfo(@PathVariable Long postId) {
         GroupBuyForUpdateResponse groupBuyForUpdate = groupBuyService.getGroupBuyEditInfo(postId);
         return ResponseEntity.ok(
                 WrapperResponse.<GroupBuyForUpdateResponse>builder()
                         .message("공구 게시글 수정을 성공적으로 조회했습니다.")
                         .data(groupBuyForUpdate)
+                        .build()
+        );
+    }
+
+    /// 공구 게시글 상세 조회 SUCCESS
+    @GetMapping("/{postId}")
+    public ResponseEntity<WrapperResponse<DetailResponse>> getGroupBuyDetailInfo(@PathVariable Long postId) {
+        DetailResponse detail = groupBuyService.getGroupBuyDetailInfo(postId);
+        return ResponseEntity.ok(
+                WrapperResponse.<DetailResponse>builder()
+                        .message("공구 게시글 상세 정보를 성공적으로 조회했습니다.")
+                        .data(detail)
                         .build()
         );
     }

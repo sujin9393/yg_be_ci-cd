@@ -124,20 +124,9 @@ public class GroupBuy extends BaseEntity {
                 .unitAmount(req.getUnitAmount())
                 .description(req.getDescription())
                 .dueDate(req.getDueDate())
+                .location(req.getLocation())
                 .pickupDate(req.getPickupDate())
                 .user(host)
                 .build();
-    }
-
-    // 공구 게시글 이미지 저장 로직
-    public void addImage(String url, String imageUrlResized, int seqNo, boolean thumbnail) {
-        Image img = Image.builder()
-                .imageUrl(url)
-                .imageUrlResized(imageUrlResized)
-                .imageSeqNo(seqNo)
-                .thumbnail(thumbnail)
-                .groupBuy(this)
-                .build();
-        this.images.add(img);
     }
 }

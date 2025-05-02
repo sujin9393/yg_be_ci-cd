@@ -17,7 +17,6 @@ public class Image {
     @Column(nullable = false)
     private String imageUrl;
 
-    @Column(nullable = false)
     private String imageUrlResized;
 
     @Builder.Default

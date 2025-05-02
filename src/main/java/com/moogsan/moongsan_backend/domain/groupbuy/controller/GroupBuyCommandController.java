@@ -32,7 +32,7 @@ public class GroupBuyCommandController {
 
     private final GroupBuyCommandService groupBuyService;
 
-    // 공구 게시글 작성
+    /// 공구 게시글 작성 SUCCESS
     @PostMapping
     public ResponseEntity<WrapperResponse<CommandGroupBuyResponse>> createGroupBuy(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -50,6 +50,7 @@ public class GroupBuyCommandController {
         }
 
         Long postId = groupBuyService.createGroupBuy(userDetails.getUser(), request);
+
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(postId)
