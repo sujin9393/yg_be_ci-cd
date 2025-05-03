@@ -104,15 +104,45 @@ public class GroupBuy extends BaseEntity {
                 .collect(Collectors.toList());
     }
 
-    @Transient
-    public double getSoldRatio() {
-        if (totalAmount == 0) return 0.0;
-        return (double)(totalAmount - leftAmount) / totalAmount;
+    public void increaseLeftAmount(int quantity) {
+        this.leftAmount += quantity;
     }
 
-    @Transient
-    public boolean isDueSoon() {
-        return getSoldRatio() >= 0.8;
+    public void decreaseLeftAmount(int quantity) {
+        this.leftAmount = Math.max(0, this.leftAmount - quantity);
     }
 
+    public void increaseParticipantCount() {
+        this.participantCount++;
+    }
+
+    public void decreaseParticipantCount() {
+        this.participantCount = Math.max(0, this.participantCount - 1);
+    }
+
+
+    ///  공구 게시글 마감 임박 여부 구현 로직 필요
+
+    // 공구 게시글 생성 팩토리 메서드
+    public static GroupBuy of(CreateGroupBuyRequest req, User host) {
+        System.out.println(">> DTO 이미지 리스트: " + req.getImageUrls());
+        System.out.println(">> DTO URL: " + req.getUrl());
+        System.out.println(">> 로그인 유저: " + host);
+
+        return GroupBuy.builder()
+                .title(req.getTitle())
+                .name(req.getName())
+                .url(req.getUrl())
+                .price(req.getPrice())
+                .unitPrice(req.getPrice() / req.getTotalAmount()) // 정수로 치환 필요
+                .totalAmount(req.getTotalAmount())
+                .leftAmount(req.getLeftAmount())
+                .unitAmount(req.getUnitAmount())
+                .description(req.getDescription())
+                .dueDate(req.getDueDate())
+                .location(req.getLocation())
+                .pickupDate(req.getPickupDate())
+                .user(host)
+                .build();
+    }
 }
