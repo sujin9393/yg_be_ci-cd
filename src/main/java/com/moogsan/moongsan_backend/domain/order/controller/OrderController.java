@@ -34,7 +34,7 @@ public class OrderController {
                 .body(Map.of("message", "주문이 성공적으로 등록되었습니다.", "data", null));
     }
 
-    @DeleteMapping("/orders/post/{postId}")
+    @DeleteMapping("/orders/postId/{postId}")
     public ResponseEntity<?> cancelOrder(
             @PathVariable Long postId,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
