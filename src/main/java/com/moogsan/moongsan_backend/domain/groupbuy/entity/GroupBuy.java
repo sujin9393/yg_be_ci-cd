@@ -104,6 +104,22 @@ public class GroupBuy extends BaseEntity {
                 .collect(Collectors.toList());
     }
 
+    public void increaseLeftAmount(int quantity) {
+        this.leftAmount += quantity;
+    }
+
+    public void decreaseLeftAmount(int quantity) {
+        this.leftAmount = Math.max(0, this.leftAmount - quantity);
+    }
+
+    public void increaseParticipantCount() {
+        this.participantCount++;
+    }
+
+    public void decreaseParticipantCount() {
+        this.participantCount = Math.max(0, this.participantCount - 1);
+    }
+
 
     ///  공구 게시글 마감 임박 여부 구현 로직 필요
 

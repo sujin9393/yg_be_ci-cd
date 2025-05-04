@@ -32,7 +32,10 @@ public class Order {
     private GroupBuy groupBuy;
 
     @Column(length = 20, nullable = false)
-    private String status;
+    private String status = "PENDING";
+
+    @Column(length = 20, nullable = false)
+    private String confirmationStatus = "UNCONFIRMED";
 
     @Column(nullable = false)
     private Integer quantity;
@@ -50,4 +53,7 @@ public class Order {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    public void cancel() {
+        this.deletedAt = LocalDateTime.now();
+    }
 }

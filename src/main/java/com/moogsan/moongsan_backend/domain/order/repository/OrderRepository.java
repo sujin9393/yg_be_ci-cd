@@ -16,4 +16,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     // 유저 ID + 공구글 ID로 주문 단건 조회
     Optional<Order> findByUserIdAndGroupBuyId(Long userId, Long groupBuyId);
+
+    // 유저 ID + 공구글 ID + 상태가 아닌 주문 단건 조회
+    Optional<Order> findByUserIdAndGroupBuyIdAndStatusNot(Long userId, Long groupBuyId, String status);
+
+    // 공구
 }
