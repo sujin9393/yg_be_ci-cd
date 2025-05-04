@@ -12,6 +12,8 @@ import com.moogsan.moongsan_backend.domain.groupbuy.entity.GroupBuy;
 import com.moogsan.moongsan_backend.domain.groupbuy.entity.Image;
 import com.moogsan.moongsan_backend.domain.groupbuy.mapper.GroupBuyQueryMapper;
 import com.moogsan.moongsan_backend.domain.groupbuy.repository.GroupBuyRepository;
+import com.moogsan.moongsan_backend.domain.order.entity.Order;
+import com.moogsan.moongsan_backend.domain.order.repository.OrderRepository;
 import com.moogsan.moongsan_backend.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -31,7 +33,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class GroupBuyQueryService {
     private final GroupBuyRepository groupBuyRepository;
-    // private final WishRepository wishRepository;
+    private final OrderRepository orderRepository;
     private final GroupBuyQueryMapper groupBuyQueryMapper;
 
     /// 공구 게시글 수정 전 정보 조회
@@ -125,7 +127,7 @@ public class GroupBuyQueryService {
         LocalDateTime nextCreatedAt = null;
 
         if (hasMore) {
-            BasicListResponse last = posts.get(posts.size() - 1);
+            BasicListResponse last = posts.getLast();
             nextCursor = Math.toIntExact(last.getPostId());
             nextCreatedAt = last.getCreatedAt();
 
@@ -165,25 +167,34 @@ public class GroupBuyQueryService {
         return null;
     }
 
-    /*
+
     /// 참여 공구 리스트 조회
     public PagedResponse<ParticipatedListResponse> getGroupBuyParticipatedList(
             User currentUser,
             String sort,
-            Long cursor,
+            Long cursorId,
             Integer limit
     ) {
-        long cursorId = Optional.ofNullable(cursor).orElse(Long.MAX_VALUE);
-        Pageable page = PageRequest.of(0, limit, Sort.by("post.id").descending());
+        String status = sort.toUpperCase();
 
-        // 주문(Participation) 조회
-        List<Order> orders = orderRepository
-                .findByUserIdAndPostStatusAndPostIdLessThan(
-                        currentUser.getId(),
-                        "OPEN",            // 필요에 따라 sort→status 필터로 변경
-                        cursorId,
-                        page
-                );
+        Pageable page = PageRequest.of(0, limit, Sort.by("groupBuy.id").descending());
+
+        // cursorId가 없으면 cursor 조건 제외
+        List<Order> orders;
+        if (cursorId == null) {
+            orders = orderRepository.findByUserIdAndGroupBuyPostStatus(
+                    currentUser.getId(),
+                    status,
+                    page
+            );
+        } else {
+            orders = orderRepository.findByUserIdAndGroupBuyPostStatusAndGroupBuyIdLessThan(
+                    currentUser.getId(),
+                    status,
+                    cursorId,
+                    page
+            );
+        }
 
         // 매핑
         List<ParticipatedListResponse> posts = orders.stream()
@@ -193,7 +204,7 @@ public class GroupBuyQueryService {
         // 다음 커서 및 더보기 여부
         Long nextCursor = posts.isEmpty()
                 ? null
-                : posts.get(posts.size() - 1).getPostId();
+                : posts.getLast().getPostId();
         boolean hasMore = posts.size() == limit;
 
         return PagedResponse.<ParticipatedListResponse>builder()
@@ -203,7 +214,6 @@ public class GroupBuyQueryService {
                 .hasMore(hasMore)
                 .build();
     }
-     */
 
     /// 공구 참여자 조회
     public ParticipantListResponse getGroupBuyParticipantsInfo(Long postId) {

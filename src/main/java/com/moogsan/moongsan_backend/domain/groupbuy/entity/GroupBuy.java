@@ -133,9 +133,6 @@ public class GroupBuy extends BaseEntity {
 
     // 공구 게시글 생성 팩토리 메서드
     public static GroupBuy of(CreateGroupBuyRequest req, User host) {
-        System.out.println(">> DTO 이미지 리스트: " + req.getImageUrls());
-        System.out.println(">> DTO URL: " + req.getUrl());
-        System.out.println(">> 로그인 유저: " + host);
 
         return GroupBuy.builder()
                 .title(req.getTitle())
