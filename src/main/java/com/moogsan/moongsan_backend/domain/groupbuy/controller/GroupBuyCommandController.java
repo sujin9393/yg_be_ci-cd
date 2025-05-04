@@ -59,13 +59,13 @@ public class GroupBuyCommandController {
     // 공구 게시글 삭제
     //  TODO V2
 
-    /*
+
     // 공구 참여 취소
     @DeleteMapping("/{postId}/participants")
     public ResponseEntity<WrapperResponse<EmptyResponse>> leaveGroupBuy(
-            @AuthenticationPrincipal User currentUser,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long postId){
-        groupBuyService.leaveGroupBuy(currentUser, postId);
+        groupBuyService.leaveGroupBuy(userDetails.getUser(), postId);
 
         return ResponseEntity.ok(
                 WrapperResponse.<EmptyResponse>builder()
@@ -73,7 +73,6 @@ public class GroupBuyCommandController {
                         .build()
         );
     }
-     */
 
     // 관심 공구 추가
     //  TODO V2
@@ -81,13 +80,12 @@ public class GroupBuyCommandController {
     // 관심 공구 취소
     //  TODO V2
 
-    /*
     // 공구 게시글 공구 종료
-    @PatchMapping("/{postId}/participants")
+    @PatchMapping("/{postId}/end")
     public ResponseEntity<WrapperResponse<EmptyResponse>> endGroupBuy(
-            @AuthenticationPrincipal User currentUser,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long postId){
-        groupBuyService.endGroupBuy(currentUser, postId);
+        groupBuyService.endGroupBuy(userDetails.getUser(), postId);
 
         return ResponseEntity.ok(
                 WrapperResponse.<EmptyResponse>builder()
@@ -95,8 +93,6 @@ public class GroupBuyCommandController {
                         .build()
         );
     }
-
-     */
 
     // 검색 -> post가 아니라 get이어야 하지 않나?
     //  TODO V2

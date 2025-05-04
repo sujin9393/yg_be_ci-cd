@@ -16,13 +16,90 @@ import java.util.Optional;
 public interface GroupBuyRepository extends JpaRepository<GroupBuy, Long> {
     //Optional<GroupBuy> findById(Long id);
 
+    // 공구 마감 조건 기반 조회
+    List<GroupBuy> findByPostStatusAndDueDateBefore(String postStatus, LocalDateTime now);
+
     // 게시글 조회 - 공구 게시글 수정 전 정보, 공구 게시글 상세
     @EntityGraph(attributePaths = "images")
     Optional<GroupBuy> findWithImagesById(Long id);
 
-    // ----------------------------------------
-    // 1) 최신순(createdAt DESC) 커서 페이징
-    // (1-1) 카테고리 무관
+    // ----------------------------------------------------
+    // 0) Non-Cursor 메서드 (첫 페이지용)
+    // ----------------------------------------------------
+
+    // 0-1) 최신순(createdAt DESC, id DESC)
+    @Query("""
+       SELECT g
+         FROM GroupBuy g
+        ORDER BY g.createdAt DESC, g.id DESC
+       """
+    )
+    List<GroupBuy> findAllByCreatedOrder(Pageable pageable);
+
+    @Query("""
+       SELECT g
+         FROM GroupBuy g
+         JOIN g.groupBuyCategories gbc
+        WHERE gbc.category.id = :categoryId
+        ORDER BY g.createdAt DESC, g.id DESC
+       """
+    )
+    List<GroupBuy> findByCategoryCreatedOrder(
+            @Param("categoryId") Long categoryId,
+            Pageable pageable
+    );
+
+    // 0-2) 마감 임박순(dueSoon = true, createdAt DESC, id DESC)
+    @Query("""
+       SELECT g
+         FROM GroupBuy g
+        WHERE g.dueSoon = true
+        ORDER BY g.createdAt DESC, g.id DESC
+       """
+    )
+    List<GroupBuy> findAllByDueSoonOrder(Pageable pageable);
+
+    @Query("""
+       SELECT g
+         FROM GroupBuy g
+         JOIN g.groupBuyCategories gbc
+        WHERE gbc.category.id = :categoryId
+          AND g.dueSoon = true
+        ORDER BY g.createdAt DESC, g.id DESC
+       """
+    )
+    List<GroupBuy> findByCategoryDueSoonOrder(
+            @Param("categoryId") Long categoryId,
+            Pageable pageable
+    );
+
+    // 0-3) 가격 낮은 순(unitPrice ASC, createdAt DESC, id DESC)
+    @Query("""
+       SELECT g
+         FROM GroupBuy g
+        ORDER BY g.unitPrice ASC, g.createdAt DESC, g.id DESC
+       """
+    )
+    List<GroupBuy> findAllByPriceOrder(Pageable pageable);
+
+    @Query("""
+       SELECT g
+         FROM GroupBuy g
+         JOIN g.groupBuyCategories gbc
+        WHERE gbc.category.id = :categoryId
+        ORDER BY g.unitPrice ASC, g.createdAt DESC, g.id DESC
+       """
+    )
+    List<GroupBuy> findByCategoryPriceOrder(
+            @Param("categoryId") Long categoryId,
+            Pageable pageable
+    );
+
+
+    // ----------------------------------------------------
+    // 1) 최신순(createdAt DESC, id DESC) 커서 페이징
+    // ----------------------------------------------------
+
     @Query("""
        SELECT g
          FROM GroupBuy g
@@ -34,7 +111,6 @@ public interface GroupBuyRepository extends JpaRepository<GroupBuy, Long> {
             Pageable pageable
     );
 
-    // (1-2) 특정 카테고리만
     @Query("""
        SELECT g
          FROM GroupBuy g
@@ -49,9 +125,11 @@ public interface GroupBuyRepository extends JpaRepository<GroupBuy, Long> {
             Pageable pageable
     );
 
-    // ----------------------------------------
-    // 2) 마감 임박순(dueSoon = true, 최신순)
-    // (2-1) 카테고리 무관
+
+    // ----------------------------------------------------
+    // 2) 마감 임박순(dueSoon = true, 최신순) 커서 페이징
+    // ----------------------------------------------------
+
     @Query("""
        SELECT g
          FROM GroupBuy g
@@ -68,7 +146,6 @@ public interface GroupBuyRepository extends JpaRepository<GroupBuy, Long> {
             Pageable pageable
     );
 
-    // (2-2) 특정 카테고리만
     @Query("""
        SELECT g
          FROM GroupBuy g
@@ -88,9 +165,11 @@ public interface GroupBuyRepository extends JpaRepository<GroupBuy, Long> {
             Pageable pageable
     );
 
-    // ----------------------------------------
-    // 3) 가격 낮은 순(unitPrice ASC, 커서 비교 포함)
-    // (3-1) 카테고리 무관
+
+    // ----------------------------------------------------
+    // 3) 가격 낮은 순(unitPrice ASC) 커서 페이징
+    // ----------------------------------------------------
+
     @Query("""
        SELECT g
          FROM GroupBuy g
@@ -112,7 +191,6 @@ public interface GroupBuyRepository extends JpaRepository<GroupBuy, Long> {
             Pageable pageable
     );
 
-    // (3-2) 특정 카테고리만
     @Query("""
        SELECT g
          FROM GroupBuy g

@@ -2,6 +2,7 @@ package com.moogsan.moongsan_backend.domain.groupbuy.entity;
 
 import com.moogsan.moongsan_backend.domain.BaseEntity;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.command.request.CreateGroupBuyRequest;
+import com.moogsan.moongsan_backend.domain.groupbuy.exception.specific.GroupBuyInvalidStateException;
 import com.moogsan.moongsan_backend.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -104,6 +105,17 @@ public class GroupBuy extends BaseEntity {
                 .collect(Collectors.toList());
     }
 
+    @Transient
+    public double getSoldRatio() {
+        if (totalAmount == 0) return 0.0;
+        return (double)(totalAmount - leftAmount) / totalAmount;
+    }
+
+    @Transient
+    public boolean isDueSoon() {
+        return getSoldRatio() >= 0.8;
+    }
+
     public void increaseLeftAmount(int quantity) {
         this.leftAmount += quantity;
     }
@@ -120,15 +132,18 @@ public class GroupBuy extends BaseEntity {
         this.participantCount = Math.max(0, this.participantCount - 1);
     }
 
-    @Transient
-    public double getSoldRatio() {
-        if (totalAmount == 0) return 0.0;
-        return (double)(totalAmount - leftAmount) / totalAmount;
-    }
-
-    @Transient
-    public boolean isDueSoon() {
-        return getSoldRatio() >= 0.8;
+    public void changePostStatus(String status) {
+        String normalized = status.trim().toUpperCase();
+        switch (normalized) {
+            case "CLOSED":
+                this.postStatus = "CLOSED";
+                break;
+            case "ENDED":
+                this.postStatus = "ENDED";
+                break;
+            default:
+                throw new GroupBuyInvalidStateException("공구 진행 상태는 CLOSED 또는 ENDED로만 전환할 수 있습니다.");
+        }
     }
 
     // 공구 게시글 생성 팩토리 메서드
