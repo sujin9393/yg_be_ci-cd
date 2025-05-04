@@ -75,6 +75,18 @@ public class GroupBuyCommandController {
 
     // 공구 게시글 삭제
     //  TODO V2
+    @DeleteMapping("{postId}")
+    public ResponseEntity<WrapperResponse<CommandGroupBuyResponse>> updateGroupBuy(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long postId) {
+
+        groupBuyService.deleteGroupBuy(userDetails.getUser(), postId);
+
+        return ResponseEntity.ok()
+                .body(WrapperResponse.<CommandGroupBuyResponse>builder()
+                        .message("공구 게시글이 성공적으로 삭제되었습니다.")
+                        .build());
+    }
 
 
     // 공구 참여 취소
