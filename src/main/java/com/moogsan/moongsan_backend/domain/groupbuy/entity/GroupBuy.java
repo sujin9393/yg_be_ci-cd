@@ -98,13 +98,6 @@ public class GroupBuy extends BaseEntity {
     @OrderBy("imageSeqNo ASC")
     private List<Image> images = new ArrayList<>();
 
-
-    public List<Category> getCategories() {
-        return groupBuyCategories.stream()
-                .map(GroupBuyCategory::getCategory)
-                .collect(Collectors.toList());
-    }
-
     @Transient
     public double getSoldRatio() {
         if (totalAmount == 0) return 0.0;
@@ -144,25 +137,5 @@ public class GroupBuy extends BaseEntity {
             default:
                 throw new GroupBuyInvalidStateException("공구 진행 상태는 CLOSED 또는 ENDED로만 전환할 수 있습니다.");
         }
-    }
-
-    // 공구 게시글 생성 팩토리 메서드
-    public static GroupBuy of(CreateGroupBuyRequest req, User host) {
-
-        return GroupBuy.builder()
-                .title(req.getTitle())
-                .name(req.getName())
-                .url(req.getUrl())
-                .price(req.getPrice())
-                .unitPrice(req.getPrice() / req.getTotalAmount()) // 정수로 치환 필요
-                .totalAmount(req.getTotalAmount())
-                .leftAmount(req.getLeftAmount())
-                .unitAmount(req.getUnitAmount())
-                .description(req.getDescription())
-                .dueDate(req.getDueDate())
-                .location(req.getLocation())
-                .pickupDate(req.getPickupDate())
-                .user(host)
-                .build();
     }
 }

@@ -38,7 +38,12 @@ public class GroupBuyCommandService {
     /// 공구 게시글 작성
     public Long createGroupBuy(User currentUser, CreateGroupBuyRequest createGroupBuyRequest) {
 
-        /// TODO 약수 계산 로직 수행
+        int total = createGroupBuyRequest.getTotalAmount();
+        int unit  = createGroupBuyRequest.getUnitAmount();
+
+        if (unit == 0 || total % unit != 0) {
+            throw new GroupBuyInvalidStateException("상품 주문 단위는 상품 전체 수량의 약수여야 합니다.");
+        }
 
         // GroupBuy 기본 필드 매핑 (팩토리 메서드 사용)
         GroupBuy gb = groupBuyCommandMapper.create(createGroupBuyRequest, currentUser);
