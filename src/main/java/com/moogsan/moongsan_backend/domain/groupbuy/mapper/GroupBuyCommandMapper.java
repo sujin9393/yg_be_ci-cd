@@ -1,6 +1,7 @@
 package com.moogsan.moongsan_backend.domain.groupbuy.mapper;
 
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.command.request.CreateGroupBuyRequest;
+import com.moogsan.moongsan_backend.domain.groupbuy.dto.command.request.UpdateGroupBuyRequest;
 import com.moogsan.moongsan_backend.domain.groupbuy.entity.GroupBuy;
 import com.moogsan.moongsan_backend.domain.user.entity.User;
 import org.springframework.stereotype.Component;

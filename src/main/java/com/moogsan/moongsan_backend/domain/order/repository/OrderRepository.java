@@ -33,5 +33,5 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             Pageable pageable
     );
 
-    // 공구
+    int countByGroupBuyId(Long postId);
 }

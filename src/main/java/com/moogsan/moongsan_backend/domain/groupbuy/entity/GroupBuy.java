@@ -1,7 +1,7 @@
 package com.moogsan.moongsan_backend.domain.groupbuy.entity;
 
 import com.moogsan.moongsan_backend.domain.BaseEntity;
-import com.moogsan.moongsan_backend.domain.groupbuy.dto.command.request.CreateGroupBuyRequest;
+import com.moogsan.moongsan_backend.domain.groupbuy.dto.command.request.UpdateGroupBuyRequest;
 import com.moogsan.moongsan_backend.domain.groupbuy.exception.specific.GroupBuyInvalidStateException;
 import com.moogsan.moongsan_backend.domain.user.entity.User;
 import jakarta.persistence.*;
@@ -10,7 +10,6 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -137,5 +136,32 @@ public class GroupBuy extends BaseEntity {
             default:
                 throw new GroupBuyInvalidStateException("공구 진행 상태는 CLOSED 또는 ENDED로만 전환할 수 있습니다.");
         }
+    }
+
+    // ===========================================
+    // 업데이트용 도메인 메서드
+    // ===========================================
+    public GroupBuy updateForm(UpdateGroupBuyRequest req) {
+        if (req.getTitle() != null) {
+            this.title = req.getTitle();
+        }
+        if (req.getName() != null) {
+            this.name = req.getName();
+        }
+        if (req.getUrl() != null) {
+            this.url = req.getUrl();
+        }
+        if (req.getDescription() != null) {
+            this.description = req.getDescription();
+        }
+        if (req.getDueDate() != null) {
+            this.dueDate = req.getDueDate();
+        }
+        if (req.getPickupDate() != null) {
+            this.pickupDate = req.getPickupDate();
+            this.pickupChangeReason = req.getDateModificationReason();
+        }
+
+        return this;
     }
 }

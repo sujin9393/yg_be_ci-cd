@@ -3,6 +3,7 @@ package com.moogsan.moongsan_backend.domain.groupbuy.controller;
 import com.moogsan.moongsan_backend.domain.EmptyResponse;
 import com.moogsan.moongsan_backend.domain.WrapperResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.command.request.CreateGroupBuyRequest;
+import com.moogsan.moongsan_backend.domain.groupbuy.dto.command.request.UpdateGroupBuyRequest;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.command.response.CommandGroupBuyResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyUpdate.GroupBuyForUpdateResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.service.GroupBuyCommandService;
@@ -55,6 +56,22 @@ public class GroupBuyCommandController {
 
     // 공구 게시글 수정
     //  TODO V2
+    @PatchMapping("{postId}")
+    public ResponseEntity<WrapperResponse<CommandGroupBuyResponse>> updateGroupBuy(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody UpdateGroupBuyRequest request,
+            @PathVariable Long postId) {
+
+        groupBuyService.updateGroupBuy(userDetails.getUser(), request, postId);
+
+        CommandGroupBuyResponse response = new CommandGroupBuyResponse(postId);
+
+        return ResponseEntity.ok()
+                .body(WrapperResponse.<CommandGroupBuyResponse>builder()
+                        .message("공구 게시글이 성공적으로 수정되었습니다.")
+                        .data(response)
+                        .build());
+    }
 
     // 공구 게시글 삭제
     //  TODO V2
