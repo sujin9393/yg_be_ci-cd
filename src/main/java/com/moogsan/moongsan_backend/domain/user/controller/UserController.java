@@ -94,8 +94,9 @@ public class UserController {
     }
 
     @DeleteMapping("/users/token")
-    public ResponseEntity<WrapperResponse<Void>> logout(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        logoutService.logout(userDetails.getUser().getId());
+    public ResponseEntity<WrapperResponse<Void>> logout(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                        HttpServletResponse response) {
+        logoutService.logout(userDetails.getUser().getId(), response);
         return ResponseEntity.ok(
             WrapperResponse.<Void>builder()
                     .message("로그아웃이 성공적으로 처리되었습니다.")
@@ -105,8 +106,9 @@ public class UserController {
     }
 
     @DeleteMapping("/users")
-    public ResponseEntity<WrapperResponse<Void>> withdraw(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        withdrawService.withdraw(userDetails.getUser().getId());
+    public ResponseEntity<WrapperResponse<Void>> withdraw(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                          HttpServletResponse response) {
+        withdrawService.withdraw(userDetails.getUser().getId(), response);
         return ResponseEntity.ok(
                 WrapperResponse.<Void>builder()
                         .message("회원탈퇴가 완료되었습니다.")
