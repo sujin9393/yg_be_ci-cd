@@ -38,17 +38,6 @@ public class GroupBuyCommandController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody CreateGroupBuyRequest request) {
 
-        // 인증 정보가 없으면 바로 401 응답
-        if (userDetails == null) {
-            WrapperResponse<CommandGroupBuyResponse> unauthorized = WrapperResponse.<CommandGroupBuyResponse>builder()
-                    .message("로그인이 필요합니다")
-                    .data(null)
-                    .build();
-            return ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .body(unauthorized);
-        }
-
         Long postId = groupBuyService.createGroupBuy(userDetails.getUser(), request);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()

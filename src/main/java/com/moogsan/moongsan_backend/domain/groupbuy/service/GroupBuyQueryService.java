@@ -12,6 +12,8 @@ import com.moogsan.moongsan_backend.domain.groupbuy.entity.GroupBuy;
 import com.moogsan.moongsan_backend.domain.groupbuy.entity.Image;
 import com.moogsan.moongsan_backend.domain.groupbuy.mapper.GroupBuyQueryMapper;
 import com.moogsan.moongsan_backend.domain.groupbuy.repository.GroupBuyRepository;
+import com.moogsan.moongsan_backend.domain.order.entity.Order;
+import com.moogsan.moongsan_backend.domain.order.repository.OrderRepository;
 import com.moogsan.moongsan_backend.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -31,7 +33,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class GroupBuyQueryService {
     private final GroupBuyRepository groupBuyRepository;
-    // private final WishRepository wishRepository;
+    private final OrderRepository orderRepository;
     private final GroupBuyQueryMapper groupBuyQueryMapper;
 
     /// 공구 게시글 수정 전 정보 조회
@@ -54,17 +56,16 @@ public class GroupBuyQueryService {
     }
     */
 
-    /// 공구 리스트 조회
+    /// 공구 리스트 조회 => nextCursorId 뿐만 아니라 nextCursorPrice, nextCreatedAt 을 만드는 게 좋을까?
     public PagedResponse<BasicListResponse> getGroupBuyListByCursor(
             Long categoryId,
             String sort,
-            Long cursor,
-            LocalDateTime lastCreatedAt,   // 후속 페이지용
-            Integer lastPrice,             // 후속 페이지용
+            Long cursorId,
+            LocalDateTime cursorCreatedAt,
+            Integer cursorPrice,
             Integer limit
     ) {
         // 1) 커서 ID 및 페이지 설정
-        Long cursorId = (cursor != null) ? cursor : Long.MAX_VALUE;
         Pageable page = PageRequest.of(0, limit);
 
         // 2) 정렬 타입에 따라 서로 다른 @Query 메소드 호출
@@ -72,8 +73,8 @@ public class GroupBuyQueryService {
         switch (sort) {
             case "price_asc":
                 // 최초 요청일 땐 lastPrice, lastCreatedAt 기본값
-                int priceCursor    = (lastPrice != null)     ? lastPrice     : 0;
-                LocalDateTime crt  = (lastCreatedAt != null) ? lastCreatedAt : LocalDateTime.now();
+                int priceCursor    = (cursorPrice != null)   ? cursorPrice     : 0;
+                LocalDateTime crt  = (cursorCreatedAt != null) ? cursorCreatedAt : LocalDateTime.now();
                 if (categoryId != null) {
                     entities = groupBuyRepository.findByCategoryAndPriceAscCursor(
                             categoryId, priceCursor, crt, cursorId, page
@@ -86,8 +87,8 @@ public class GroupBuyQueryService {
                 break;
 
             case "ending_soon":
-                LocalDateTime dueCursorAt = (lastCreatedAt != null)
-                        ? lastCreatedAt
+                LocalDateTime dueCursorAt = (cursorCreatedAt != null)
+                        ? cursorCreatedAt
                         : LocalDateTime.now();
                 if (categoryId != null) {
                     entities = groupBuyRepository.findByCategoryAndDueSoonCursor(
@@ -120,15 +121,28 @@ public class GroupBuyQueryService {
 
         // 4) 다음 커서 & 더보기 여부 계산
         boolean hasMore = posts.size() == limit;
-        Integer nextCursor = hasMore
-                ? Math.toIntExact(posts.getLast().getPostId())
-                : null;
+
+        Integer nextCursor      = null;
+        Integer nextCursorPrice = null;
+        LocalDateTime nextCreatedAt = null;
+
+        if (hasMore) {
+            BasicListResponse last = posts.getLast();
+            nextCursor = Math.toIntExact(last.getPostId());
+            nextCreatedAt = last.getCreatedAt();
+
+            if ("price_asc".equals(sort)) {
+                nextCursorPrice = last.getUnitPrice();
+            }
+        }
 
         // 5) 응답
         return PagedResponse.<BasicListResponse>builder()
                 .count(posts.size())
                 .posts(posts)
                 .nextCursor(nextCursor)
+                .nextCursorPrice(nextCursorPrice)
+                .nextCreatedAt(nextCreatedAt)
                 .hasMore(hasMore)
                 .build();
     }
@@ -153,25 +167,34 @@ public class GroupBuyQueryService {
         return null;
     }
 
-    /*
+
     /// 참여 공구 리스트 조회
     public PagedResponse<ParticipatedListResponse> getGroupBuyParticipatedList(
             User currentUser,
             String sort,
-            Long cursor,
+            Long cursorId,
             Integer limit
     ) {
-        long cursorId = Optional.ofNullable(cursor).orElse(Long.MAX_VALUE);
-        Pageable page = PageRequest.of(0, limit, Sort.by("post.id").descending());
+        String status = sort.toUpperCase();
 
-        // 주문(Participation) 조회
-        List<Order> orders = orderRepository
-                .findByUserIdAndPostStatusAndPostIdLessThan(
-                        currentUser.getId(),
-                        "OPEN",            // 필요에 따라 sort→status 필터로 변경
-                        cursorId,
-                        page
-                );
+        Pageable page = PageRequest.of(0, limit, Sort.by("groupBuy.id").descending());
+
+        // cursorId가 없으면 cursor 조건 제외
+        List<Order> orders;
+        if (cursorId == null) {
+            orders = orderRepository.findByUserIdAndGroupBuyPostStatus(
+                    currentUser.getId(),
+                    status,
+                    page
+            );
+        } else {
+            orders = orderRepository.findByUserIdAndGroupBuyPostStatusAndGroupBuyIdLessThan(
+                    currentUser.getId(),
+                    status,
+                    cursorId,
+                    page
+            );
+        }
 
         // 매핑
         List<ParticipatedListResponse> posts = orders.stream()
@@ -181,7 +204,7 @@ public class GroupBuyQueryService {
         // 다음 커서 및 더보기 여부
         Long nextCursor = posts.isEmpty()
                 ? null
-                : posts.get(posts.size() - 1).getPostId();
+                : posts.getLast().getPostId();
         boolean hasMore = posts.size() == limit;
 
         return PagedResponse.<ParticipatedListResponse>builder()
@@ -191,7 +214,6 @@ public class GroupBuyQueryService {
                 .hasMore(hasMore)
                 .build();
     }
-     */
 
     /// 공구 참여자 조회
     public ParticipantListResponse getGroupBuyParticipantsInfo(Long postId) {
