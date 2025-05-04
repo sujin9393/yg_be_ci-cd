@@ -31,7 +31,7 @@ public class OrderController {
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         orderCreateService.createOrder(orderCreateRequest, Long.valueOf(String.valueOf(userDetails.getUser().getId())));
-        orderCreateService.changePostStatus(orderCreateRequest.getPostId());
+//        orderCreateService.changePostStatus(orderCreateRequest.getPostId()); // 남은 수량 0일시 공구 종료
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("message", "주문이 성공적으로 등록되었습니다.");
         response.put("data", null);
