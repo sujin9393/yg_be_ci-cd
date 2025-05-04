@@ -81,7 +81,7 @@ public class GroupBuyCommandController {
     //  TODO V2
 
     // 공구 게시글 공구 종료
-    @PatchMapping("/{postId}/participants")
+    @PatchMapping("/{postId}/end")
     public ResponseEntity<WrapperResponse<EmptyResponse>> endGroupBuy(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long postId){

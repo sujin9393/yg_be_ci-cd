@@ -139,10 +139,10 @@ public class GroupBuy extends BaseEntity {
                 this.postStatus = "CLOSED";
                 break;
             case "ENDED":
-                this.postStatus = "COMPLETED";
+                this.postStatus = "ENDED";
                 break;
             default:
-                throw new GroupBuyInvalidStateException("공구 진행 상태는 CLOSED 혹은 COMPLETED로만 변경 가능합니다.");
+                throw new GroupBuyInvalidStateException("공구 진행 상태는 CLOSED 또는 ENDED로만 전환할 수 있습니다.");
         }
     }
 

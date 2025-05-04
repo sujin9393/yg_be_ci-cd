@@ -16,6 +16,9 @@ import java.util.Optional;
 public interface GroupBuyRepository extends JpaRepository<GroupBuy, Long> {
     //Optional<GroupBuy> findById(Long id);
 
+    // 공구 마감 조건 기반 조회
+    List<GroupBuy> findByPostStatusAndDueDateBefore(String postStatus, LocalDateTime now);
+
     // 게시글 조회 - 공구 게시글 수정 전 정보, 공구 게시글 상세
     @EntityGraph(attributePaths = "images")
     Optional<GroupBuy> findWithImagesById(Long id);

@@ -23,6 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @Transactional
@@ -30,8 +31,6 @@ import java.time.LocalDateTime;
 public class GroupBuyCommandService {
 
     private final GroupBuyRepository groupBuyRepository;
-    private final Path uploadDir;         // 업로드 디렉토리(application.yml에 설정 필요)
-    private final String publicBaseUrl;   // 외부에 공개되는 베이스 URL (https://cdn.example.com/uploads 등등)
     private final ImageMapper imageMapper;
     private final GroupBuyCommandMapper groupBuyCommandMapper;
     private final OrderRepository orderRepository;
@@ -67,7 +66,7 @@ public class GroupBuyCommandService {
 
         // 해당 공구가 OPEN인지 조회, dueDate가 현재 이후인지 조회 -> 아니면 409
         if (!groupBuy.getPostStatus().equals("OPEN")
-            || !groupBuy.getDueDate().isAfter(LocalDateTime.now())) {
+            || groupBuy.getDueDate().isBefore(LocalDateTime.now())) {
             throw new GroupBuyInvalidStateException("공구 참여 취소는 공구가 열려있는 상태에서만 가능합니다.");
         }
 
@@ -105,7 +104,14 @@ public class GroupBuyCommandService {
 
 
     ///  공구 마감
-    // TODO V1! -> 수량이 0이 되거나 dueDate가 지나면 자동으로 공구 마감
+    public void closePastDueGroupBuys(LocalDateTime now) {
+        List<GroupBuy> expired = groupBuyRepository
+                .findByPostStatusAndDueDateBefore("OPEN", now);
+        for (GroupBuy gb : expired) {
+            gb.changePostStatus("CLOSED");
+        }
+        groupBuyRepository.saveAll(expired);
+    }
 
 
     /// 공구 게시글 공구 종료
@@ -115,23 +121,23 @@ public class GroupBuyCommandService {
         GroupBuy groupBuy = groupBuyRepository.findById(postId)
                 .orElseThrow(GroupBuyNotFoundException::new);
 
-        // 해당 공구가 ENDED가 아닌지 조회 -> 아니면 409
+        // 해당 공구가 CLOSED인지 조회 -> 아니면 409
         if (!groupBuy.getPostStatus().equals("CLOSED")) {
             throw new GroupBuyInvalidStateException("공구 종료는 모집 마감 이후에만 가능합니다.");
         }
 
         // dueDate와 pickupDate 이후인지 조회 -> 아니면 409
-        if (groupBuy.getDueDate().isBefore(LocalDateTime.now())) {
+        if (groupBuy.getDueDate().isAfter(LocalDateTime.now())) {
             throw new GroupBuyInvalidStateException("공구 종료는 공구 마감 일자 이후에만 가능합니다.");
         }
 
-        if (groupBuy.getDueDate().isBefore(LocalDateTime.now())) {
+        if (groupBuy.getDueDate().isAfter(LocalDateTime.now())) {
             throw new GroupBuyInvalidStateException("공구 종료는 공구 픽업 일자 이후에만 가능합니다.");
         }
 
         // 해당 공구의 작성자가 해당 유저인지 조회 -> 아니면 403
         if(!groupBuy.getUser().getId().equals(currentUser.getId())) {
-            throw new GroupBuyNotHostException();
+            throw new GroupBuyNotHostException("공구 종료는 공구의 주최자만 요청 가능합니다.");
         }
 
         //공구 게시글 status ENDED로 변경
