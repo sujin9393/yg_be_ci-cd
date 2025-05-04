@@ -56,7 +56,7 @@ public class GroupBuyQueryService {
     }
     */
 
-    /// 공구 리스트 조회 => nextCursorId 뿐만 아니라 nextCursorPrice, nextCreatedAt 을 만드는 게 좋을까?
+    /// 공구 리스트 조회
     public PagedResponse<BasicListResponse> getGroupBuyListByCursor(
             Long categoryId,
             String sort,
@@ -65,82 +65,107 @@ public class GroupBuyQueryService {
             Integer cursorPrice,
             Integer limit
     ) {
-        // 1) 커서 ID 및 페이지 설정
+        // 1) 페이징 객체 생성 (첫 페이지는 0번 인덱스, limit 만큼)
         Pageable page = PageRequest.of(0, limit);
 
-        // 2) 정렬 타입에 따라 서로 다른 @Query 메소드 호출
+        // 2) 각 정렬에 따라 cursor 유무 분기
         List<GroupBuy> entities;
         switch (sort) {
             case "price_asc":
-                // 최초 요청일 땐 lastPrice, lastCreatedAt 기본값
-                int priceCursor    = (cursorPrice != null)   ? cursorPrice     : 0;
-                LocalDateTime crt  = (cursorCreatedAt != null) ? cursorCreatedAt : LocalDateTime.now();
-                if (categoryId != null) {
-                    entities = groupBuyRepository.findByCategoryAndPriceAscCursor(
-                            categoryId, priceCursor, crt, cursorId, page
-                    );
+                int lastPrice   = (cursorPrice != null)   ? cursorPrice     : 0;
+                LocalDateTime lastCreated = (cursorCreatedAt != null)
+                        ? cursorCreatedAt
+                        : LocalDateTime.now();
+
+                if (cursorId == null) {
+                    // --- 첫 페이지: 단순 가격 오름차순 ---
+                    if (categoryId != null) {
+                        entities = groupBuyRepository.findByCategoryPriceOrder(categoryId, page);
+                    } else {
+                        entities = groupBuyRepository.findAllByPriceOrder(page);
+                    }
                 } else {
-                    entities = groupBuyRepository.findByPriceAscCursor(
-                            priceCursor, crt, cursorId, page
-                    );
+                    // --- 다음 페이지: unitPrice ASC + createdAt DESC + id DESC cursor ---
+                    if (categoryId != null) {
+                        entities = groupBuyRepository.findByCategoryAndPriceAscCursor(
+                                categoryId, lastPrice, lastCreated, cursorId, page);
+                    } else {
+                        entities = groupBuyRepository.findByPriceAscCursor(
+                                lastPrice, lastCreated, cursorId, page);
+                    }
                 }
                 break;
 
             case "ending_soon":
-                LocalDateTime dueCursorAt = (cursorCreatedAt != null)
+                LocalDateTime lastDueCreated = (cursorCreatedAt != null)
                         ? cursorCreatedAt
                         : LocalDateTime.now();
-                if (categoryId != null) {
-                    entities = groupBuyRepository.findByCategoryAndDueSoonCursor(
-                            categoryId, dueCursorAt, cursorId, page
-                    );
+
+                if (cursorId == null) {
+                    // --- 첫 페이지: 마감 임박순 ---
+                    if (categoryId != null) {
+                        entities = groupBuyRepository.findByCategoryDueSoonOrder(categoryId, page);
+                    } else {
+                        entities = groupBuyRepository.findAllByDueSoonOrder(page);
+                    }
                 } else {
-                    entities = groupBuyRepository.findByDueSoonCursor(
-                            dueCursorAt, cursorId, page
-                    );
+                    // --- 다음 페이지: dueSoon cursor (createdAt DESC, id DESC) ---
+                    if (categoryId != null) {
+                        entities = groupBuyRepository.findByCategoryAndDueSoonCursor(
+                                categoryId, lastDueCreated, cursorId, page);
+                    } else {
+                        entities = groupBuyRepository.findByDueSoonCursor(
+                                lastDueCreated, cursorId, page);
+                    }
                 }
                 break;
 
-            default:  // 최신순
-                if (categoryId != null) {
-                    entities = groupBuyRepository.findByCategoryAndCreatedCursor(
-                            categoryId, cursorId, page
-                    );
+            default:  // 최신순 (createdAt DESC, id DESC)
+                if (cursorId == null) {
+                    // --- 첫 페이지: 최신순 ---
+                    if (categoryId != null) {
+                        entities = groupBuyRepository.findByCategoryCreatedOrder(categoryId, page);
+                    } else {
+                        entities = groupBuyRepository.findAllByCreatedOrder(page);
+                    }
                 } else {
-                    entities = groupBuyRepository.findByCreatedCursor(
-                            cursorId, page
-                    );
+                    // --- 다음 페이지: created cursor ---
+                    if (categoryId != null) {
+                        entities = groupBuyRepository.findByCategoryAndCreatedCursor(
+                                categoryId, cursorId, page);
+                    } else {
+                        entities = groupBuyRepository.findByCreatedCursor(cursorId, page);
+                    }
                 }
                 break;
         }
 
-        // 3) DTO 변환
+        // 3) DTO 매핑
         List<BasicListResponse> posts = entities.stream()
                 .map(groupBuyQueryMapper::toBasicListResponse)
                 .collect(Collectors.toList());
 
-        // 4) 다음 커서 & 더보기 여부 계산
+        // 4) 다음 커서 & hasMore 계산
         boolean hasMore = posts.size() == limit;
 
-        Integer nextCursor      = null;
+        Long nextCursor      = null;
         Integer nextCursorPrice = null;
         LocalDateTime nextCreatedAt = null;
 
         if (hasMore) {
-            BasicListResponse last = posts.getLast();
-            nextCursor = Math.toIntExact(last.getPostId());
+            BasicListResponse last = posts.get(posts.size() - 1);
+            nextCursor    = last.getPostId();
             nextCreatedAt = last.getCreatedAt();
-
             if ("price_asc".equals(sort)) {
                 nextCursorPrice = last.getUnitPrice();
             }
         }
 
-        // 5) 응답
+        // 5) 응답 빌드
         return PagedResponse.<BasicListResponse>builder()
                 .count(posts.size())
                 .posts(posts)
-                .nextCursor(nextCursor)
+                .nextCursor(nextCursor != null ? nextCursor.intValue() : null)  // int로 변환
                 .nextCursorPrice(nextCursorPrice)
                 .nextCreatedAt(nextCreatedAt)
                 .hasMore(hasMore)
