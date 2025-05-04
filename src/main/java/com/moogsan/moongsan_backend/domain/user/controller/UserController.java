@@ -11,8 +11,11 @@ import com.moogsan.moongsan_backend.domain.user.service.LogoutService;
 import com.moogsan.moongsan_backend.domain.user.service.SignUpService;
 import com.moogsan.moongsan_backend.domain.user.service.UserProfileService;
 import com.moogsan.moongsan_backend.domain.user.service.WithdrawService;
+import com.moogsan.moongsan_backend.domain.user.service.TokenRefreshService;
 import com.moogsan.moongsan_backend.domain.user.entity.CustomUserDetails;
 import com.moogsan.moongsan_backend.domain.WrapperResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -31,25 +34,28 @@ public class UserController {
     private final CheckNicknameService nicknameService;
     private final LogoutService logoutService;
     private final WithdrawService withdrawService;
+    private final TokenRefreshService tokenRefreshService;
 
     @PostMapping("/users")
-    public ResponseEntity<WrapperResponse<LoginResponse>> signUp(@Valid @RequestBody SignUpRequest request) {
-        LoginResponse response = signUpService.signUp(request);
+    public ResponseEntity<WrapperResponse<LoginResponse>> signUp(@Valid @RequestBody SignUpRequest request,
+                                                                 HttpServletResponse response) {
+        LoginResponse loginResponse = signUpService.signUp(request, response);
         return ResponseEntity.ok(
             WrapperResponse.<LoginResponse>builder()
                 .message("회원가입이 완료되었습니다.")
-                .data(response)
+                .data(loginResponse)
                 .build()
         );
     }
 
     @PostMapping("/users/token")
-    public ResponseEntity<WrapperResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest loginRequest) {
-        LoginResponse response = loginService.login(loginRequest);
+    public ResponseEntity<WrapperResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest loginRequest,
+                                                                jakarta.servlet.http.HttpServletResponse response) {
+        LoginResponse loginResponse = loginService.login(loginRequest, response);
         return ResponseEntity.ok(
             WrapperResponse.<LoginResponse>builder()
                 .message("로그인이 완료되었습니다.")
-                .data(response)
+                .data(loginResponse)
                 .build()
         );
     }
@@ -104,6 +110,17 @@ public class UserController {
         return ResponseEntity.ok(
                 WrapperResponse.<Void>builder()
                         .message("회원탈퇴가 완료되었습니다.")
+                        .data(null)
+                        .build()
+        );
+    }
+
+    @PostMapping("/users/token/refresh")
+    public ResponseEntity<WrapperResponse<Void>> refreshToken(HttpServletRequest request, HttpServletResponse response) {
+        tokenRefreshService.refreshAccessToken(request, response);
+        return ResponseEntity.ok(
+                WrapperResponse.<Void>builder()
+                        .message("Access Token이 재발급되었습니다.")
                         .data(null)
                         .build()
         );

@@ -96,4 +96,7 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return this.deletedAt == null && !"DELETED".equalsIgnoreCase(this.status);
     }
+    public void setLastLoginAt() {
+        this.logoutAt = java.time.LocalDateTime.now();
+    }
 }

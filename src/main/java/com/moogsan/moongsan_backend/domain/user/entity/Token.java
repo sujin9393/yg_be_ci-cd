@@ -23,4 +23,9 @@ public class Token {
     private String token;
 
     private LocalDateTime expires;
+
+    public String getRefreshToken() {
+        return token;
+    }
+
 }
