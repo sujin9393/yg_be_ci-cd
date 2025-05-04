@@ -120,6 +120,17 @@ public class GroupBuy extends BaseEntity {
         this.participantCount = Math.max(0, this.participantCount - 1);
     }
 
+    @Transient
+    public double getSoldRatio() {
+        if (totalAmount == 0) return 0.0;
+        return (double)(totalAmount - leftAmount) / totalAmount;
+    }
+
+    @Transient
+    public boolean isDueSoon() {
+        return getSoldRatio() >= 0.8;
+    }
+
     // 공구 게시글 생성 팩토리 메서드
     public static GroupBuy of(CreateGroupBuyRequest req, User host) {
         System.out.println(">> DTO 이미지 리스트: " + req.getImageUrls());
@@ -142,16 +153,4 @@ public class GroupBuy extends BaseEntity {
                 .user(host)
                 .build();
     }
-
-    @Transient
-    public double getSoldRatio() {
-        if (totalAmount == 0) return 0.0;
-        return (double)(totalAmount - leftAmount) / totalAmount;
-    }
-
-    @Transient
-    public boolean isDueSoon() {
-        return getSoldRatio() >= 0.8;
-    }
-
 }
