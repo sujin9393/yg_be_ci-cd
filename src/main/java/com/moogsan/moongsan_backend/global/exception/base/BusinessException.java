@@ -37,8 +37,8 @@ public class BusinessException extends RuntimeException {
         this.parameters = Collections.unmodifiableMap(parameters);
     }
 
-    public ErrorCodeType getErrorCode() {
-        return errorCode;
+    public String getErrorCode() {
+        return errorCode.getCode();
     }
 
     public HttpStatus getHttpStatus() {

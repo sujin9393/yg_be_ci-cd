@@ -8,6 +8,7 @@ import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyL
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyUpdate.GroupBuyForUpdateResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.entity.GroupBuy;
 import com.moogsan.moongsan_backend.domain.groupbuy.entity.Image;
+import com.moogsan.moongsan_backend.domain.order.entity.Order;
 import com.moogsan.moongsan_backend.domain.user.entity.User;
 import org.springframework.stereotype.Component;
 
@@ -107,10 +108,11 @@ public class GroupBuyQueryMapper {
                 .build();
     }
 
-    /*
+
     // 참여 공구 리스트 조회
     public ParticipatedListResponse toParticipatedListResponse(Order o) {
-        GroupBuy post = o.getPost();
+        GroupBuy post = o.getGroupBuy();
+
         String img = post.getImages().stream()
                 .findFirst()
                 .map(Image::getImageUrl)
@@ -132,5 +134,4 @@ public class GroupBuyQueryMapper {
                 .dueSoon(dueSoon)
                 .build();
     }
-    */
 }

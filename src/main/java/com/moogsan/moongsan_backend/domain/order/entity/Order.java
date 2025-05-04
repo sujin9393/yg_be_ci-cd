@@ -31,11 +31,9 @@ public class Order {
     @JoinColumn(name = "post_id", nullable = false)
     private GroupBuy groupBuy;
 
+    @Builder.Default
     @Column(length = 20, nullable = false)
     private String status = "PENDING";
-
-    @Column(length = 20, nullable = false)
-    private String confirmationStatus = "UNCONFIRMED";
 
     @Column(nullable = false)
     private Integer quantity;
@@ -43,6 +41,7 @@ public class Order {
     @Column(length = 50, nullable = false)
     private String name;
 
+    @Builder.Default
     @Column(name = "deleted_count")
     private Integer deletedCount = 0;
 
