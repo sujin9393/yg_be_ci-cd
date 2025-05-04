@@ -10,6 +10,7 @@ import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyL
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyUpdate.GroupBuyForUpdateResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.entity.GroupBuy;
 import com.moogsan.moongsan_backend.domain.groupbuy.entity.Image;
+import com.moogsan.moongsan_backend.domain.groupbuy.exception.specific.GroupBuyNotFoundException;
 import com.moogsan.moongsan_backend.domain.groupbuy.mapper.GroupBuyQueryMapper;
 import com.moogsan.moongsan_backend.domain.groupbuy.repository.GroupBuyRepository;
 import com.moogsan.moongsan_backend.domain.order.entity.Order;
@@ -39,7 +40,7 @@ public class GroupBuyQueryService {
     /// 공구 게시글 수정 전 정보 조회
     public GroupBuyForUpdateResponse getGroupBuyEditInfo(Long postId) {
         GroupBuy groupBuy = groupBuyRepository.findWithImagesById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
+                .orElseThrow(GroupBuyNotFoundException::new);
 
         return groupBuyQueryMapper.toUpdateResponse(groupBuy);
     }
@@ -175,7 +176,7 @@ public class GroupBuyQueryService {
     /// 공구 게시글 상세 조회
     public DetailResponse getGroupBuyDetailInfo(Long postId) {
         GroupBuy groupBuy = groupBuyRepository.findWithImagesById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
+                .orElseThrow(GroupBuyNotFoundException::new);
 
         return groupBuyQueryMapper.toDetailResponse(groupBuy);
     }
