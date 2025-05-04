@@ -50,14 +50,6 @@ public class GroupBuyQueryController {
         );
     }
 
-    /*
-    * Long categoryId,
-            String sort,
-            Long cursorId,
-            LocalDateTime cursorCreatedAt,
-            Integer cursorPrice,
-            Integer limit*/
-
     // 공구 리스트 조회
     @GetMapping
     public ResponseEntity<WrapperResponse<PagedResponse<BasicListResponse>>> getGroupBuyListByCursor(
