@@ -8,8 +8,5 @@ import lombok.Getter;
 public class LoginResponse {
     private Long userId;
     private String nickname;
-    private String accessToken;
-    private String refreshToken;
-    private Long accessTokenExpireAt;
-    private String redirectUrl;
+    private String imageUrl;
 }

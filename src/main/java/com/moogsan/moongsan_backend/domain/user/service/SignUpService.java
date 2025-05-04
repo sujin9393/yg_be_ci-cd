@@ -5,6 +5,8 @@ import com.moogsan.moongsan_backend.domain.user.dto.response.LoginResponse;
 import com.moogsan.moongsan_backend.domain.user.entity.User;
 import com.moogsan.moongsan_backend.domain.user.repository.UserRepository;
 import com.moogsan.moongsan_backend.global.security.jwt.JwtUtil;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,7 +21,7 @@ public class SignUpService {
     private final JwtUtil jwtUtil;
 
     @Transactional
-    public LoginResponse signUp(SignUpRequest request) {
+    public LoginResponse signUp(SignUpRequest request, HttpServletResponse response) {
         validateDuplicateUser(request);
 
         User user = User.builder()
@@ -37,17 +39,33 @@ public class SignUpService {
                 .build();
 
         User savedUser = userRepository.save(user);
+        userRepository.flush();
         String accessToken = jwtUtil.generateAccessToken(savedUser);
         String refreshToken = jwtUtil.generateRefreshToken(savedUser);
         Long accessTokenExpireAt = jwtUtil.getAccessTokenExpireAt();
 
+        // Set Access Token as Cookie
+        Cookie accessTokenCookie = new Cookie("AccessToken", accessToken);
+        accessTokenCookie.setHttpOnly(true);
+        accessTokenCookie.setSecure(true);
+        accessTokenCookie.setPath("/");
+        accessTokenCookie.setMaxAge((int) (accessTokenExpireAt / 1000));
+        response.addCookie(accessTokenCookie);
+        response.addHeader("Set-Cookie", "AccessToken=" + accessToken + "; HttpOnly; Secure; Path=/; SameSite=None");
+
+        // Set Refresh Token as Cookie
+        Cookie refreshTokenCookie = new Cookie("RefreshToken", refreshToken);
+        refreshTokenCookie.setHttpOnly(true);
+        refreshTokenCookie.setSecure(true);
+        refreshTokenCookie.setPath("/");
+        refreshTokenCookie.setMaxAge((int) (jwtUtil.getRefreshTokenExpireMillis() / 1000));
+        response.addCookie(refreshTokenCookie);
+        response.addHeader("Set-Cookie", "RefreshToken=" + refreshToken + "; HttpOnly; Secure; Path=/; SameSite=None");
+
         return new LoginResponse(
                 savedUser.getId(),
                 savedUser.getNickname(),
-                accessToken,
-                refreshToken,
-                accessTokenExpireAt,
-                "https://example.com/home"
+                savedUser.getImageUrl()
         );
     }
 
