@@ -1,7 +1,7 @@
 package com.moogsan.moongsan_backend.domain.groupbuy.entity;
 
 import com.moogsan.moongsan_backend.domain.BaseEntity;
-import com.moogsan.moongsan_backend.domain.groupbuy.dto.command.request.CreateGroupBuyRequest;
+import com.moogsan.moongsan_backend.domain.groupbuy.dto.command.request.UpdateGroupBuyRequest;
 import com.moogsan.moongsan_backend.domain.groupbuy.exception.specific.GroupBuyInvalidStateException;
 import com.moogsan.moongsan_backend.domain.user.entity.User;
 import jakarta.persistence.*;
@@ -10,7 +10,6 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -98,13 +97,6 @@ public class GroupBuy extends BaseEntity {
     @OrderBy("imageSeqNo ASC")
     private List<Image> images = new ArrayList<>();
 
-
-    public List<Category> getCategories() {
-        return groupBuyCategories.stream()
-                .map(GroupBuyCategory::getCategory)
-                .collect(Collectors.toList());
-    }
-
     @Transient
     public double getSoldRatio() {
         if (totalAmount == 0) return 0.0;
@@ -146,23 +138,30 @@ public class GroupBuy extends BaseEntity {
         }
     }
 
-    // 공구 게시글 생성 팩토리 메서드
-    public static GroupBuy of(CreateGroupBuyRequest req, User host) {
+    // ===========================================
+    // 업데이트용 도메인 메서드
+    // ===========================================
+    public GroupBuy updateForm(UpdateGroupBuyRequest req) {
+        if (req.getTitle() != null) {
+            this.title = req.getTitle();
+        }
+        if (req.getName() != null) {
+            this.name = req.getName();
+        }
+        if (req.getUrl() != null) {
+            this.url = req.getUrl();
+        }
+        if (req.getDescription() != null) {
+            this.description = req.getDescription();
+        }
+        if (req.getDueDate() != null) {
+            this.dueDate = req.getDueDate();
+        }
+        if (req.getPickupDate() != null) {
+            this.pickupDate = req.getPickupDate();
+            this.pickupChangeReason = req.getDateModificationReason();
+        }
 
-        return GroupBuy.builder()
-                .title(req.getTitle())
-                .name(req.getName())
-                .url(req.getUrl())
-                .price(req.getPrice())
-                .unitPrice(req.getPrice() / req.getTotalAmount()) // 정수로 치환 필요
-                .totalAmount(req.getTotalAmount())
-                .leftAmount(req.getLeftAmount())
-                .unitAmount(req.getUnitAmount())
-                .description(req.getDescription())
-                .dueDate(req.getDueDate())
-                .location(req.getLocation())
-                .pickupDate(req.getPickupDate())
-                .user(host)
-                .build();
+        return this;
     }
 }

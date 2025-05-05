@@ -1,6 +1,7 @@
 package com.moogsan.moongsan_backend.domain.groupbuy.service;
 
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.command.request.CreateGroupBuyRequest;
+import com.moogsan.moongsan_backend.domain.groupbuy.dto.command.request.UpdateGroupBuyRequest;
 import com.moogsan.moongsan_backend.domain.groupbuy.entity.GroupBuy;
 import com.moogsan.moongsan_backend.domain.groupbuy.exception.specific.GroupBuyInvalidStateException;
 import com.moogsan.moongsan_backend.domain.groupbuy.exception.specific.GroupBuyNotFoundException;
@@ -12,16 +13,11 @@ import com.moogsan.moongsan_backend.domain.groupbuy.repository.GroupBuyRepositor
 import com.moogsan.moongsan_backend.domain.order.entity.Order;
 import com.moogsan.moongsan_backend.domain.order.exception.specific.OrderInvalidStateException;
 import com.moogsan.moongsan_backend.domain.order.repository.OrderRepository;
-import com.moogsan.moongsan_backend.domain.user.entity.CustomUserDetails;
 import com.moogsan.moongsan_backend.domain.user.entity.User;
-import com.moogsan.moongsan_backend.global.exception.specific.InvalidRequestException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -30,6 +26,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GroupBuyCommandService {
 
+    private final GroupBuy groupBuy;
     private final GroupBuyRepository groupBuyRepository;
     private final ImageMapper imageMapper;
     private final GroupBuyCommandMapper groupBuyCommandMapper;
@@ -38,7 +35,12 @@ public class GroupBuyCommandService {
     /// 공구 게시글 작성
     public Long createGroupBuy(User currentUser, CreateGroupBuyRequest createGroupBuyRequest) {
 
-        /// TODO 약수 계산 로직 수행
+        int total = createGroupBuyRequest.getTotalAmount();
+        int unit  = createGroupBuyRequest.getUnitAmount();
+
+        if (unit == 0 || total % unit != 0) {
+            throw new GroupBuyInvalidStateException("상품 주문 단위는 상품 전체 수량의 약수여야 합니다.");
+        }
 
         // GroupBuy 기본 필드 매핑 (팩토리 메서드 사용)
         GroupBuy gb = groupBuyCommandMapper.create(createGroupBuyRequest, currentUser);
@@ -52,10 +54,63 @@ public class GroupBuyCommandService {
 
     /// 공구 게시글 수정
     // TODO V2
+    public Long updateGroupBuy(User currentUser, UpdateGroupBuyRequest updateGroupBuyRequest, Long postId) {
 
-    /// 공구 게시글 삭제
+        // 해당 공구가 존재하는지 조회 -> 아니면 404
+        GroupBuy groupBuy = groupBuyRepository.findById(postId)
+                .orElseThrow(GroupBuyNotFoundException::new);
+
+        // 해당 공구의 status가 open인지 조회 -> 아니면 409
+        if (!groupBuy.getPostStatus().equals("OPEN")
+                || groupBuy.getDueDate().isBefore(LocalDateTime.now())) {
+            throw new GroupBuyInvalidStateException("공구 수정은 공구가 열려있는 상태에서만 가능합니다.");
+        }
+
+        // 해당 공구의 주최자가 해당 유저인지 조회 -> 아니면 403
+        if(!groupBuy.getUser().getId().equals(currentUser.getId())) {
+            throw new GroupBuyNotHostException("공구 수정은 공구의 주최자만 요청 가능합니다.");
+        }
+
+        // GroupBuy 기본 필드 매핑 (팩토리 메서드 사용)
+        GroupBuy gb = groupBuy.updateForm(updateGroupBuyRequest);
+
+        ///  TODO: 기존 이미지 처리 로직 필요
+        imageMapper.mapImagesToGroupBuy(updateGroupBuyRequest.getImageUrls(), gb);
+
+        groupBuyRepository.save(gb);
+
+        return gb.getId();
+    }
+
+    /// 공구 게시글 삭제: 참여자가 아무도 없는, 주문 레코드가 없는 경우이므로 하드 삭제
     // TODO V2
+    public void deleteGroupBuy(User currentUser, Long postId) {
 
+        // 해당 공구가 존재하는지 조회 -> 아니면 404
+        GroupBuy groupBuy = groupBuyRepository.findById(postId)
+                .orElseThrow(GroupBuyNotFoundException::new);
+
+        // 해당 공구의 status가 open인지 조회 -> 아니면 409
+        if (!groupBuy.getPostStatus().equals("OPEN")
+                || groupBuy.getDueDate().isBefore(LocalDateTime.now())) {
+            throw new GroupBuyInvalidStateException("공구 삭제는 공구가 열려있는 상태에서만 가능합니다.");
+        }
+
+        // 해당 공구의 참여자가 0명인지 조회 -> 아니면 409
+        int participantCount = orderRepository.countByGroupBuyId(postId);
+
+        if(participantCount != 0) {
+            throw new GroupBuyInvalidStateException("참여자가 1명 이상일 경우 공구를 삭제할 수 없습니다.");
+        }
+
+        // 해당 공구의 주최자가 해당 유저인지 조회 -> 아니면 403
+        if(!groupBuy.getUser().getId().equals(currentUser.getId())) {
+            throw new GroupBuyNotHostException("공구 삭제는 공구의 주최자만 요청 가능합니다.");
+        }
+
+        groupBuyRepository.delete(groupBuy);
+
+    }
 
     /// 공구 참여 취소
     public void leaveGroupBuy(User currentUser, Long postId) {
@@ -126,16 +181,17 @@ public class GroupBuyCommandService {
             throw new GroupBuyInvalidStateException("공구 종료는 모집 마감 이후에만 가능합니다.");
         }
 
-        // dueDate와 pickupDate 이후인지 조회 -> 아니면 409
+        // dueDate 이후인지 조회 -> 아니면 409
         if (groupBuy.getDueDate().isAfter(LocalDateTime.now())) {
             throw new GroupBuyInvalidStateException("공구 종료는 공구 마감 일자 이후에만 가능합니다.");
         }
 
+        // pickupDate 이후인지 조회 -> 아니면 409
         if (groupBuy.getDueDate().isAfter(LocalDateTime.now())) {
             throw new GroupBuyInvalidStateException("공구 종료는 공구 픽업 일자 이후에만 가능합니다.");
         }
 
-        // 해당 공구의 작성자가 해당 유저인지 조회 -> 아니면 403
+        // 해당 공구의 주최자가 해당 유저인지 조회 -> 아니면 403
         if(!groupBuy.getUser().getId().equals(currentUser.getId())) {
             throw new GroupBuyNotHostException("공구 종료는 공구의 주최자만 요청 가능합니다.");
         }

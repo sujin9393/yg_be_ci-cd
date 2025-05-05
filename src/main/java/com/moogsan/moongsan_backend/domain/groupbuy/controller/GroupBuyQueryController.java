@@ -50,7 +50,7 @@ public class GroupBuyQueryController {
         );
     }
 
-    // 공구 리스트 조회
+    /// 공구 리스트 조회 SUCCESS
     @GetMapping
     public ResponseEntity<WrapperResponse<PagedResponse<BasicListResponse>>> getGroupBuyListByCursor(
             @RequestParam(value = "category", required = false) Long categoryId,
