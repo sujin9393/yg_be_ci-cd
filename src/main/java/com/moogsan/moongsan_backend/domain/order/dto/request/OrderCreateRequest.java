@@ -12,6 +12,9 @@ public class OrderCreateRequest {
     private Long postId;
 
     @NotNull
+    private Integer price;
+
+    @NotNull
     private Integer quantity;
 
     private String name;

@@ -50,6 +50,7 @@ public class OrderCreateService {
         Order order = Order.builder()
                 .user(user)
                 .groupBuy(groupBuy)
+                .price(request.getPrice())
                 .quantity(request.getQuantity())
                 .name(orderName)
                 .build();

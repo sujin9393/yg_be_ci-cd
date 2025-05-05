@@ -36,6 +36,9 @@ public class Order {
     private String status = "PENDING";
 
     @Column(nullable = false)
+    private Integer price;
+
+    @Column(nullable = false)
     private Integer quantity;
 
     @Column(length = 50, nullable = false)
