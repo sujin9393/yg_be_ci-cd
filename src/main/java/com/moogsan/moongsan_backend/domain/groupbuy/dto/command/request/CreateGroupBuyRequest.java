@@ -35,13 +35,13 @@ public class CreateGroupBuyRequest {
     @Min(value = 1, message = "상품 전체 수량은 1 이상이어야 합니다.")
     private Integer totalAmount;
 
-    @NotNull(message = "상품 남은 수량은 필수 입력 항목입니다.")
-    @Min(value = 1, message = "상품 남은 수량은 1 이상이어야 합니다.")
-    private Integer leftAmount;
-
     @NotNull(message = "상품 주문 단위는 필수 입력 항목입니다.")
     @Min(value = 1, message = "상품 주문 단위는 1 이상이어야 합니다.")
     private Integer unitAmount;
+
+    @NotNull(message = "주최자 주문 수량은 필수 입력 항목입니다.")
+    @Min(value = 1, message = "주최자 주문 수량은 1 이상이어야 합니다.")
+    private Integer hostQuantity;
 
     @NotBlank(message = "상품 상세 설명은 필수 입력 항목입니다.")
     @Size(min = 2, max = 2000, message = "상품 설명은 2자 이상, 2000자 이하로 입력해주세요.")

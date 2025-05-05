@@ -45,6 +45,9 @@ public class GroupBuy extends BaseEntity {
     @Column(nullable = false)
     private int unitAmount;
 
+    @Column(nullable = false)
+    private int hostQuantity;
+
     @Column(nullable = false, length = 500)
     private String description;
 

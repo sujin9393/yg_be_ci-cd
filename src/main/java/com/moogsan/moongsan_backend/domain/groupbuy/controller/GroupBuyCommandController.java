@@ -76,7 +76,7 @@ public class GroupBuyCommandController {
     // 공구 게시글 삭제
     //  TODO V2
     @DeleteMapping("{postId}")
-    public ResponseEntity<WrapperResponse<CommandGroupBuyResponse>> updateGroupBuy(
+    public ResponseEntity<WrapperResponse<CommandGroupBuyResponse>> deleteGroupBuy(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long postId) {
 
