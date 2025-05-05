@@ -38,6 +38,7 @@ public class GroupBuyQueryService {
     private final GroupBuyQueryMapper groupBuyQueryMapper;
 
     /// 공구 게시글 수정 전 정보 조회
+    /// TODO V2
     public GroupBuyForUpdateResponse getGroupBuyEditInfo(Long postId) {
         GroupBuy groupBuy = groupBuyRepository.findWithImagesById(postId)
                 .orElseThrow(GroupBuyNotFoundException::new);
@@ -45,6 +46,7 @@ public class GroupBuyQueryService {
         return groupBuyQueryMapper.toUpdateResponse(groupBuy);
     }
 
+    /// TODO 모든 조회 로직에 위시 여부 조회 추가(리턴되는 리스트 위시 여부만 조회)
     // Wish-related methods commented out
     /*
     // (일반 메소드) 리스트 내 위시 여부 조회
@@ -57,6 +59,14 @@ public class GroupBuyQueryService {
     }
     */
 
+    /// 검색
+    // TODO V2 -> 메서드명 고민해보기
+    public PagedResponse getSearchList(Long cursor, Integer limit) {
+
+        return null;
+    }
+
+
     /// 공구 리스트 조회
     public PagedResponse<BasicListResponse> getGroupBuyListByCursor(
             Long categoryId,
@@ -66,10 +76,10 @@ public class GroupBuyQueryService {
             Integer cursorPrice,
             Integer limit
     ) {
-        // 1) 페이징 객체 생성 (첫 페이지는 0번 인덱스, limit 만큼)
+        // 페이징 객체 생성 (첫 페이지는 0번 인덱스, limit 만큼)
         Pageable page = PageRequest.of(0, limit);
 
-        // 2) 각 정렬에 따라 cursor 유무 분기
+        // 각 정렬에 따라 cursor 유무 분기
         List<GroupBuy> entities;
         switch (sort) {
             case "price_asc":
@@ -141,12 +151,12 @@ public class GroupBuyQueryService {
                 break;
         }
 
-        // 3) DTO 매핑
+        // DTO 매핑
         List<BasicListResponse> posts = entities.stream()
                 .map(groupBuyQueryMapper::toBasicListResponse)
                 .collect(Collectors.toList());
 
-        // 4) 다음 커서 & hasMore 계산
+        // 다음 커서 & hasMore 계산
         boolean hasMore = posts.size() == limit;
 
         Long nextCursor      = null;
@@ -154,15 +164,14 @@ public class GroupBuyQueryService {
         LocalDateTime nextCreatedAt = null;
 
         if (hasMore) {
-            BasicListResponse last = posts.get(posts.size() - 1);
+            BasicListResponse last = posts.getLast();
             nextCursor    = last.getPostId();
             nextCreatedAt = last.getCreatedAt();
             if ("price_asc".equals(sort)) {
                 nextCursorPrice = last.getUnitPrice();
             }
         }
-
-        // 5) 응답 빌드
+        
         return PagedResponse.<BasicListResponse>builder()
                 .count(posts.size())
                 .posts(posts)
@@ -182,14 +191,14 @@ public class GroupBuyQueryService {
     }
 
     /// 관심 공구 리스트 조회
+    /// TODO V2
     public PagedResponse getGroupBuyWishList(Long cursor, Integer limit) {
-        // TODO V2
         return null;
     }
 
     /// 주최 공구 리스트 조회
+    /// TODO V2
     public PagedResponse getGroupBuyHostedList(String sort, Long cursor, Integer limit) {
-        // TODO V2
         return null;
     }
 
@@ -242,8 +251,9 @@ public class GroupBuyQueryService {
     }
 
     /// 공구 참여자 조회
+    /// TODO V2
     public ParticipantListResponse getGroupBuyParticipantsInfo(Long postId) {
-        // TODO V2
         return null;
     }
+
 }

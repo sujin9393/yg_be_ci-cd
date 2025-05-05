@@ -6,12 +6,12 @@ import com.moogsan.moongsan_backend.domain.groupbuy.entity.GroupBuy;
 import com.moogsan.moongsan_backend.domain.groupbuy.exception.specific.GroupBuyInvalidStateException;
 import com.moogsan.moongsan_backend.domain.groupbuy.exception.specific.GroupBuyNotFoundException;
 import com.moogsan.moongsan_backend.domain.groupbuy.exception.specific.GroupBuyNotHostException;
-import com.moogsan.moongsan_backend.domain.groupbuy.exception.specific.OrderNotFoundException;
 import com.moogsan.moongsan_backend.domain.groupbuy.mapper.GroupBuyCommandMapper;
 import com.moogsan.moongsan_backend.domain.groupbuy.mapper.ImageMapper;
 import com.moogsan.moongsan_backend.domain.groupbuy.repository.GroupBuyRepository;
 import com.moogsan.moongsan_backend.domain.order.entity.Order;
 import com.moogsan.moongsan_backend.domain.order.exception.specific.OrderInvalidStateException;
+import com.moogsan.moongsan_backend.domain.order.exception.specific.OrderNotFoundException;
 import com.moogsan.moongsan_backend.domain.order.repository.OrderRepository;
 import com.moogsan.moongsan_backend.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GroupBuyCommandService {
 
-    private final GroupBuy groupBuy;
     private final GroupBuyRepository groupBuyRepository;
     private final ImageMapper imageMapper;
     private final GroupBuyCommandMapper groupBuyCommandMapper;
@@ -47,6 +46,7 @@ public class GroupBuyCommandService {
 
         imageMapper.mapImagesToGroupBuy(createGroupBuyRequest.getImageUrls(), gb);
 
+        gb.increaseParticipantCount();
         groupBuyRepository.save(gb);
 
         return gb.getId();
@@ -74,7 +74,7 @@ public class GroupBuyCommandService {
         // GroupBuy 기본 필드 매핑 (팩토리 메서드 사용)
         GroupBuy gb = groupBuy.updateForm(updateGroupBuyRequest);
 
-        ///  TODO: 기존 이미지 처리 로직 필요
+        ///  TODO: 기존 이미지 처리 로직 필요!
         imageMapper.mapImagesToGroupBuy(updateGroupBuyRequest.getImageUrls(), gb);
 
         groupBuyRepository.save(gb);
@@ -98,7 +98,6 @@ public class GroupBuyCommandService {
 
         // 해당 공구의 참여자가 0명인지 조회 -> 아니면 409
         int participantCount = orderRepository.countByGroupBuyId(postId);
-
         if(participantCount != 0) {
             throw new GroupBuyInvalidStateException("참여자가 1명 이상일 경우 공구를 삭제할 수 없습니다.");
         }
@@ -153,10 +152,46 @@ public class GroupBuyCommandService {
 
     /// 관심 공구 추가
     // TODO V2
+    public Long wishPost(User currentUser, Long postId) {
+
+        // 해당 공구가 존재하는지 조회 -> 없으면 404
+        GroupBuy groupBuy = groupBuyRepository.findById(postId)
+                .orElseThrow(GroupBuyNotFoundException::new);
+
+        // 해당 공구가 OPEN인지 조회, dueDate가 현재 이후인지 조회 -> 아니면 409
+        if (!groupBuy.getPostStatus().equals("OPEN")
+                || groupBuy.getDueDate().isBefore(LocalDateTime.now())) {
+            throw new GroupBuyInvalidStateException("관심 공구 등록은 공구가 열려있는 상태에서만 가능합니다.");
+        }
+
+        ///  TODO: 관심 공구 등록 여부 조회 -> 등록했으면 409
+
+
+        ///  TODO: 관심 공구 등록
+
+
+        ///  TODO: 저장
+
+        return postId;
+    }
 
     /// 관심 공구 취소
     // TODO V2
+    public void unwishPost(User currentUser, Long postId) {
 
+        // 해당 공구가 존재하는지 조회 -> 없으면 404
+        GroupBuy groupBuy = groupBuyRepository.findById(postId)
+                .orElseThrow(GroupBuyNotFoundException::new);
+
+        ///  TODO: 관심 공구 등록 여부 조회 -> 등록하지 않았으면 409
+
+
+        ///  TODO: 관심 공구 취소
+
+
+        ///  TODO: 저장
+
+    }
 
     ///  공구 마감
     public void closePastDueGroupBuys(LocalDateTime now) {
@@ -199,10 +234,8 @@ public class GroupBuyCommandService {
         //공구 게시글 status ENDED로 변경
         groupBuy.changePostStatus("ENDED");
 
-        // TODO V2, V3에서는 참여자 채팅방 해제, 익명 채팅방 즉시 해제
+        // TODO V2, V3에서는 참여자 채팅방 해제 카운트 시작(2주- CS 고려), 익명 채팅방 즉시 해제
 
     }
 
-    /// 검색
-    // TODO V2
 }
