@@ -4,6 +4,8 @@ import com.moogsan.moongsan_backend.domain.user.dto.request.LoginRequest;
 import com.moogsan.moongsan_backend.domain.user.dto.response.LoginResponse;
 import com.moogsan.moongsan_backend.domain.user.entity.Token;
 import com.moogsan.moongsan_backend.domain.user.entity.User;
+import com.moogsan.moongsan_backend.domain.user.exception.base.UserException;
+import com.moogsan.moongsan_backend.domain.user.exception.code.UserErrorCode;
 import com.moogsan.moongsan_backend.domain.user.repository.TokenRepository;
 import com.moogsan.moongsan_backend.domain.user.repository.UserRepository;
 import com.moogsan.moongsan_backend.global.security.jwt.JwtUtil;
@@ -29,11 +31,11 @@ public class LoginService {
     public LoginResponse login(LoginRequest request, HttpServletResponse response) {
         // 1. 이메일로 사용자 조회
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("해당 이메일을 가진 사용자가 존재하지 않습니다."));
+                .orElseThrow(() -> new UserException(UserErrorCode.NOT_FOUND, "해당 이메일을 가진 사용자가 존재하지 않습니다."));
 
         // 비밀번호 검증
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            throw new UserException(UserErrorCode.UNAUTHORIZED, "비밀번호가 일치하지 않습니다.");
         }
 
         // 탈퇴 복구 및 마지막 로그인 시간 기록

@@ -3,6 +3,8 @@ package com.moogsan.moongsan_backend.domain.user.service;
 import com.moogsan.moongsan_backend.domain.user.entity.User;
 import com.moogsan.moongsan_backend.domain.user.repository.TokenRepository;
 import com.moogsan.moongsan_backend.domain.user.repository.UserRepository;
+import com.moogsan.moongsan_backend.domain.user.exception.base.UserException;
+import com.moogsan.moongsan_backend.domain.user.exception.code.UserErrorCode;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +24,7 @@ public class LogoutService {
     public void logout(Long userId, HttpServletResponse response) {
         // 1. 사용자 조회
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new UserException(UserErrorCode.NOT_FOUND, "해당 사용자를 찾을 수 없습니다."));
 
         // 2. 로그아웃 시간 기록
         user.setLogoutAt(LocalDateTime.now());

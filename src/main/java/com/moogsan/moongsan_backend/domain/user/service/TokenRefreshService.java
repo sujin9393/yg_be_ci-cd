@@ -7,7 +7,8 @@ import com.moogsan.moongsan_backend.domain.user.entity.User;
 import com.moogsan.moongsan_backend.domain.user.entity.Token;
 import com.moogsan.moongsan_backend.domain.user.repository.TokenRepository;
 import com.moogsan.moongsan_backend.domain.user.repository.UserRepository;
-import com.moogsan.moongsan_backend.domain.user.exception.UnauthorizedException;
+import com.moogsan.moongsan_backend.domain.user.exception.base.UserException;
+import com.moogsan.moongsan_backend.domain.user.exception.code.UserErrorCode;
 import com.moogsan.moongsan_backend.global.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,7 @@ public class TokenRefreshService {
         // 1. 쿠키에서 RefreshToken 추출
         String refreshToken = extractRefreshTokenFromCookie(request);
         if (refreshToken == null || !jwtUtil.validateToken(refreshToken)) {
-            throw new UnauthorizedException("Refresh Token이 유효하지 않습니다.");
+            throw new UserException(UserErrorCode.UNAUTHORIZED, "Refresh Token이 유효하지 않습니다.");
         }
 
         // 2. userId 추출
@@ -32,15 +33,15 @@ public class TokenRefreshService {
 
         // 3. DB의 refreshToken과 일치하는지 확인
         Token storedToken = tokenRepository.findByUserId(userId)
-                .orElseThrow(() -> new UnauthorizedException("저장된 Refresh Token이 없습니다."));
+                .orElseThrow(() -> new UserException(UserErrorCode.NOT_FOUND, "저장된 Refresh Token이 없습니다."));
 
         if (!storedToken.getRefreshToken().equals(refreshToken)) {
-            throw new UnauthorizedException("Refresh Token이 일치하지 않습니다.");
+            throw new UserException(UserErrorCode.UNAUTHORIZED, "Refresh Token이 일치하지 않습니다.");
         }
 
         // 4. AccessToken 재발급
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UnauthorizedException("유저 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new UserException(UserErrorCode.NOT_FOUND, "유저 정보를 찾을 수 없습니다."));
 
         String newAccessToken = jwtUtil.generateAccessToken(user);
         long accessTokenExpireAt = jwtUtil.getAccessTokenExpireAt();
