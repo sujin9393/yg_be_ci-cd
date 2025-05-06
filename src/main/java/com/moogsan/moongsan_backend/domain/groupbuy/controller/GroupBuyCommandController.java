@@ -3,8 +3,10 @@ package com.moogsan.moongsan_backend.domain.groupbuy.controller;
 import com.moogsan.moongsan_backend.domain.EmptyResponse;
 import com.moogsan.moongsan_backend.domain.WrapperResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.command.request.CreateGroupBuyRequest;
+import com.moogsan.moongsan_backend.domain.groupbuy.dto.command.request.DescriptionGenerationRequest;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.command.request.UpdateGroupBuyRequest;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.command.response.CommandGroupBuyResponse;
+import com.moogsan.moongsan_backend.domain.groupbuy.dto.command.response.DescriptionDto;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyUpdate.GroupBuyForUpdateResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.service.GroupBuyCommandService;
 import com.moogsan.moongsan_backend.domain.groupbuy.service.GroupBuyQueryService;
@@ -21,6 +23,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import reactor.core.publisher.Mono;
 
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -52,6 +55,32 @@ public class GroupBuyCommandController {
                         .message("공구 게시글이 성공적으로 업로드되었습니다.")
                         .data(response)
                         .build());
+    }
+
+    // 공구 게시글 상세 설명 생성
+    @PostMapping("/generation/description")
+    public Mono<ResponseEntity<WrapperResponse<DescriptionDto>>> generate(
+            @RequestBody @Valid DescriptionGenerationRequest req) {
+
+        return groupBuyService.generate(req.getUrl())
+                // 성공 시: 내부 WrapperResponse 로 감싸서 200 OK
+                .map(data -> {
+                    WrapperResponse<DescriptionDto> body =
+                            new WrapperResponse<>("상품 상세 설명이 생성되었습니다.", data);
+                    return ResponseEntity.ok(body);
+                })
+                // URL 포맷 검증 등으로 IllegalArgumentException 발생 시 400 Bad Request
+                .onErrorResume(IllegalArgumentException.class, e -> {
+                    WrapperResponse<DescriptionDto> err =
+                            new WrapperResponse<>(e.getMessage(), null);
+                    return Mono.just(ResponseEntity.badRequest().body(err));
+                })
+                // 그 외 서버 에러는 500으로
+                .onErrorResume(IllegalStateException.class, e -> {
+                    WrapperResponse<DescriptionDto> err =
+                            new WrapperResponse<>("서버에서 오류가 발생했습니다. 잠시 후 다시 시도해주세요.", null);
+                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(err));
+                });
     }
 
     // 공구 게시글 수정

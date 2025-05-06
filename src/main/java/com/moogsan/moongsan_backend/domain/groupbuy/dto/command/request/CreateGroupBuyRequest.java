@@ -8,8 +8,7 @@ import org.hibernate.validator.constraints.URL;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

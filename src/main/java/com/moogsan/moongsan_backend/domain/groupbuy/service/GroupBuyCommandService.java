@@ -1,7 +1,9 @@
 package com.moogsan.moongsan_backend.domain.groupbuy.service;
 
+import com.moogsan.moongsan_backend.domain.groupbuy.client.AiClient;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.command.request.CreateGroupBuyRequest;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.command.request.UpdateGroupBuyRequest;
+import com.moogsan.moongsan_backend.domain.groupbuy.dto.command.response.DescriptionDto;
 import com.moogsan.moongsan_backend.domain.groupbuy.entity.GroupBuy;
 import com.moogsan.moongsan_backend.domain.groupbuy.exception.specific.GroupBuyInvalidStateException;
 import com.moogsan.moongsan_backend.domain.groupbuy.exception.specific.GroupBuyNotFoundException;
@@ -17,6 +19,7 @@ import com.moogsan.moongsan_backend.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,6 +33,7 @@ public class GroupBuyCommandService {
     private final ImageMapper imageMapper;
     private final GroupBuyCommandMapper groupBuyCommandMapper;
     private final OrderRepository orderRepository;
+    private final AiClient aiClient;
 
     /// 공구 게시글 작성
     public Long createGroupBuy(User currentUser, CreateGroupBuyRequest createGroupBuyRequest) {
@@ -50,6 +54,11 @@ public class GroupBuyCommandService {
         groupBuyRepository.save(gb);
 
         return gb.getId();
+    }
+
+    /// 공구 게시글 상세 설명 생성
+    public Mono<DescriptionDto> generate(String url) {
+        return aiClient.generateDescription(url);
     }
 
     /// 공구 게시글 수정
