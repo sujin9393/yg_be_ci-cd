@@ -3,6 +3,8 @@ package com.moogsan.moongsan_backend.domain.user.service;
 import com.moogsan.moongsan_backend.domain.user.entity.User;
 import com.moogsan.moongsan_backend.domain.user.repository.UserRepository;
 import com.moogsan.moongsan_backend.domain.user.repository.TokenRepository;
+import com.moogsan.moongsan_backend.domain.user.exception.base.UserException;
+import com.moogsan.moongsan_backend.domain.user.exception.code.UserErrorCode;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,7 +22,7 @@ public class WithdrawService {
     @Transactional
     public void withdraw(Long userId, HttpServletResponse response) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+                .orElseThrow(() -> new UserException(UserErrorCode.NOT_FOUND, "존재하지 않는 사용자입니다."));
 
         user.setDeletedAt(LocalDateTime.now());
 

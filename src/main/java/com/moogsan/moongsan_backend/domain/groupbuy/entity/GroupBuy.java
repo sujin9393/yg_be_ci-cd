@@ -117,6 +117,9 @@ public class GroupBuy extends BaseEntity {
 
     public void decreaseLeftAmount(int quantity) {
         this.leftAmount = Math.max(0, this.leftAmount - quantity);
+        if (this.leftAmount == 0) {
+            this.postStatus = "CLOSED";
+        }
     }
 
     public void increaseParticipantCount() {
