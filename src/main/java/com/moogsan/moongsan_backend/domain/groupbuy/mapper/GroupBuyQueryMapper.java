@@ -93,6 +93,9 @@ public class GroupBuyQueryMapper {
                 .soldAmount(gb.getTotalAmount() - gb.getLeftAmount())
                 .totalAmount(gb.getTotalAmount())
                 .participantCount(gb.getParticipantCount())
+                .dueDate(gb.getDueDate())
+                .pickupDate(gb.getPickupDate())
+                .location(gb.getLocation())
                 .createdAt(gb.getCreatedAt())
                 .userProfileResponse(toUserProfile(gb.getUser()))
                 .build();
