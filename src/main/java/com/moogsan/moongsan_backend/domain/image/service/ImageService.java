@@ -1,4 +1,4 @@
-package com.moogsan.moongsan_backend.domain.image.controller;
+package com.moogsan.moongsan_backend.domain.image.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;

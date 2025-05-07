@@ -1,6 +1,7 @@
 package com.moogsan.moongsan_backend.domain.image.controller;
 
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.command.response.ImageUploadResponse;
+import com.moogsan.moongsan_backend.domain.image.service.ImageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
