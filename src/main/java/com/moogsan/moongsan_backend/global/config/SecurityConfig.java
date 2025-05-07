@@ -58,10 +58,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
                 "http://localhost:3000",
-                "http://localhost:8000",
-                "https://test.moongsan.com",
-                "https://moongsan.com",
-                "https://dev.moongsan.com"
+                "https://moongsan.com"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
