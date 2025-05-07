@@ -81,9 +81,10 @@ public class SignUpService {
         tokenRepository.save(newToken);
 
         return new LoginResponse(
-                savedUser.getId(),
-                savedUser.getNickname(),
-                savedUser.getImageUrl()
+                user.getNickname(),
+                user.getName(),
+                user.getImageUrl(),
+                user.getType()
         );
     }
 

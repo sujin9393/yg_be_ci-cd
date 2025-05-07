@@ -81,9 +81,10 @@ public class LoginService {
 
         // 7. 최소 응답 정보 반환
         return new LoginResponse(
-                user.getId(),
                 user.getNickname(),
-                user.getImageUrl()
+                user.getName(),
+                user.getImageUrl(),
+                user.getType()
         );
     }
 }
