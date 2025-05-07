@@ -21,6 +21,7 @@ public class DetailResponse {
     private String description;             // 상품 상세 설명
     private String url;                     // 상품 URL
     private List<ImageResponse> imageUrls;  // 상품 이미지 목록
+    private String location;                // 장소
 
     // 숫자 데이터
     private int unitPrice;                  // 상품 단위 당 가격
@@ -36,6 +37,8 @@ public class DetailResponse {
 
     // 날짜
     private LocalDateTime createdAt;       // 공구글 생성 시각
+    private LocalDateTime dueDate;         // 마감 일자
+    private LocalDateTime pickupDate;      // 픽업 일자
 
     // 연관 객체
     private UserProfileResponse userProfileResponse;    // 주최자 정보
