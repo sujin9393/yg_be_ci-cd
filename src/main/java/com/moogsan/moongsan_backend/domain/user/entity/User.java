@@ -46,8 +46,9 @@ public class User implements UserDetails {
     @Column(name = "account_number", length = 32)
     private String accountNumber; // 계좌 번호
 
+    @Builder.Default
     @Column(name = "image_url", length = 512)
-    private String imageUrl; // 프로필 이미지 URL
+    private String imageUrl = null; // 프로필 이미지 URL
 
     @Column(nullable = false, length = 30)
     private String type; // 사용자 타입 (예: USER, ADMIN)
