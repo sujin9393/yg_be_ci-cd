@@ -13,7 +13,7 @@ public class ImageResponse {
     private int imageSeqNo;     // 이미지 순서
 
     // 본문
-    private String imageUrl;    // 이미지 URL(리사이즈된 버전 URL)
+    private String imageKey;    // 이미지 URL(리사이즈된 버전 URL)
 
     // 상태/플래그
     private boolean thumbnail;  // 썸네일 여부

@@ -19,7 +19,7 @@ public class BasicListResponse {
     private String postStatus;       // 공구 진행 상태(OPEN, CLOSED, ENDED)
 
     // 본문
-    private List<ImageResponse> imageUrls;  // 상품 이미지 목록
+    private List<ImageResponse> imageKeys;  // 상품 이미지 목록
 
     // 숫자 데이터
     private int unitPrice;           // 주문 단위 가격

@@ -62,9 +62,6 @@ public class CreateGroupBuyRequest {
     @NotNull(message = "이미지 리스트는 필수입니다.")
     @Size(min=1, max = 5, message = "이미지는 1장 이상, 5장 이하까지 등록할 수 있습니다.")
     private List<
-            @NotBlank(message = "이미지 파일은 공백이 될 수 없습니다.")
-            @Pattern(
-                    regexp = "(?i).+\\.(jpe?g|png|webp)$",
-                    message = "이미지 파일은 JPG, JPEG, PNG, WEBP 확장자만 허용됩니다."
+            @NotBlank(message = "이미지 파일은 공백이 될 수 없습니다."
             ) String> imageKeys;
 }

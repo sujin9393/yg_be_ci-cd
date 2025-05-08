@@ -17,7 +17,7 @@ public class HostedListResponse {
 
     // 본문
     private String location;       // 거래 장소
-    private String imageUrl;       // thumbnail 이미지
+    private String imageKey;       // thumbnail 이미지
 
     // 숫자 데이터
     private int price;             // 총 상품 가격

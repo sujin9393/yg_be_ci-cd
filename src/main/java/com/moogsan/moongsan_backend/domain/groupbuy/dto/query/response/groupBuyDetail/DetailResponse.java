@@ -20,7 +20,7 @@ public class DetailResponse {
     // 본문
     private String description;             // 상품 상세 설명
     private String url;                     // 상품 URL
-    private List<ImageResponse> imageUrls;  // 상품 이미지 목록
+    private List<ImageResponse> imageKeys;  // 상품 이미지 목록
     private String location;                // 장소
 
     // 숫자 데이터
