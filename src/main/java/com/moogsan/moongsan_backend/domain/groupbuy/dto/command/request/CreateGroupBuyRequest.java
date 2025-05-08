@@ -66,5 +66,5 @@ public class CreateGroupBuyRequest {
             @Pattern(
                     regexp = "(?i).+\\.(jpe?g|png|webp)$",
                     message = "이미지 파일은 JPG, JPEG, PNG, WEBP 확장자만 허용됩니다."
-            ) String> imageUrls;
+            ) String> imageKeys;
 }

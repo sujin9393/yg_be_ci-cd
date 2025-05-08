@@ -1,4 +1,4 @@
-package com.moogsan.moongsan_backend.domain.groupbuy.dto.command.response;
+package com.moogsan.moongsan_backend.domain.image.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

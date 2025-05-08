@@ -7,7 +7,7 @@ import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyL
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.ParticipatedList.ParticipatedListResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyUpdate.GroupBuyForUpdateResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.entity.GroupBuy;
-import com.moogsan.moongsan_backend.domain.groupbuy.entity.Image;
+import com.moogsan.moongsan_backend.domain.image.entity.Image;
 import com.moogsan.moongsan_backend.domain.order.entity.Order;
 import com.moogsan.moongsan_backend.domain.user.entity.User;
 import org.springframework.stereotype.Component;
@@ -23,7 +23,7 @@ public class GroupBuyQueryMapper {
     public GroupBuyForUpdateResponse toUpdateResponse(GroupBuy gb){
         List<ImageResponse> imageUrls = gb.getImages().stream()
                 .map(image -> ImageResponse.builder()
-                        .imageUrl(image.getImageUrl())
+                        .imageUrl(image.getImageKey())
                         .imageSeqNo(image.getImageSeqNo())
                         .thumbnail(image.isThumbnail())
                         .build())
@@ -48,7 +48,7 @@ public class GroupBuyQueryMapper {
     public BasicListResponse toBasicListResponse(GroupBuy g) {
         List<ImageResponse> imgs = g.getImages().stream()
                 .map(img -> ImageResponse.builder()
-                        .imageUrl(img.getImageUrl())
+                        .imageUrl(img.getImageKey())
                         .imageSeqNo(img.getImageSeqNo())
                         .thumbnail(img.isThumbnail())
                         .build())
@@ -74,7 +74,7 @@ public class GroupBuyQueryMapper {
     public DetailResponse toDetailResponse(GroupBuy gb) {
         List<ImageResponse> imageUrls = gb.getImages().stream()
                 .map(img -> ImageResponse.builder()
-                        .imageUrl(img.getImageUrl())
+                        .imageUrl(img.getImageKey())
                         .imageSeqNo(img.getImageSeqNo())
                         .thumbnail(img.isThumbnail())
                         .build())
@@ -118,7 +118,7 @@ public class GroupBuyQueryMapper {
 
         String img = post.getImages().stream()
                 .findFirst()
-                .map(Image::getImageUrl)
+                .map(Image::getImageKey)
                 .orElse(null);
 
         boolean dueSoon = "OPEN".equals(post.getPostStatus())
