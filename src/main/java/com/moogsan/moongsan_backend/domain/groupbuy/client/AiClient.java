@@ -6,6 +6,7 @@ import com.moogsan.moongsan_backend.domain.groupbuy.dto.command.request.Descript
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.command.response.ApiResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.command.response.DescriptionDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatusCode;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class AiClient {
@@ -26,6 +28,9 @@ public class AiClient {
      * 외부 AI API 호출 → ApiResponse<DescriptionDto> 로 파싱 → DescriptionDto 추출
      */
     public Mono<DescriptionDto> generateDescription(String url) {
+        log.info("[AiClient] aiBaseUrl = {}", aiBaseUrl);
+        log.info("[AiClient] full endpoint = {}", aiBaseUrl + "/generation/description");
+
         DescriptionGenerationRequest req = DescriptionGenerationRequest.builder()
                 .url(url)
                 .build();
