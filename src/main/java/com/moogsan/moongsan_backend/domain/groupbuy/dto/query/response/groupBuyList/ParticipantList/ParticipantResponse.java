@@ -14,7 +14,7 @@ public class ParticipantResponse {
 
     // 본문
     private String phoneNumber;    // 전화번호
-    private String imageUrl;       // 프로필 이미지
+    private String imageKey;       // 프로필 이미지
 
 
     // 숫자 데이터

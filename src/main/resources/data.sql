@@ -255,7 +255,7 @@ INSERT INTO group_buy (
 
 -- 4) image (대표 썸네일만 1~40)
 INSERT INTO image (
-    id, image_url, image_url_resized, image_seq_no, thumbnail, group_buy_id
+    id, image_key, image_resized_key, image_seq_no, thumbnail, group_buy_id
 ) VALUES
   ( 1, '/uploads/4748bfa5-4fe7-462b-a4e0-0380efd6713a.png', NULL, 0, TRUE,  1),
   ( 2, '/uploads/4748bfa5-4fe7-462b-a4e0-0380efd6713a.png', NULL, 0, TRUE,  2),

@@ -48,7 +48,7 @@ public class GroupBuyCommandService {
         // GroupBuy 기본 필드 매핑 (팩토리 메서드 사용)
         GroupBuy gb = groupBuyCommandMapper.create(createGroupBuyRequest, currentUser);
 
-        imageMapper.mapImagesToGroupBuy(createGroupBuyRequest.getImageUrls(), gb);
+        imageMapper.mapImagesToGroupBuy(createGroupBuyRequest.getImageKeys(), gb);
 
         gb.increaseParticipantCount();
         groupBuyRepository.save(gb);

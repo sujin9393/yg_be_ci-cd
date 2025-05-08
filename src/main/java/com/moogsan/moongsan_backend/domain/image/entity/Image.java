@@ -1,5 +1,6 @@
-package com.moogsan.moongsan_backend.domain.groupbuy.entity;
+package com.moogsan.moongsan_backend.domain.image.entity;
 
+import com.moogsan.moongsan_backend.domain.groupbuy.entity.GroupBuy;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,9 +16,9 @@ public class Image {
     private Long id;
 
     @Column(nullable = false)
-    private String imageUrl;
+    private String imageKey;
 
-    private String imageUrlResized;
+    private String imageResizedKey;
 
     @Builder.Default
     @Column(nullable = false)

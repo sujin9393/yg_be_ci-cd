@@ -7,7 +7,7 @@ import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyL
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.ParticipatedList.ParticipatedListResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyUpdate.GroupBuyForUpdateResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.entity.GroupBuy;
-import com.moogsan.moongsan_backend.domain.groupbuy.entity.Image;
+import com.moogsan.moongsan_backend.domain.image.entity.Image;
 import com.moogsan.moongsan_backend.domain.order.entity.Order;
 import com.moogsan.moongsan_backend.domain.user.entity.User;
 import org.springframework.stereotype.Component;
@@ -23,7 +23,7 @@ public class GroupBuyQueryMapper {
     public GroupBuyForUpdateResponse toUpdateResponse(GroupBuy gb){
         List<ImageResponse> imageUrls = gb.getImages().stream()
                 .map(image -> ImageResponse.builder()
-                        .imageUrl(image.getImageUrl())
+                        .imageKey(image.getImageKey())
                         .imageSeqNo(image.getImageSeqNo())
                         .thumbnail(image.isThumbnail())
                         .build())
@@ -34,7 +34,7 @@ public class GroupBuyQueryMapper {
                 .name(gb.getName())
                 .description(gb.getDescription())
                 .url(gb.getUrl())
-                .imageUrls(imageUrls)
+                .imageKeys(imageUrls)
                 .dueDate(gb.getDueDate())
                 .location(gb.getLocation())
                 .pickupDate(gb.getPickupDate())
@@ -48,7 +48,7 @@ public class GroupBuyQueryMapper {
     public BasicListResponse toBasicListResponse(GroupBuy g) {
         List<ImageResponse> imgs = g.getImages().stream()
                 .map(img -> ImageResponse.builder()
-                        .imageUrl(img.getImageUrl())
+                        .imageKey(img.getImageKey())
                         .imageSeqNo(img.getImageSeqNo())
                         .thumbnail(img.isThumbnail())
                         .build())
@@ -59,7 +59,7 @@ public class GroupBuyQueryMapper {
                 .title(g.getTitle())
                 .name(g.getName())
                 .postStatus(g.getPostStatus())
-                .imageUrls(imgs)
+                .imageKeys(imgs)
                 .unitPrice(g.getUnitPrice())
                 .unitAmount(g.getUnitAmount())
                 .soldAmount(g.getTotalAmount() - g.getLeftAmount())
@@ -74,7 +74,7 @@ public class GroupBuyQueryMapper {
     public DetailResponse toDetailResponse(GroupBuy gb) {
         List<ImageResponse> imageUrls = gb.getImages().stream()
                 .map(img -> ImageResponse.builder()
-                        .imageUrl(img.getImageUrl())
+                        .imageKey(img.getImageKey())
                         .imageSeqNo(img.getImageSeqNo())
                         .thumbnail(img.isThumbnail())
                         .build())
@@ -87,7 +87,7 @@ public class GroupBuyQueryMapper {
                 .postStatus(gb.getPostStatus())
                 .description(gb.getDescription())
                 .url(gb.getUrl())
-                .imageUrls(imageUrls)
+                .imageKeys(imageUrls)
                 .unitPrice(gb.getUnitPrice())
                 .unitAmount(gb.getUnitAmount())
                 .soldAmount(gb.getTotalAmount() - gb.getLeftAmount())
@@ -118,7 +118,7 @@ public class GroupBuyQueryMapper {
 
         String img = post.getImages().stream()
                 .findFirst()
-                .map(Image::getImageUrl)
+                .map(Image::getImageKey)
                 .orElse(null);
 
         boolean dueSoon = "OPEN".equals(post.getPostStatus())
@@ -130,7 +130,7 @@ public class GroupBuyQueryMapper {
                 .title(post.getTitle())
                 .postStatus(post.getPostStatus())
                 .location(post.getLocation())
-                .imageUrl(img)
+                .imageKey(img)
                 .soldAmount(post.getTotalAmount() - post.getLeftAmount())
                 .totalAmount(post.getTotalAmount())
                 .participantCount(post.getParticipantCount())
