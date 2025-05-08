@@ -30,8 +30,8 @@ public class FileService {
      * @return key, url 정보가 담긴 PresignResponse
      */
     public PresignResponse presign(String fileName) {
-        // 1) S3 key 생성 (temp/{UUID}-{fileName})
-        String key = "temp/" + UUID.randomUUID() + "-" + fileName;
+        // 1) S3 key 생성 (images/{UUID}-{fileName})
+        String key = "images/" + UUID.randomUUID() + "-" + fileName;
 
         // 2) Presign 요청 객체 생성
         PutObjectRequest objReq = PutObjectRequest.builder()

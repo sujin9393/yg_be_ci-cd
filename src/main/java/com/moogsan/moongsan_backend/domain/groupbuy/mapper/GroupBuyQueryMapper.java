@@ -107,6 +107,7 @@ public class GroupBuyQueryMapper {
                 .authorId(u.getId())
                 .nickname(u.getNickname())
                 .accountNumber(u.getAccountNumber())
+                .accountBank(u.getAccountBank())
                 .profileImageUrl(u.getImageUrl())
                 .build();
     }
