@@ -1,0 +1,56 @@
+name: Backend CI/CD
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: sally2020s/yg-be
+  CONTAINER_NAME: yg-backend
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 레포지토리 코드 가져오기
+      - name: Checkout source
+        uses: actions/checkout@v3
+
+      # Docker 빌드 환경 세팅
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v2
+
+      # Docker 이미지 빌드 (jar 포함)
+      - name: Build Docker image with JAR
+        run: docker build -t $IMAGE_NAME .
+
+      # 이미지 tar 파일로 저장
+      - name: Save Docker image as tar
+        run: docker save $IMAGE_NAME > app.tar
+
+      # GCP 서버로 tar 전송 (SSH SCP)
+      - name: Copy image to GCP VM
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.GCP_HOST }}
+          username: ${{ secrets.GCP_USERNAME }}
+          key: ${{ secrets.GCP_SSH_KEY }}
+          source: "app.tar"
+          target: "~/backend"
+
+      # GCP 서버에서 이미지 로드 및 컨테이너 실행
+      - name: Run container on GCP VM
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.GCP_HOST }}
+          username: ${{ secrets.GCP_USERNAME }}
+          key: ${{ secrets.GCP_SSH_KEY }}
+          script: |
+            docker load < ~/backend/app.tar
+            docker stop $CONTAINER_NAME || true
+            docker rm $CONTAINER_NAME || true
+            docker run -d -p 8080:8080 --name $CONTAINER_NAME $IMAGE_NAME
