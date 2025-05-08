@@ -37,7 +37,6 @@ public class FileService {
         PutObjectRequest objReq = PutObjectRequest.builder()
                 .bucket(bucket)
                 .key(key)
-                .acl(ObjectCannedACL.PUBLIC_READ)
                 .build();
 
         PutObjectPresignRequest preReq = PutObjectPresignRequest.builder()

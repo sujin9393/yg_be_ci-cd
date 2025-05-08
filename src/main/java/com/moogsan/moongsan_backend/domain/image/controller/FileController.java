@@ -24,11 +24,7 @@ public class FileController {
     public ResponseEntity<PresignResponse> presign(
             @RequestParam String fileName
     ) {
-        // 1) 이미지 레코드(DB) 생성 + key 생성
-        //    FileService.createImageRecord(...)은 imageId와 key를 반환합니다.
         PresignResponse presign = fileService.presign(fileName);
-
-        // 2) imageId, key, url을 포함해 응답
         return ResponseEntity.ok(presign);
     }
 }
