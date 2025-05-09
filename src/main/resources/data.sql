@@ -4,7 +4,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- 1) users
 INSERT INTO users (
     id, email, password, nickname, name,
-    phone_number, account_bank, account_number, image_url,
+    phone_number, account_bank, account_number, image_key,
     type, status, joined_at, modified_at, logout_at, deleted_at
 ) VALUES (
     1,
