@@ -34,11 +34,7 @@ public class DetailResponse {
 
     // 상태/플래그
     private boolean dueSoon;                // 마감 임박 여부
-
-    @JsonProperty("isWish")
     private boolean isWish;                 // 관심 여부
-
-    @JsonProperty("isParticipant")
     private boolean isParticipant;          // 참여 여부
 
     // 날짜
@@ -48,4 +44,14 @@ public class DetailResponse {
 
     // 연관 객체
     private UserProfileResponse userProfileResponse;    // 주최자 정보
+
+    @JsonProperty("isWish")
+    public boolean isWish() {
+        return isWish;
+    }
+
+    @JsonProperty("isParticipant")
+    public boolean isParticipant() {
+        return isParticipant;
+    }
 }

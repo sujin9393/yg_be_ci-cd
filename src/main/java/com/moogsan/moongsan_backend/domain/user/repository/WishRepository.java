@@ -16,6 +16,12 @@ public interface WishRepository extends JpaRepository<Wish, Long> {
 
     boolean existsByUserIdAndGroupBuyId(Long userId, Long groupBuyId);
 
+    // 공구 리스트 목록에 속한 공구가 관심 공구인지 확인
+    @Query("select w.groupBuy.id from Wish w where w.user.id = :userId and w.groupBuy.id in :ids")
+    List<Long> findWishedGroupBuyIds(@Param("userId") Long userId,
+                                     @Param("ids") List<Long> groupBuyIds);
+
+    // 관심 공구 리스트 첫 조회
     @Query("""
        select w.groupBuy
          from Wish w
@@ -29,6 +35,7 @@ public interface WishRepository extends JpaRepository<Wish, Long> {
             Pageable pageable
     );
 
+    // 관심 공구 리스트 이어서 조회
     @Query("""
        select w.groupBuy
          from Wish w

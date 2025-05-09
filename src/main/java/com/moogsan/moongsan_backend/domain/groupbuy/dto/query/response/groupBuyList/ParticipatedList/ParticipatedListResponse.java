@@ -27,8 +27,10 @@ public class ParticipatedListResponse {
     // 상태/플래그
     private String orderStatus;    // 주문 상태: PENDING(입금 전), PAID(입금 됨, 입금 확인 전), CONFIRMED(입금 확인), CANCELED(취소)
     private boolean dueSoon;       // 마감 임박 여부
-
-    @JsonProperty("isWish")
     private boolean isWish;        // 관심 여부
 
+    @JsonProperty("isWish")
+    public boolean isWish() {
+        return isWish;
+    }
 }

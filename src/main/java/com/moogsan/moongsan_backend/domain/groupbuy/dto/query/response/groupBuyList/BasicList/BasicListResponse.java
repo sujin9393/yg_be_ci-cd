@@ -31,11 +31,14 @@ public class BasicListResponse {
 
     // 상태/플래그
     private boolean dueSoon;         // 마감 임박 여부
-
-    @JsonProperty("isWish")
     private boolean isWish;          // 관심 여부
 
     // 날짜
     private LocalDateTime createdAt; // 생성 일시
+
+    @JsonProperty("isWish")
+    public boolean isWish() {
+        return isWish;
+    }
 
 }
