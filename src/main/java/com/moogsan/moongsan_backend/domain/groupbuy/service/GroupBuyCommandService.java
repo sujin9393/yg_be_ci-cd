@@ -136,7 +136,7 @@ public class GroupBuyCommandService {
         }
 
         // 해당 공구의 주문 테이블에 해당 유저의 주문이 존재하는지 조회 -> 아니면 404
-        Order order = orderRepository.findByUserIdAndGroupBuyId(currentUser.getId(), groupBuy.getId())
+        Order order = orderRepository.findByUserIdAndGroupBuyIdAndStatusNot(currentUser.getId(), groupBuy.getId(), "CANCELED")
                 .orElseThrow(OrderNotFoundException::new);
 
         // 해당 주문의 상태가 canceled가 아닌지 조회 -> 아니면 409
