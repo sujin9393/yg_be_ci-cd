@@ -26,12 +26,15 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             Pageable pageable
     );
 
-
     List<Order> findByUserIdAndGroupBuyPostStatus(
             Long userId,
             String postStatus,
             Pageable pageable
     );
 
+    // 특정 공구의 참여 인원 수 확인
     int countByGroupBuyId(Long postId);
+
+    // 특정 유저의 특정 공구 참여 여부 확인
+    boolean existsByUserIdAndGroupBuyId(Long userId, Long groupBuyId);
 }

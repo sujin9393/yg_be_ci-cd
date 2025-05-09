@@ -179,11 +179,14 @@ public class GroupBuyQueryService {
     }
 
     /// 공구 게시글 상세 조회
-    public DetailResponse getGroupBuyDetailInfo(Long postId) {
+    public DetailResponse getGroupBuyDetailInfo(Long userId, Long postId) {
+
         GroupBuy groupBuy = groupBuyRepository.findWithImagesById(postId)
                 .orElseThrow(GroupBuyNotFoundException::new);
 
-        return groupBuyQueryMapper.toDetailResponse(groupBuy);
+        boolean isParticipant = orderRepository.existsByUserIdAndGroupBuyId(userId, postId);
+
+        return groupBuyQueryMapper.toDetailResponse(groupBuy, isParticipant);
     }
 
     /// 관심 공구 리스트 조회

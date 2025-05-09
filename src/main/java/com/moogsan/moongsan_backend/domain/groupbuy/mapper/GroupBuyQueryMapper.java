@@ -71,7 +71,7 @@ public class GroupBuyQueryMapper {
     }
 
     // 상세 페이지 조회용 DTO
-    public DetailResponse toDetailResponse(GroupBuy gb) {
+    public DetailResponse toDetailResponse(GroupBuy gb, Boolean isParticipant) {
         List<ImageResponse> imageUrls = gb.getImages().stream()
                 .map(img -> ImageResponse.builder()
                         .imageKey(img.getImageKey())
@@ -92,10 +92,12 @@ public class GroupBuyQueryMapper {
                 .unitAmount(gb.getUnitAmount())
                 .soldAmount(gb.getTotalAmount() - gb.getLeftAmount())
                 .totalAmount(gb.getTotalAmount())
+                .leftAmount(gb.getLeftAmount())
                 .participantCount(gb.getParticipantCount())
                 .dueDate(gb.getDueDate())
                 .pickupDate(gb.getPickupDate())
                 .location(gb.getLocation())
+                .isParticipant(isParticipant)
                 .createdAt(gb.getCreatedAt())
                 .userProfileResponse(toUserProfile(gb.getUser()))
                 .build();
