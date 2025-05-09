@@ -6,5 +6,5 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class CheckNicknameResponse {
-    private String isDuplication; // "YES" 또는 "NO"
+    private String isDuplication;   // 닉네임 중복 여부 중복=YES/중복없음=NO
 }

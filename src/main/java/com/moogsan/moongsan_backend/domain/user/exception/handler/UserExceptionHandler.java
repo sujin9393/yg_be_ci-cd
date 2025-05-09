@@ -13,7 +13,7 @@ public class UserExceptionHandler {
     @ExceptionHandler(UserException.class)
     public ResponseEntity<ErrorResponse> handleUserException(UserException e) {
         UserErrorCode errorCode = e.getErrorCode();
-        String message = e.getMessage(); // already uses defaultMessage if custom not provided
+        String message = e.getMessage(); // 커스텀 메세지 미제공 시, 기본 메세지 사용
 
         return ResponseEntity
                 .status(errorCode.getStatus())

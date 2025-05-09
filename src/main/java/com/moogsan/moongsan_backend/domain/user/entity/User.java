@@ -23,50 +23,50 @@ public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // DB에서 자동 증가
-    private Long id; // 사용자 고유 식별자 (PK)
+    private Long id;    // 고유 식별자 (PK)
 
     @Column(nullable = false, length = 255)
-    private String email; // 사용자 이메일 (로그인 ID 역할 가능)
+    private String email;   // 이메일 (로그인 ID 역할 가능)
 
     @Column(length = 60)
-    private String nickname; // 사용자 닉네임
+    private String nickname;// 닉네임
 
     @Column(length = 36)
-    private String name; // 사용자 실명
+    private String name;    // 실명
 
     @Column(name = "phone_number", length = 11)
-    private String phoneNumber; // 사용자 전화번호 (하이픈 제외)
+    private String phoneNumber; // 전화번호 (하이픈 제외)
 
     @Column(length = 60)
-    private String password; // 비밀번호 (암호화 저장)
+    private String password;    // 비밀번호 (암호화 저장)
 
     @Column(name = "account_bank", length = 30)
     private String accountBank; // 계좌 은행명
 
     @Column(name = "account_number", length = 32)
-    private String accountNumber; // 계좌 번호
+    private String accountNumber;   // 계좌 번호
 
     @Builder.Default
     @Column(name = "image_key", length = 512)
     private String imageKey = null; // 프로필 이미지 URL
 
     @Column(nullable = false, length = 30)
-    private String type; // 사용자 타입 (예: USER, ADMIN)
+    private String type;    // 사용자 유형 (예: USER, ADMIN)
 
     @Column(nullable = false, length = 30)
-    private String status; // 사용자 상태 (예: ACTIVE, SUSPENDED, DEACTIVATED)
+    private String status;  // 사용자 상태 (예: ACTIVE, SUSPENDED, DEACTIVATED)
 
     @Column(name = "joined_at", nullable = false)
     private LocalDateTime joinedAt; // 가입 시각
 
     @Column(name = "modified_at")
-    private LocalDateTime modifiedAt; // 마지막 정보 수정 시각
+    private LocalDateTime modifiedAt;   // 마지막 정보 수정 시각
 
     @Column(name = "logout_at")
     private LocalDateTime logoutAt; // 마지막 로그아웃 시각
 
     @Column(name = "deleted_at")
-    private LocalDateTime deletedAt; // 탈퇴(삭제) 시각
+    private LocalDateTime deletedAt;    // 탈퇴(삭제) 시각
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

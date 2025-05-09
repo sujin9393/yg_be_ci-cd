@@ -10,22 +10,22 @@ import org.springframework.http.HttpStatus;
 
 @Service
 @RequiredArgsConstructor
-public class OrderCancelService {
+public class OrderCancelService { // 주문 취소는 GroupBuy에서 다룸
 
-    private final OrderRepository orderRepository;
-
-    @Transactional
-    public void cancelOrder(Long userId, Long postId) {
-        Order order = orderRepository.findByUserIdAndGroupBuyIdAndStatusNot(userId, postId, "CANCELED")
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "주문 내역을 찾을 수 없습니다."));
-        if ("CANCELED".equals(order.getStatus())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 취소된 주문입니다.");
-        }
-        order.cancel();
-
-        // GroupBuy에 반영
-        order.getGroupBuy().increaseLeftAmount(order.getQuantity());
-        order.getGroupBuy().decreaseParticipantCount();
-        orderRepository.save(order);
-    }
+//    private final OrderRepository orderRepository;
+//
+//    @Transactional
+//    public void cancelOrder(Long userId, Long postId) {
+//        Order order = orderRepository.findByUserIdAndGroupBuyIdAndStatusNot(userId, postId, "CANCELED")
+//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "주문 내역을 찾을 수 없습니다."));
+//        if ("CANCELED".equals(order.getStatus())) {
+//            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 취소된 주문입니다.");
+//        }
+//        order.cancel();
+//
+//        // GroupBuy에 반영
+//        order.getGroupBuy().increaseLeftAmount(order.getQuantity());
+//        order.getGroupBuy().decreaseParticipantCount();
+//        orderRepository.save(order);
+//    }
 }

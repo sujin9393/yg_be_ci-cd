@@ -23,8 +23,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.Wrapper;
-
 
 @RestController
 @RequestMapping("/api")
@@ -40,6 +38,7 @@ public class UserController {
     private final TokenRefreshService tokenRefreshService;
     private final WishService wishService;
 
+    // 회원가입 API
     @PostMapping("/users")
     public ResponseEntity<WrapperResponse<LoginResponse>> signUp(@Valid @RequestBody SignUpRequest request,
                                                                  HttpServletResponse response) {
@@ -52,6 +51,7 @@ public class UserController {
         );
     }
 
+    // 로그인 API
     @PostMapping("/users/token")
     public ResponseEntity<WrapperResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest loginRequest,
                                                                 jakarta.servlet.http.HttpServletResponse response) {
@@ -64,6 +64,7 @@ public class UserController {
         );
     }
 
+    // 닉네임 중복 체크 API
     @GetMapping("/users/check-nickname")
     public ResponseEntity<WrapperResponse<CheckNicknameResponse>> checkNickname(@RequestParam String nickname) {
         CheckNicknameResponse response = nicknameService.checkNickname(nickname);
@@ -85,6 +86,7 @@ public class UserController {
         );
     }
 
+    // 유저 프로필 조회 API
     @GetMapping("/users/profile")
     public ResponseEntity<WrapperResponse<UserProfileResponse>> getProfile(
         @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -97,6 +99,7 @@ public class UserController {
                 .build());
     }
 
+    // 로그아웃 API
     @DeleteMapping("/users/token")
     public ResponseEntity<WrapperResponse<Void>> logout(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                         HttpServletResponse response) {
@@ -109,6 +112,7 @@ public class UserController {
         );
     }
 
+    // 회원탈퇴 API
     @DeleteMapping("/users")
     public ResponseEntity<WrapperResponse<Void>> withdraw(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                           HttpServletResponse response) {
@@ -121,6 +125,7 @@ public class UserController {
         );
     }
 
+    // Access Token 재발행 API
     @PostMapping("/users/token/refresh")
     public ResponseEntity<WrapperResponse<Void>> refreshToken(HttpServletRequest request, HttpServletResponse response) {
         tokenRefreshService.refreshAccessToken(request, response);
@@ -132,6 +137,7 @@ public class UserController {
         );
     }
 
+    // 관심 목록 등록 API
     @PostMapping("/users/wish/{postId}")
     public ResponseEntity<WrapperResponse<Void>> addWish(@PathVariable Long postId,
                                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -145,6 +151,7 @@ public class UserController {
         );
     }
 
+    // 관심 목록 삭제 API
     @DeleteMapping("/users/wish/{postId}")
     public ResponseEntity<WrapperResponse<Void>> removeWish(@PathVariable Long postId,
                                                             @AuthenticationPrincipal CustomUserDetails userDetails) {

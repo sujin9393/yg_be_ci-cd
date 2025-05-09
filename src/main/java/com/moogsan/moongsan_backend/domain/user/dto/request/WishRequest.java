@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 public class WishRequest {
 
     @NotNull
-    private Long postId;
+    private Long postId; // 공구글 ID
 }
