@@ -2,9 +2,11 @@ package com.moogsan.moongsan_backend.domain.groupbuy.service;
 
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyDetail.DetailResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.BasicList.BasicListResponse;
+import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.HostedList.HostedListResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.PagedResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.ParticipantList.ParticipantListResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.ParticipatedList.ParticipatedListResponse;
+import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.WishList.WishListResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyUpdate.GroupBuyForUpdateResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.entity.GroupBuy;
 import com.moogsan.moongsan_backend.domain.groupbuy.exception.specific.GroupBuyNotFoundException;
@@ -191,14 +193,101 @@ public class GroupBuyQueryService {
 
     /// 관심 공구 리스트 조회
     /// TODO V2
-    public PagedResponse getGroupBuyWishList(Long cursor, Integer limit) {
-        return null;
+    /*
+    public PagedResponse<WishListResponse> getGroupBuyWishList(
+            User currentUser,
+            String sort,
+            Long cursorId,
+            Integer limit) {
+        String status = sort.toUpperCase();
+
+        Pageable page = PageRequest.of(0, limit, Sort.by("groupBuy.id").descending());
+
+        // cursorId가 없으면 cursor 조건 제외
+        List<GroupBuy> groupBuys;
+        if (cursorId == null) {
+            groupBuys = wishRepository.findByUserIdAndGroupBuyPostStatus(
+                    currentUser.getId(),
+                    status,
+                    page
+            );
+        } else {
+            groupBuys = wishRepository.findByUserIdAndGroupBuyPostStatusAndGroupBuyIdLessThan(
+                    currentUser.getId(),
+                    status,
+                    cursorId,
+                    page
+            );
+        }
+
+        // 매핑
+        List<WishListResponse> posts = groupBuys.stream()
+                .map(groupBuyQueryMapper::toWishListResponse)
+                .toList();
+
+        // 다음 커서 및 더보기 여부
+        Long nextCursor = posts.isEmpty()
+                ? null
+                : posts.getLast().getPostId();
+        boolean hasMore = posts.size() == limit;
+
+        return PagedResponse.<WishListResponse>builder()
+                .count(posts.size())
+                .posts(posts)
+                .nextCursor(nextCursor != null ? nextCursor.intValue() : null)
+                .hasMore(hasMore)
+                .build();
     }
+
+     */
+
 
     /// 주최 공구 리스트 조회
     /// TODO V2
-    public PagedResponse getGroupBuyHostedList(String sort, Long cursor, Integer limit) {
-        return null;
+    public PagedResponse<HostedListResponse> getGroupBuyHostedList(
+            User currentUser,
+            String sort,
+            Long cursorId,
+            Integer limit) {
+
+        String status = sort.toUpperCase();
+
+        Pageable page = PageRequest.of(0, limit, Sort.by("groupBuy.id").descending());
+
+        // cursorId가 없으면 cursor 조건 제외
+        List<GroupBuy> groupBuys;
+        if (cursorId == null) {
+            groupBuys = groupBuyRepository.findByUserIdAndGroupBuyPostStatus(
+                    currentUser.getId(),
+                    status,
+                    page
+            );
+        } else {
+            groupBuys = groupBuyRepository.findByUserIdAndGroupBuyPostStatusAndGroupBuyIdLessThan(
+                    currentUser.getId(),
+                    status,
+                    cursorId,
+                    page
+            );
+        }
+
+        // 매핑
+        List<HostedListResponse> posts = groupBuys.stream()
+                .map(groupBuyQueryMapper::toHostedListResponse)
+                .toList();
+
+        // 다음 커서 및 더보기 여부
+        Long nextCursor = posts.isEmpty()
+                ? null
+                : posts.getLast().getPostId();
+        boolean hasMore = posts.size() == limit;
+
+        return PagedResponse.<HostedListResponse>builder()
+                .count(posts.size())
+                .posts(posts)
+                .nextCursor(nextCursor != null ? nextCursor.intValue() : null)
+                .hasMore(hasMore)
+                .build();
     }
 
 

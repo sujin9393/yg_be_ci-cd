@@ -79,10 +79,12 @@ public class GroupBuyQueryController {
     // 관심 공구 리스트 조회
     @GetMapping("/user/wishes")
     public ResponseEntity<WrapperResponse<PagedResponse<WishListResponse>>> getGroupBuyWishList(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(value = "sort") String sort,
             @RequestParam(value = "cursor", required = false) Long cursor,
             @RequestParam(value = "limit", defaultValue = "10") Integer limit
     ) {
-        PagedResponse<WishListResponse> pagedResponse = groupBuyService.getGroupBuyWishList(cursor, limit);
+        PagedResponse<WishListResponse> pagedResponse = groupBuyService.getGroupBuyWishList(userDetails.getUser(), sort, cursor, limit);
         return ResponseEntity.ok(
                 WrapperResponse.<PagedResponse<WishListResponse>>builder()
                         .message("관심 공구 리스트를 성공적으로 조회했습니다.")
@@ -94,11 +96,12 @@ public class GroupBuyQueryController {
     // 주최 공구 리스트 조회
     @GetMapping("/user/hosts")
     public ResponseEntity<WrapperResponse<PagedResponse<HostedListResponse>>> getGroupBuyHostedList(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(value = "sort") String sort,
             @RequestParam(value = "cursor", required = false) Long cursor,
             @RequestParam(value = "limit", defaultValue = "10") Integer limit
     ) {
-        PagedResponse<HostedListResponse> pagedResponse = groupBuyService.getGroupBuyHostedList(sort, cursor, limit);
+        PagedResponse<HostedListResponse> pagedResponse = groupBuyService.getGroupBuyHostedList(userDetails.getUser(), sort, cursor, limit);
         return ResponseEntity.ok(
                 WrapperResponse.<PagedResponse<HostedListResponse>>builder()
                         .message("주최 공구 리스트를 성공적으로 조회했습니다.")
