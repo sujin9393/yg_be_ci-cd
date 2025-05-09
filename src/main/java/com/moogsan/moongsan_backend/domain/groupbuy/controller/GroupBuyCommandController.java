@@ -132,12 +132,6 @@ public class GroupBuyCommandController {
         );
     }
 
-    // 관심 공구 추가
-    //  TODO V2
-
-    // 관심 공구 취소
-    //  TODO V2
-
     // 공구 게시글 공구 종료
     @PatchMapping("/{postId}/end")
     public ResponseEntity<WrapperResponse<EmptyResponse>> endGroupBuy(

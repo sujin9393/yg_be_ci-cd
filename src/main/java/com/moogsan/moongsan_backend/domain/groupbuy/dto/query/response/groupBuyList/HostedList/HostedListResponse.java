@@ -1,5 +1,6 @@
 package com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.HostedList;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -28,6 +29,8 @@ public class HostedListResponse {
 
     // 상태/플래그
     private boolean dueSoon;       // 마감 임박 여부
+
+    @JsonProperty("isWish")
     private boolean isWish;        // 관심 여부
 
 }
