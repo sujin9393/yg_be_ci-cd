@@ -11,9 +11,11 @@ import com.moogsan.moongsan_backend.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class MyPageService {
 
     private final UserRepository userRepository;
@@ -44,6 +46,11 @@ public class MyPageService {
     public void updateBasicInfo(Long userId, MyPageBasicRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserException(UserErrorCode.NOT_FOUND));
-        user.updateBasicInfo(request.getName(), request.getNickname(), request.getPhoneNumber());
+
+        String name = request.getName() != null ? request.getName() : user.getName();
+        String nickname = request.getNickname() != null ? request.getNickname() : user.getNickname();
+        String phoneNumber = request.getPhoneNumber() != null ? request.getPhoneNumber() : user.getPhoneNumber();
+
+        user.updateBasicInfo(name, nickname, phoneNumber);
     }
 }

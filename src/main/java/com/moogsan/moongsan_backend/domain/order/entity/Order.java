@@ -1,5 +1,6 @@
 package com.moogsan.moongsan_backend.domain.order.entity;
 
+import com.moogsan.moongsan_backend.domain.BaseEntity;
 import com.moogsan.moongsan_backend.domain.groupbuy.entity.GroupBuy;
 import com.moogsan.moongsan_backend.domain.user.entity.User;
 import jakarta.persistence.*;
@@ -15,7 +16,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class Order {
+public class Order extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,15 +48,4 @@ public class Order {
     @Builder.Default
     @Column(name = "deleted_count")
     private Integer deletedCount = 0;
-
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
-
-    public void cancel() {
-        this.deletedAt = LocalDateTime.now();
-    }
 }
