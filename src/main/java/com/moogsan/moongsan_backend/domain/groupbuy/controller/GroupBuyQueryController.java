@@ -38,7 +38,7 @@ public class GroupBuyQueryController {
         );
     }
 
-    /// 공구 게시글 상세 조회 SUCCESS
+    // 공구 게시글 상세 조회 V2 update - wish
     @GetMapping("/{postId}")
     public ResponseEntity<WrapperResponse<DetailResponse>> getGroupBuyDetailInfo(
         @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -52,7 +52,7 @@ public class GroupBuyQueryController {
         );
     }
 
-    /// 공구 리스트 조회 SUCCESS
+    // 공구 리스트 조회  V2 update - wish
     @GetMapping
     public ResponseEntity<WrapperResponse<PagedResponse<BasicListResponse>>> getGroupBuyListByCursor(
             @RequestParam(value = "category", required = false) Long categoryId,
@@ -96,7 +96,7 @@ public class GroupBuyQueryController {
 
      */
 
-    // 주최 공구 리스트 조회
+    // 주최 공구 리스트 조회 V2 update - wish
     @GetMapping("/user/hosts")
     public ResponseEntity<WrapperResponse<PagedResponse<HostedListResponse>>> getGroupBuyHostedList(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -113,7 +113,7 @@ public class GroupBuyQueryController {
         );
     }
 
-    /// 참여 공구 리스트 조회 SUCCESS
+    // 참여 공구 리스트 조회 SUCCESS V2 update - wish
     @GetMapping("/user/participants")
     public ResponseEntity<WrapperResponse<PagedResponse<ParticipatedListResponse>>> getGroupBuyParticipatedList(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -130,7 +130,7 @@ public class GroupBuyQueryController {
         );
     }
 
-    // 공구 참여자 조회
+    /// 공구 참여자 조회 SUCCESS
     @GetMapping("/{postId}/participants")
     public ResponseEntity<WrapperResponse<ParticipantListResponse>> getGroupBuyParticipantsInfo(
             @AuthenticationPrincipal User currentUser,

@@ -20,14 +20,14 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Optional<Order> findByUserIdAndGroupBuyIdAndStatusNot(Long userId, Long groupBuyId, String status);
 
     // 특정 유저의 공구 게시글 상태별 참여(주문) 리스트 첫 조회
-    List<Order> findByUserIdAndGroupBuyPostStatus(
+    List<Order> findByUserIdAndGroupBuy_PostStatus(
             Long userId,
             String postStatus,
             Pageable pageable
     );
 
     // 특정 유저의 공구 게시글 상태별 참여(주문) 리스트 이어서 조회
-    List<Order> findByUserIdAndGroupBuyPostStatusAndGroupBuyIdLessThan(
+    List<Order> findByUserIdAndGroupBuy_PostStatusAndIdLessThan(
             Long userId,
             String postStatus,
             Long cursorId,

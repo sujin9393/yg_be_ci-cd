@@ -256,13 +256,13 @@ public class GroupBuyQueryService {
         // cursorId가 없으면 cursor 조건 제외
         List<GroupBuy> groupBuys;
         if (cursorId == null) {
-            groupBuys = groupBuyRepository.findByUserIdAndPostStatus(
+            groupBuys = groupBuyRepository.findByUser_IdAndPostStatus (
                     currentUser.getId(),
                     status,
                     page
             );
         } else {
-            groupBuys = groupBuyRepository.findByUserIdAndPostStatusAndIdLessThan(
+            groupBuys = groupBuyRepository.findByUser_IdAndPostStatusAndIdLessThan (
                     currentUser.getId(),
                     status,
                     cursorId,
@@ -304,13 +304,13 @@ public class GroupBuyQueryService {
         // cursorId가 없으면 cursor 조건 제외
         List<Order> orders;
         if (cursorId == null) {
-            orders = orderRepository.findByUserIdAndGroupBuyPostStatus(
+            orders = orderRepository.findByUserIdAndGroupBuy_PostStatus(
                     currentUser.getId(),
                     status,
                     page
             );
         } else {
-            orders = orderRepository.findByUserIdAndGroupBuyPostStatusAndGroupBuyIdLessThan(
+            orders = orderRepository.findByUserIdAndGroupBuy_PostStatusAndIdLessThan(
                     currentUser.getId(),
                     status,
                     cursorId,
