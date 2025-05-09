@@ -56,10 +56,12 @@ public class GroupBuyCommandService {
         return gb.getId();
     }
 
+
     /// 공구 게시글 상세 설명 생성
     public Mono<DescriptionDto> generate(String url) {
         return aiClient.generateDescription(url);
     }
+
 
     /// 공구 게시글 수정
     // TODO V2

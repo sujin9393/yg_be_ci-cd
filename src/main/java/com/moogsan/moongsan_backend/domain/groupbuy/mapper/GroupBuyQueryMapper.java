@@ -4,7 +4,10 @@ import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.ImageResp
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyDetail.DetailResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyDetail.UserProfileResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.BasicList.BasicListResponse;
+import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.HostedList.HostedListResponse;
+import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.ParticipantList.ParticipantResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.ParticipatedList.ParticipatedListResponse;
+import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.WishList.WishListResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyUpdate.GroupBuyForUpdateResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.entity.GroupBuy;
 import com.moogsan.moongsan_backend.domain.image.entity.Image;
@@ -71,7 +74,7 @@ public class GroupBuyQueryMapper {
     }
 
     // 상세 페이지 조회용 DTO
-    public DetailResponse toDetailResponse(GroupBuy gb) {
+    public DetailResponse toDetailResponse(GroupBuy gb, Boolean isParticipant) {
         List<ImageResponse> imageUrls = gb.getImages().stream()
                 .map(img -> ImageResponse.builder()
                         .imageKey(img.getImageKey())
@@ -92,10 +95,12 @@ public class GroupBuyQueryMapper {
                 .unitAmount(gb.getUnitAmount())
                 .soldAmount(gb.getTotalAmount() - gb.getLeftAmount())
                 .totalAmount(gb.getTotalAmount())
+                .leftAmount(gb.getLeftAmount())
                 .participantCount(gb.getParticipantCount())
                 .dueDate(gb.getDueDate())
                 .pickupDate(gb.getPickupDate())
                 .location(gb.getLocation())
+                .isParticipant(isParticipant)
                 .createdAt(gb.getCreatedAt())
                 .userProfileResponse(toUserProfile(gb.getUser()))
                 .build();
@@ -108,7 +113,58 @@ public class GroupBuyQueryMapper {
                 .nickname(u.getNickname())
                 .accountNumber(u.getAccountNumber())
                 .accountBank(u.getAccountBank())
-                .profileImageUrl(u.getImageUrl())
+                .profileImageUrl(u.getImageKey())
+                .build();
+    }
+
+    // 관심 공구 리스트 조회
+    public WishListResponse toWishListResponse(GroupBuy gb) {
+        String img = gb.getImages().stream()
+                .findFirst()
+                .map(Image::getImageKey)
+                .orElse(null);
+
+        boolean dueSoon = "OPEN".equals(gb.getPostStatus())
+                && gb.getDueDate().isAfter(LocalDateTime.now())
+                && gb.getDueDate().isBefore(LocalDateTime.now().plusDays(3));
+
+        return WishListResponse.builder()
+                .postId(gb.getId())
+                .title(gb.getTitle())
+                .postStatus(gb.getPostStatus())
+                .location(gb.getLocation())
+                .imageKey(img)
+                .price(gb.getPrice())
+                .soldAmount(gb.getTotalAmount() - gb.getLeftAmount())
+                .totalAmount(gb.getTotalAmount())
+                .participantCount(gb.getParticipantCount())
+                .dueSoon(dueSoon)
+                .build();
+    }
+
+    // 주최 공구 리스트 조회
+    public HostedListResponse toHostedListResponse(GroupBuy gb) {
+        String img = gb.getImages().stream()
+                .findFirst()
+                .map(Image::getImageKey)
+                .orElse(null);
+
+        boolean dueSoon = "OPEN".equals(gb.getPostStatus())
+                && gb.getDueDate().isAfter(LocalDateTime.now())
+                && gb.getDueDate().isBefore(LocalDateTime.now().plusDays(3));
+
+        return HostedListResponse.builder()
+                .postId(gb.getId())
+                .title(gb.getTitle())
+                .postStatus(gb.getPostStatus())
+                .location(gb.getLocation())
+                .imageKey(img)
+                .hostPrice(gb.getUnitPrice() * gb.getHostQuantity())
+                .hostQuantity(gb.getHostQuantity())
+                .soldAmount(gb.getTotalAmount() - gb.getLeftAmount())
+                .totalAmount(gb.getTotalAmount())
+                .participantCount(gb.getParticipantCount())
+                .dueSoon(dueSoon)
                 .build();
     }
 
@@ -132,10 +188,28 @@ public class GroupBuyQueryMapper {
                 .postStatus(post.getPostStatus())
                 .location(post.getLocation())
                 .imageKey(img)
+                .orderPrice(o.getPrice())
+                .orderQuantity(o.getQuantity())
+                .orderStatus(o.getStatus())
                 .soldAmount(post.getTotalAmount() - post.getLeftAmount())
                 .totalAmount(post.getTotalAmount())
                 .participantCount(post.getParticipantCount())
                 .dueSoon(dueSoon)
                 .build();
     }
+
+    public ParticipantResponse toParticipantResponse(Order order) {
+        User user = order.getUser();
+
+        return ParticipantResponse.builder()
+                .participantId(user.getId())
+                .nickname(user.getNickname())
+                .phoneNumber(user.getPhoneNumber())
+                .imageKey(user.getImageKey())
+                .orderName(order.getName())
+                .orderQuantity(order.getQuantity())
+                .orderStatus(order.getStatus())
+                .build();
+    }
+
 }

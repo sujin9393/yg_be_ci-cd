@@ -4,7 +4,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- 1) users
 INSERT INTO users (
     id, email, password, nickname, name,
-    phone_number, account_bank, account_number, image_url,
+    phone_number, account_bank, account_number, image_key,
     type, status, joined_at, modified_at, logout_at, deleted_at
 ) VALUES (
     1,
@@ -38,7 +38,7 @@ INSERT INTO group_buy (
 ) VALUES
   ( 1, '🎉 신상 공구 런칭 #1',  '더미 상품 #1',
     '🎁 인기 상품을 함께 구매하고 추가 할인 혜택을 받아보세요. 놓치지 마세요! 👍',
-    'https://example.com/1',   10000,10000,  50,   1, 49, 10, FALSE, NULL,
+    'https://example.com/1',   10000,1000,  10,   1, 9, 1, FALSE, NULL,
     '2025-06-01 12:00:00','테스트 장소','2025-06-05 12:00:00',0,0,0,'OPEN', NULL,
     1,'2025-03-27 00:00:00','2025-06-05 09:00:00'),
   ( 2, '🔥 한정 공구 오픈 #2',  '더미 상품 #2',

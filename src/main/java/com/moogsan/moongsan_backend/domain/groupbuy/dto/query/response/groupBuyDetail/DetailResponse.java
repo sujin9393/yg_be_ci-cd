@@ -28,6 +28,7 @@ public class DetailResponse {
     private int unitAmount;                 // 상품 주문 단위
     private int soldAmount;                 // 판매 수량
     private int totalAmount;                // 전체 수량
+    private int leftAmount;                 // 남은 수량
     private int participantCount;           // 참여 인원 수
 
     // 상태/플래그
