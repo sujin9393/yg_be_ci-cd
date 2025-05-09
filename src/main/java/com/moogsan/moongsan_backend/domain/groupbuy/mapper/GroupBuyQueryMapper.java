@@ -4,7 +4,9 @@ import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.ImageResp
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyDetail.DetailResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyDetail.UserProfileResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.BasicList.BasicListResponse;
+import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.HostedList.HostedListResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.ParticipatedList.ParticipatedListResponse;
+import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.WishList.WishListResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyUpdate.GroupBuyForUpdateResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.entity.GroupBuy;
 import com.moogsan.moongsan_backend.domain.image.entity.Image;
@@ -111,6 +113,57 @@ public class GroupBuyQueryMapper {
                 .accountNumber(u.getAccountNumber())
                 .accountBank(u.getAccountBank())
                 .profileImageUrl(u.getImageUrl())
+                .build();
+    }
+
+    // 관심 공구 리스트 조회
+    public WishListResponse toWishListResponse(GroupBuy gb) {
+        String img = gb.getImages().stream()
+                .findFirst()
+                .map(Image::getImageKey)
+                .orElse(null);
+
+        boolean dueSoon = "OPEN".equals(gb.getPostStatus())
+                && gb.getDueDate().isAfter(LocalDateTime.now())
+                && gb.getDueDate().isBefore(LocalDateTime.now().plusDays(3));
+
+        return WishListResponse.builder()
+                .postId(gb.getId())
+                .title(gb.getTitle())
+                .postStatus(gb.getPostStatus())
+                .location(gb.getLocation())
+                .imageKey(img)
+                .price(gb.getPrice())
+                .soldAmount(gb.getTotalAmount() - gb.getLeftAmount())
+                .totalAmount(gb.getTotalAmount())
+                .participantCount(gb.getParticipantCount())
+                .dueSoon(dueSoon)
+                .build();
+    }
+
+    // 주최 공구 리스트 조회
+    public HostedListResponse toHostedListResponse(GroupBuy gb) {
+        String img = gb.getImages().stream()
+                .findFirst()
+                .map(Image::getImageKey)
+                .orElse(null);
+
+        boolean dueSoon = "OPEN".equals(gb.getPostStatus())
+                && gb.getDueDate().isAfter(LocalDateTime.now())
+                && gb.getDueDate().isBefore(LocalDateTime.now().plusDays(3));
+
+        return HostedListResponse.builder()
+                .postId(gb.getId())
+                .title(gb.getTitle())
+                .postStatus(gb.getPostStatus())
+                .location(gb.getLocation())
+                .imageKey(img)
+                .hostPrice(gb.getUnitPrice() * gb.getHostQuantity())
+                .hostQuantity(gb.getHostQuantity())
+                .soldAmount(gb.getTotalAmount() - gb.getLeftAmount())
+                .totalAmount(gb.getTotalAmount())
+                .participantCount(gb.getParticipantCount())
+                .dueSoon(dueSoon)
                 .build();
     }
 

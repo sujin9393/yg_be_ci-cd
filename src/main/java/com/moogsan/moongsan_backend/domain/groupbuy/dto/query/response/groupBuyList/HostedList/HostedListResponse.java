@@ -11,7 +11,7 @@ import java.util.List;
 public class HostedListResponse {
 
     // 식별/메타
-    private Long postId;         // 공구 게시글 아이디
+    private Long postId;           // 공구 게시글 아이디
     private String title;          // 공구 게시글 제목
     private String postStatus;     // 공구 진행 상태(OPEN, CLOSED, ENDED)
 
@@ -20,8 +20,8 @@ public class HostedListResponse {
     private String imageKey;       // thumbnail 이미지
 
     // 숫자 데이터
-    private int price;             // 총 상품 가격
-    private int orderQuantity;     // 주문 개수(주최자)
+    private int hostPrice;         // 구매 상품 가격
+    private int hostQuantity;      // 주문 개수(주최자)
     private int soldAmount;        // 판매 수량(totalAmount - leftAmount)
     private int totalAmount;       // 상품 전체 수량
     private int participantCount;  // 참여 인원 수
