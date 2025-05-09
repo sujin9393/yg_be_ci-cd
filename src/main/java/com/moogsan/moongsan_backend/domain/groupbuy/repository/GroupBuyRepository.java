@@ -20,10 +20,10 @@ public interface GroupBuyRepository extends JpaRepository<GroupBuy, Long> {
     List<GroupBuy> findByPostStatusAndDueDateBefore(String postStatus, LocalDateTime now);
 
     // 공구 주최 리스트 첫 조회
-    List<GroupBuy> findByUserIdAndPostStatus(Long userId, String postStatus, Pageable pageable);
+    List<GroupBuy> findByUser_IdAndPostStatus(Long userId, String postStatus, Pageable pageable);
 
     // 공구 주최 리스트 이어서 조회
-    List<GroupBuy> findByUserIdAndPostStatusAndIdLessThan(
+    List<GroupBuy> findByUser_IdAndPostStatusAndIdLessThan(
             Long userId,
             String postStatus,
             Long cursorId,
