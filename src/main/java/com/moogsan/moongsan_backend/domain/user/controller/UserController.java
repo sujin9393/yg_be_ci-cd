@@ -12,6 +12,7 @@ import com.moogsan.moongsan_backend.domain.user.service.SignUpService;
 import com.moogsan.moongsan_backend.domain.user.service.UserProfileService;
 import com.moogsan.moongsan_backend.domain.user.service.WithdrawService;
 import com.moogsan.moongsan_backend.domain.user.service.TokenRefreshService;
+import com.moogsan.moongsan_backend.domain.user.service.WishService;
 import com.moogsan.moongsan_backend.domain.user.entity.CustomUserDetails;
 import com.moogsan.moongsan_backend.domain.WrapperResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,6 +22,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.sql.Wrapper;
 
 
 @RestController
@@ -35,6 +38,7 @@ public class UserController {
     private final LogoutService logoutService;
     private final WithdrawService withdrawService;
     private final TokenRefreshService tokenRefreshService;
+    private final WishService wishService;
 
     @PostMapping("/users")
     public ResponseEntity<WrapperResponse<LoginResponse>> signUp(@Valid @RequestBody SignUpRequest request,
@@ -127,4 +131,31 @@ public class UserController {
                         .build()
         );
     }
+
+    @PostMapping("/users/wish/{postId}")
+    public ResponseEntity<WrapperResponse<Void>> addWish(@PathVariable Long postId,
+                                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
+        wishService.addWish(userDetails.getUser().getId(), postId);
+
+        return ResponseEntity.ok(
+                WrapperResponse.<Void>builder()
+                        .message("관심 등록이 완료되었습니다.")
+                        .data(null)
+                        .build()
+        );
+    }
+
+    @DeleteMapping("/users/wish/{postId}")
+    public ResponseEntity<WrapperResponse<Void>> removeWish(@PathVariable Long postId,
+                                                            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        wishService.removeWish(userDetails.getUser().getId(), postId);
+
+        return ResponseEntity.ok(
+                WrapperResponse.<Void>builder()
+                        .message("관심 등록이 취소되었습니다.")
+                        .data(null)
+                        .build()
+        );
+    }
+
 }
