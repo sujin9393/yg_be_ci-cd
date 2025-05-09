@@ -40,8 +40,10 @@ public class GroupBuyQueryController {
 
     /// 공구 게시글 상세 조회 SUCCESS
     @GetMapping("/{postId}")
-    public ResponseEntity<WrapperResponse<DetailResponse>> getGroupBuyDetailInfo(@PathVariable Long postId) {
-        DetailResponse detail = groupBuyService.getGroupBuyDetailInfo(postId);
+    public ResponseEntity<WrapperResponse<DetailResponse>> getGroupBuyDetailInfo(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @PathVariable Long postId) {
+        DetailResponse detail = groupBuyService.getGroupBuyDetailInfo(userDetails.getUser().getId(), postId);
         return ResponseEntity.ok(
                 WrapperResponse.<DetailResponse>builder()
                         .message("공구 게시글 상세 정보를 성공적으로 조회했습니다.")
