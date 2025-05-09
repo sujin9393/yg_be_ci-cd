@@ -47,11 +47,10 @@ public class AiClient {
                         resp -> Mono.error(new IllegalStateException("AI 서비스 호출 중 서버 오류가 발생했습니다.")))
                 // 외부 AI의 공통 래퍼(ApiResponse<T>) 형태로 역직렬화
                 .bodyToMono(new ParameterizedTypeReference<ApiResponse<DescriptionDto>>() {})
-                // wrapper 안에서 data만 꺼내거나, 없으면 에러 처리
                 .flatMap(apiRes -> {
-                    DescriptionDto data = apiRes.getData();
-                    if (data != null) {
-                        return Mono.just(data);
+                    DescriptionDto dto = apiRes.getData();  // 이제 data 안에 payload만 담겨 있음
+                    if (dto != null) {
+                        return Mono.just(dto);
                     } else {
                         return Mono.error(new IllegalStateException("AI 서비스가 데이터를 반환하지 않았습니다."));
                     }
