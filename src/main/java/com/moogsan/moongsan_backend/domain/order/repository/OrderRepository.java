@@ -1,6 +1,7 @@
 package com.moogsan.moongsan_backend.domain.order.repository;
 
 import com.moogsan.moongsan_backend.domain.order.entity.Order;
+import com.moogsan.moongsan_backend.domain.user.entity.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -35,6 +36,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     // 특정 공구의 참여 인원 수 확인
     int countByGroupBuyId(Long postId);
+
+    // 특정 공구의 주문 목록 확인
+    List<Order> findByGroupBuyIdAndStatusNot(Long groupBuyId, String status);
 
     // 특정 유저의 특정 공구 참여 여부 확인
     boolean existsByUserIdAndGroupBuyId(Long userId, Long groupBuyId);

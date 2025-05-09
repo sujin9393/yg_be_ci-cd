@@ -5,6 +5,7 @@ import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyD
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyDetail.UserProfileResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.BasicList.BasicListResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.HostedList.HostedListResponse;
+import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.ParticipantList.ParticipantResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.ParticipatedList.ParticipatedListResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.WishList.WishListResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyUpdate.GroupBuyForUpdateResponse;
@@ -112,7 +113,7 @@ public class GroupBuyQueryMapper {
                 .nickname(u.getNickname())
                 .accountNumber(u.getAccountNumber())
                 .accountBank(u.getAccountBank())
-                .profileImageUrl(u.getImageUrl())
+                .profileImageUrl(u.getImageKey())
                 .build();
     }
 
@@ -193,4 +194,19 @@ public class GroupBuyQueryMapper {
                 .dueSoon(dueSoon)
                 .build();
     }
+
+    public ParticipantResponse toParticipantResponse(Order order) {
+        User user = order.getUser();
+
+        return ParticipantResponse.builder()
+                .participantId(user.getId())
+                .nickname(user.getNickname())
+                .phoneNumber(user.getPhoneNumber())
+                .imageKey(user.getImageKey())
+                .orderName(order.getName())
+                .orderQuantity(order.getQuantity())
+                .orderStatus(order.getStatus())
+                .build();
+    }
+
 }

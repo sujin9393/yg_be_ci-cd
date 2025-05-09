@@ -83,7 +83,7 @@ public class LoginService {
         return new LoginResponse(
                 user.getNickname(),
                 user.getName(),
-                user.getImageUrl(),
+                user.getImageKey(),
                 user.getType()
         );
     }
