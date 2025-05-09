@@ -243,7 +243,6 @@ public class GroupBuyQueryService {
 
 
     /// 주최 공구 리스트 조회
-    /// TODO V2
     public PagedResponse<HostedListResponse> getGroupBuyHostedList(
             User currentUser,
             String sort,
@@ -257,13 +256,13 @@ public class GroupBuyQueryService {
         // cursorId가 없으면 cursor 조건 제외
         List<GroupBuy> groupBuys;
         if (cursorId == null) {
-            groupBuys = groupBuyRepository.findByUserIdAndGroupBuyPostStatus(
+            groupBuys = groupBuyRepository.findByUserIdAndPostStatus(
                     currentUser.getId(),
                     status,
                     page
             );
         } else {
-            groupBuys = groupBuyRepository.findByUserIdAndGroupBuyPostStatusAndGroupBuyIdLessThan(
+            groupBuys = groupBuyRepository.findByUserIdAndPostStatusAndIdLessThan(
                     currentUser.getId(),
                     status,
                     cursorId,
@@ -339,7 +338,6 @@ public class GroupBuyQueryService {
     }
 
     /// 공구 참여자 조회
-    /// TODO V2
     public ParticipantListResponse getGroupBuyParticipantsInfo(Long postId) {
         List<Order> orders = orderRepository.findByGroupBuyIdAndStatusNot(postId, "canceled");
 

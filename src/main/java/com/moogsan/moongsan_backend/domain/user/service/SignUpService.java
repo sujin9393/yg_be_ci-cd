@@ -41,7 +41,7 @@ public class SignUpService {
                 .phoneNumber(request.getPhoneNumber())
                 .accountBank(request.getAccountBank())
                 .accountNumber(request.getAccountNumber())
-                .imageUrl(request.getImageUrl())
+                .imageKey(request.getImageUrl())
                 .type("USER")
                 .status("ACTIVE")
                 .joinedAt(java.time.LocalDateTime.now())
@@ -83,7 +83,7 @@ public class SignUpService {
         return new LoginResponse(
                 user.getNickname(),
                 user.getName(),
-                user.getImageUrl(),
+                user.getImageKey(),
                 user.getType()
         );
     }
