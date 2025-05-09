@@ -7,6 +7,7 @@ import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyL
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.ParticipantList.ParticipantListResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.ParticipantList.ParticipantResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.ParticipatedList.ParticipatedListResponse;
+import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.WishList.WishListResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyUpdate.GroupBuyForUpdateResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.entity.GroupBuy;
 import com.moogsan.moongsan_backend.domain.groupbuy.exception.specific.GroupBuyNotFoundException;
@@ -15,7 +16,9 @@ import com.moogsan.moongsan_backend.domain.groupbuy.repository.GroupBuyRepositor
 import com.moogsan.moongsan_backend.domain.order.entity.Order;
 import com.moogsan.moongsan_backend.domain.order.repository.OrderRepository;
 import com.moogsan.moongsan_backend.domain.user.entity.User;
+import com.moogsan.moongsan_backend.domain.user.repository.WishRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -24,9 +27,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @Transactional(readOnly=true)
 @RequiredArgsConstructor
@@ -34,6 +38,7 @@ public class GroupBuyQueryService {
     private final GroupBuyRepository groupBuyRepository;
     private final OrderRepository orderRepository;
     private final GroupBuyQueryMapper groupBuyQueryMapper;
+    private final WishRepository wishRepository;
 
     /// 공구 게시글 수정 전 정보 조회
     /// TODO V2
@@ -44,18 +49,23 @@ public class GroupBuyQueryService {
         return groupBuyQueryMapper.toUpdateResponse(groupBuy);
     }
 
-    /// TODO 모든 조회 로직에 위시 여부 조회 추가(리턴되는 리스트 위시 여부만 조회)
-    // Wish-related methods commented out
-    /*
-    // (일반 메소드) 리스트 내 위시 여부 조회
-    private Set<Long> fetchWishIds(Long userId, List<GroupBuy> posts) {
+    // 모든 조회 로직에 위시 여부 조회 추가(리턴되는 리스트 위시 여부만 조회)
+    private Map<Long, Boolean> fetchWishMap(Long userId, List<GroupBuy> posts) {
         if (userId == null || posts.isEmpty()) {
-            return Collections.emptySet();
+            return Collections.emptyMap();
         }
-        List<Long> ids = posts.stream().map(GroupBuy::getId).toList();
-        return wishRepository.findPostIdsByUserAndPostIds(userId, ids);
+        List<Long> ids = posts.stream()
+                .map(GroupBuy::getId)
+                .toList();
+        Set<Long> wishedIds = new HashSet<>(wishRepository.findWishedGroupBuyIds(userId, ids));
+
+        // Map<groupBuyId, isWished>
+        return ids.stream()
+                .collect(Collectors.toMap(
+                        id -> id,
+                        id -> wishedIds.contains(id)
+                ));
     }
-    */
 
     /// 검색
     // TODO V2 -> 메서드명 고민해보기
@@ -67,6 +77,7 @@ public class GroupBuyQueryService {
 
     /// 공구 리스트 조회
     public PagedResponse<BasicListResponse> getGroupBuyListByCursor(
+            User currentUser,
             Long categoryId,
             String sort,
             Long cursorId,
@@ -150,8 +161,16 @@ public class GroupBuyQueryService {
         }
 
         // DTO 매핑
+        Map<Long, Boolean> wishMap = fetchWishMap(currentUser.getId(), entities);
+
+        // 4) DTO 매핑
         List<BasicListResponse> posts = entities.stream()
-                .map(groupBuyQueryMapper::toBasicListResponse)
+                .map(gb -> {
+                    // 로그인 안 됐거나 wishMap이 비어있으면 기본 false
+                    boolean wished = wishMap.getOrDefault(gb.getId(), false);
+                    // mapper 호출
+                    return groupBuyQueryMapper.toBasicListResponse(gb, wished);
+                })
                 .collect(Collectors.toList());
 
         // 다음 커서 & hasMore 계산
@@ -187,37 +206,38 @@ public class GroupBuyQueryService {
                 .orElseThrow(GroupBuyNotFoundException::new);
 
         boolean isParticipant = orderRepository.existsByUserIdAndGroupBuyId(userId, postId);
+        boolean isWish = wishRepository.existsByUserIdAndGroupBuyId(userId, postId);
 
-        return groupBuyQueryMapper.toDetailResponse(groupBuy, isParticipant);
+        return groupBuyQueryMapper.toDetailResponse(groupBuy, isParticipant, isWish);
     }
 
-    /// 관심 공구 리스트 조회
-    /// TODO V2
-    /*
+    /// 관심 공구 리스트 조회: 관심 등록 순으로 커서 적용 필요
     public PagedResponse<WishListResponse> getGroupBuyWishList(
             User currentUser,
-            String sort,
+            String postStatus,
             Long cursorId,
             Integer limit) {
-        String status = sort.toUpperCase();
+        String status = postStatus.toUpperCase();
 
         Pageable page = PageRequest.of(0, limit, Sort.by("groupBuy.id").descending());
 
         // cursorId가 없으면 cursor 조건 제외
         List<GroupBuy> groupBuys;
         if (cursorId == null) {
-            groupBuys = wishRepository.findByUserIdAndGroupBuyPostStatus(
-                    currentUser.getId(),
-                    status,
-                    page
-            );
+            groupBuys = wishRepository
+                    .findGroupBuysByUserAndStatus (
+                            currentUser.getId(),
+                            status,
+                            page
+                    );
         } else {
-            groupBuys = wishRepository.findByUserIdAndGroupBuyPostStatusAndGroupBuyIdLessThan(
-                    currentUser.getId(),
-                    status,
-                    cursorId,
-                    page
-            );
+            groupBuys = wishRepository
+                    .findGroupBuysByUserAndStatusBeforeId(
+                            currentUser.getId(),
+                            status,
+                            cursorId,
+                            page
+                    );
         }
 
         // 매핑
@@ -239,19 +259,17 @@ public class GroupBuyQueryService {
                 .build();
     }
 
-     */
-
 
     /// 주최 공구 리스트 조회
     public PagedResponse<HostedListResponse> getGroupBuyHostedList(
             User currentUser,
-            String sort,
+            String postStatus,
             Long cursorId,
             Integer limit) {
 
-        String status = sort.toUpperCase();
+        String status = postStatus.toUpperCase();
 
-        Pageable page = PageRequest.of(0, limit, Sort.by("groupBuy.id").descending());
+        Pageable page = PageRequest.of(0, limit, Sort.by("id").descending());
 
         // cursorId가 없으면 cursor 조건 제외
         List<GroupBuy> groupBuys;
@@ -270,10 +288,20 @@ public class GroupBuyQueryService {
             );
         }
 
-        // 매핑
+        Map<Long, Boolean> wishMap = fetchWishMap(currentUser.getId(), groupBuys);
+
         List<HostedListResponse> posts = groupBuys.stream()
-                .map(groupBuyQueryMapper::toHostedListResponse)
-                .toList();
+                .map(gb -> {
+                    // Map에서 위시 여부 꺼내기 (없으면 false)
+                    boolean isWished = wishMap.getOrDefault(gb.getId(), false);
+
+                    // DTO 변환
+                    return groupBuyQueryMapper.toHostedListResponse(
+                            gb,
+                            isWished
+                    );
+                })
+                .collect(Collectors.toList());
 
         // 다음 커서 및 더보기 여부
         Long nextCursor = posts.isEmpty()
@@ -290,7 +318,7 @@ public class GroupBuyQueryService {
     }
 
 
-    /// 참여 공구 리스트 조회
+    /// 참여 공구 리스트 조회: 주문 생성 순으로 커서 적용 추가 필요
     public PagedResponse<ParticipatedListResponse> getGroupBuyParticipatedList(
             User currentUser,
             String sort,
@@ -319,8 +347,17 @@ public class GroupBuyQueryService {
         }
 
         // 매핑
+        List<GroupBuy> groupBuys = orders.stream()
+                .map(Order::getGroupBuy)
+                .toList();
+        Map<Long, Boolean> wishMap = fetchWishMap(currentUser.getId(), groupBuys);
+
+        // DTO 매핑
         List<ParticipatedListResponse> posts = orders.stream()
-                .map(groupBuyQueryMapper::toParticipatedListResponse)
+                .map(order -> {
+                    boolean wished = wishMap.getOrDefault(order.getGroupBuy().getId(), false);
+                    return groupBuyQueryMapper.toParticipatedListResponse(order, wished);
+                })
                 .toList();
 
         // 다음 커서 및 더보기 여부

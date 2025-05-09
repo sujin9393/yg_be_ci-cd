@@ -1,5 +1,6 @@
 package com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.WishList;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -26,4 +27,8 @@ public class WishListResponse {
     private boolean dueSoon;       // 마감 임박 여부
     private boolean isWish;        // 관심 여부
 
+    @JsonProperty("isWish")
+    public boolean isWish() {
+        return isWish;
+    }
 }

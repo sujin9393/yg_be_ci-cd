@@ -161,49 +161,6 @@ public class GroupBuyCommandService {
 
     }
 
-    /// 관심 공구 추가
-    // TODO V2
-    public Long wishPost(User currentUser, Long postId) {
-
-        // 해당 공구가 존재하는지 조회 -> 없으면 404
-        GroupBuy groupBuy = groupBuyRepository.findById(postId)
-                .orElseThrow(GroupBuyNotFoundException::new);
-
-        // 해당 공구가 OPEN인지 조회, dueDate가 현재 이후인지 조회 -> 아니면 409
-        if (!groupBuy.getPostStatus().equals("OPEN")
-                || groupBuy.getDueDate().isBefore(LocalDateTime.now())) {
-            throw new GroupBuyInvalidStateException("관심 공구 등록은 공구가 열려있는 상태에서만 가능합니다.");
-        }
-
-        ///  TODO: 관심 공구 등록 여부 조회 -> 등록했으면 409
-
-
-        ///  TODO: 관심 공구 등록
-
-
-        ///  TODO: 저장
-
-        return postId;
-    }
-
-    /// 관심 공구 취소
-    // TODO V2
-    public void unwishPost(User currentUser, Long postId) {
-
-        // 해당 공구가 존재하는지 조회 -> 없으면 404
-        GroupBuy groupBuy = groupBuyRepository.findById(postId)
-                .orElseThrow(GroupBuyNotFoundException::new);
-
-        ///  TODO: 관심 공구 등록 여부 조회 -> 등록하지 않았으면 409
-
-
-        ///  TODO: 관심 공구 취소
-
-
-        ///  TODO: 저장
-
-    }
-
     ///  공구 마감
     public void closePastDueGroupBuys(LocalDateTime now) {
         List<GroupBuy> expired = groupBuyRepository
