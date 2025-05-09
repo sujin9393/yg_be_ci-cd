@@ -78,15 +78,17 @@ public class GroupBuyQueryController {
     }
 
 
-    /// 관심 공구 리스트 조회 SUCCESS
+    /// 관심 공구 리스트 조회 SUCCESS, 커서 적용 완료
     @GetMapping("/user/wishes")
     public ResponseEntity<WrapperResponse<PagedResponse<WishListResponse>>> getGroupBuyWishList(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(value = "sort") String sort,
-            @RequestParam(value = "cursor", required = false) Long cursor,
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            LocalDateTime cursorCreatedAt,
+            @RequestParam(value = "cursorId", required = false) Long cursorId,
             @RequestParam(value = "limit", defaultValue = "10") Integer limit
     ) {
-        PagedResponse<WishListResponse> pagedResponse = groupBuyService.getGroupBuyWishList(userDetails.getUser(), sort, cursor, limit);
+        PagedResponse<WishListResponse> pagedResponse = groupBuyService.getGroupBuyWishList(userDetails.getUser(), sort, cursorCreatedAt, cursorId, limit);
         return ResponseEntity.ok(
                 WrapperResponse.<PagedResponse<WishListResponse>>builder()
                         .message("관심 공구 리스트를 성공적으로 조회했습니다.")
@@ -95,7 +97,7 @@ public class GroupBuyQueryController {
         );
     }
 
-    // 주최 공구 리스트 조회 V2 update - wish, 커서 적용 필요
+    /// 주최 공구 리스트 조회 SUCCESS
     @GetMapping("/user/hosts")
     public ResponseEntity<WrapperResponse<PagedResponse<HostedListResponse>>> getGroupBuyHostedList(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -117,10 +119,13 @@ public class GroupBuyQueryController {
     public ResponseEntity<WrapperResponse<PagedResponse<ParticipatedListResponse>>> getGroupBuyParticipatedList(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(value = "sort") String sort,
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            LocalDateTime cursorCreatedAt,
             @RequestParam(value = "cursor", required = false) Long cursor,
             @RequestParam(value = "limit", defaultValue = "10") Integer limit
     ) {
-        PagedResponse<ParticipatedListResponse> pagedResponse = groupBuyService.getGroupBuyParticipatedList(userDetails.getUser(), sort, cursor, limit);
+        PagedResponse<ParticipatedListResponse> pagedResponse = groupBuyService.getGroupBuyParticipatedList(
+                userDetails.getUser(), sort, cursorCreatedAt, cursor, limit);
         return ResponseEntity.ok(
                 WrapperResponse.<PagedResponse<ParticipatedListResponse>>builder()
                         .message("참여 공구 리스트를 성공적으로 조회했습니다.")

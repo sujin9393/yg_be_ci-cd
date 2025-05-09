@@ -16,6 +16,7 @@ import com.moogsan.moongsan_backend.domain.groupbuy.repository.GroupBuyRepositor
 import com.moogsan.moongsan_backend.domain.order.entity.Order;
 import com.moogsan.moongsan_backend.domain.order.repository.OrderRepository;
 import com.moogsan.moongsan_backend.domain.user.entity.User;
+import com.moogsan.moongsan_backend.domain.user.entity.Wish;
 import com.moogsan.moongsan_backend.domain.user.repository.WishRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -66,6 +67,7 @@ public class GroupBuyQueryService {
                         id -> wishedIds.contains(id)
                 ));
     }
+
 
     /// 검색
     // TODO V2 -> 메서드명 고민해보기
@@ -205,7 +207,7 @@ public class GroupBuyQueryService {
         GroupBuy groupBuy = groupBuyRepository.findWithImagesById(postId)
                 .orElseThrow(GroupBuyNotFoundException::new);
 
-        boolean isParticipant = orderRepository.existsByUserIdAndGroupBuyId(userId, postId);
+        boolean isParticipant = orderRepository.existsByUserIdAndGroupBuyIdAndStatusNot(userId, postId, "CANCELED");
         boolean isWish = wishRepository.existsByUserIdAndGroupBuyId(userId, postId);
 
         return groupBuyQueryMapper.toDetailResponse(groupBuy, isParticipant, isWish);
@@ -215,26 +217,33 @@ public class GroupBuyQueryService {
     public PagedResponse<WishListResponse> getGroupBuyWishList(
             User currentUser,
             String postStatus,
+            LocalDateTime cursorCreatedAt,
             Long cursorId,
             Integer limit) {
         String status = postStatus.toUpperCase();
 
-        Pageable page = PageRequest.of(0, limit, Sort.by("groupBuy.id").descending());
+        Pageable page = PageRequest.of(
+                0,
+                limit,
+                Sort.by("createdAt").descending()
+                        .and(Sort.by("id").descending())
+        );
 
         // cursorId가 없으면 cursor 조건 제외
         List<GroupBuy> groupBuys;
         if (cursorId == null) {
             groupBuys = wishRepository
-                    .findGroupBuysByUserAndStatus (
+                    .findGroupBuysByUserAndPostStatus (
                             currentUser.getId(),
                             status,
                             page
                     );
         } else {
             groupBuys = wishRepository
-                    .findGroupBuysByUserAndStatusBeforeId(
+                    .findGroupBuysByUserAndPostStatusBeforeCursor(
                             currentUser.getId(),
                             status,
+                            cursorCreatedAt,
                             cursorId,
                             page
                     );
@@ -322,25 +331,32 @@ public class GroupBuyQueryService {
     public PagedResponse<ParticipatedListResponse> getGroupBuyParticipatedList(
             User currentUser,
             String sort,
+            LocalDateTime cursorCreatedAt,
             Long cursorId,
             Integer limit
     ) {
         String status = sort.toUpperCase();
 
-        Pageable page = PageRequest.of(0, limit, Sort.by("groupBuy.id").descending());
+        Pageable page = PageRequest.of(
+                0,
+                limit,
+                Sort.by("createdAt").descending()
+                        .and(Sort.by("id").descending())
+        );
 
         // cursorId가 없으면 cursor 조건 제외
         List<Order> orders;
-        if (cursorId == null) {
-            orders = orderRepository.findByUserIdAndGroupBuy_PostStatus(
+        if (cursorCreatedAt == null) {
+            orders = orderRepository.findByUserAndPostStatusAndNotCanceled(
                     currentUser.getId(),
                     status,
                     page
             );
         } else {
-            orders = orderRepository.findByUserIdAndGroupBuy_PostStatusAndIdLessThan(
+            orders = orderRepository.findByUserAndPostStatusAndNotCanceledBeforeCursor(
                     currentUser.getId(),
                     status,
+                    cursorCreatedAt,
                     cursorId,
                     page
             );

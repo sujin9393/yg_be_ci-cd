@@ -18,7 +18,7 @@ public class WishListResponse {
     private String imageKey;       // thumbnail 이미지
 
     // 숫자 데이터
-    private int price;             // 총 상품 가격
+    private int unitPrice;         // 상품 단위 가격
     private int soldAmount;        // 판매 수량
     private int totalAmount;       // 상품 주문 수량: totalAmount - leftAmount
     private int participantCount;  // 참여 인원 수
