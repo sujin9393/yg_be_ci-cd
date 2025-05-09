@@ -118,7 +118,7 @@ public class GroupBuyCommandController {
     }
 
 
-    // 공구 참여 취소
+    /// 공구 참여 취소 SUCCESS
     @DeleteMapping("/{postId}/participants")
     public ResponseEntity<WrapperResponse<EmptyResponse>> leaveGroupBuy(
             @AuthenticationPrincipal CustomUserDetails userDetails,

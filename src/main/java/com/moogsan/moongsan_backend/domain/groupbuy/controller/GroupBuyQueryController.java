@@ -76,7 +76,7 @@ public class GroupBuyQueryController {
         );
     }
 
-    /*
+
     // 관심 공구 리스트 조회
     @GetMapping("/user/wishes")
     public ResponseEntity<WrapperResponse<PagedResponse<WishListResponse>>> getGroupBuyWishList(
@@ -93,8 +93,6 @@ public class GroupBuyQueryController {
                         .build()
         );
     }
-
-     */
 
     // 주최 공구 리스트 조회 V2 update - wish
     @GetMapping("/user/hosts")

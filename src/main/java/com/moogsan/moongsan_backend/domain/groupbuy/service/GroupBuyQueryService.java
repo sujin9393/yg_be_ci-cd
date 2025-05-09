@@ -7,6 +7,7 @@ import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyL
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.ParticipantList.ParticipantListResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.ParticipantList.ParticipantResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.ParticipatedList.ParticipatedListResponse;
+import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.WishList.WishListResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyUpdate.GroupBuyForUpdateResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.entity.GroupBuy;
 import com.moogsan.moongsan_backend.domain.groupbuy.exception.specific.GroupBuyNotFoundException;
@@ -15,6 +16,7 @@ import com.moogsan.moongsan_backend.domain.groupbuy.repository.GroupBuyRepositor
 import com.moogsan.moongsan_backend.domain.order.entity.Order;
 import com.moogsan.moongsan_backend.domain.order.repository.OrderRepository;
 import com.moogsan.moongsan_backend.domain.user.entity.User;
+import com.moogsan.moongsan_backend.domain.user.repository.WishRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -34,6 +36,7 @@ public class GroupBuyQueryService {
     private final GroupBuyRepository groupBuyRepository;
     private final OrderRepository orderRepository;
     private final GroupBuyQueryMapper groupBuyQueryMapper;
+    private final WishRepository wishRepository;
 
     /// 공구 게시글 수정 전 정보 조회
     /// TODO V2
@@ -193,31 +196,32 @@ public class GroupBuyQueryService {
 
     /// 관심 공구 리스트 조회
     /// TODO V2
-    /*
     public PagedResponse<WishListResponse> getGroupBuyWishList(
             User currentUser,
-            String sort,
+            String postStatus,
             Long cursorId,
             Integer limit) {
-        String status = sort.toUpperCase();
+        String status = postStatus.toUpperCase();
 
         Pageable page = PageRequest.of(0, limit, Sort.by("groupBuy.id").descending());
 
         // cursorId가 없으면 cursor 조건 제외
         List<GroupBuy> groupBuys;
         if (cursorId == null) {
-            groupBuys = wishRepository.findByUserIdAndGroupBuyPostStatus(
-                    currentUser.getId(),
-                    status,
-                    page
-            );
+            groupBuys = wishRepository
+                    .findGroupBuysByUserAndStatus (
+                            currentUser.getId(),
+                            status,
+                            page
+                    );
         } else {
-            groupBuys = wishRepository.findByUserIdAndGroupBuyPostStatusAndGroupBuyIdLessThan(
-                    currentUser.getId(),
-                    status,
-                    cursorId,
-                    page
-            );
+            groupBuys = wishRepository
+                    .findGroupBuysByUserAndStatusBeforeId(
+                            currentUser.getId(),
+                            status,
+                            cursorId,
+                            page
+                    );
         }
 
         // 매핑
@@ -239,17 +243,15 @@ public class GroupBuyQueryService {
                 .build();
     }
 
-     */
-
 
     /// 주최 공구 리스트 조회
     public PagedResponse<HostedListResponse> getGroupBuyHostedList(
             User currentUser,
-            String sort,
+            String postStatus,
             Long cursorId,
             Integer limit) {
 
-        String status = sort.toUpperCase();
+        String status = postStatus.toUpperCase();
 
         Pageable page = PageRequest.of(0, limit, Sort.by("groupBuy.id").descending());
 
