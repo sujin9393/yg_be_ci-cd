@@ -269,7 +269,7 @@ public class GroupBuyQueryService {
 
         String status = postStatus.toUpperCase();
 
-        Pageable page = PageRequest.of(0, limit, Sort.by("groupBuy.id").descending());
+        Pageable page = PageRequest.of(0, limit, Sort.by("id").descending());
 
         // cursorId가 없으면 cursor 조건 제외
         List<GroupBuy> groupBuys;
