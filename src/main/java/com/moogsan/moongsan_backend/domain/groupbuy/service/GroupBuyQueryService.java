@@ -16,6 +16,7 @@ import com.moogsan.moongsan_backend.domain.groupbuy.repository.GroupBuyRepositor
 import com.moogsan.moongsan_backend.domain.order.entity.Order;
 import com.moogsan.moongsan_backend.domain.order.repository.OrderRepository;
 import com.moogsan.moongsan_backend.domain.user.entity.User;
+import com.moogsan.moongsan_backend.domain.user.entity.Wish;
 import com.moogsan.moongsan_backend.domain.user.repository.WishRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -215,26 +216,33 @@ public class GroupBuyQueryService {
     public PagedResponse<WishListResponse> getGroupBuyWishList(
             User currentUser,
             String postStatus,
+            LocalDateTime cursorCreatedAt,
             Long cursorId,
             Integer limit) {
         String status = postStatus.toUpperCase();
 
-        Pageable page = PageRequest.of(0, limit, Sort.by("groupBuy.id").descending());
+        Pageable page = PageRequest.of(
+                0,
+                limit,
+                Sort.by("createdAt").descending()
+                        .and(Sort.by("id").descending())
+        );
 
         // cursorId가 없으면 cursor 조건 제외
         List<GroupBuy> groupBuys;
         if (cursorId == null) {
             groupBuys = wishRepository
-                    .findGroupBuysByUserAndStatus (
+                    .findGroupBuysByUserAndPostStatus (
                             currentUser.getId(),
                             status,
                             page
                     );
         } else {
             groupBuys = wishRepository
-                    .findGroupBuysByUserAndStatusBeforeId(
+                    .findGroupBuysByUserAndPostStatusBeforeCursor(
                             currentUser.getId(),
                             status,
+                            cursorCreatedAt,
                             cursorId,
                             page
                     );

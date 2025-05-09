@@ -83,10 +83,12 @@ public class GroupBuyQueryController {
     public ResponseEntity<WrapperResponse<PagedResponse<WishListResponse>>> getGroupBuyWishList(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(value = "sort") String sort,
-            @RequestParam(value = "cursor", required = false) Long cursor,
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            LocalDateTime cursorCreatedAt,
+            @RequestParam(value = "cursorId", required = false) Long cursorId,
             @RequestParam(value = "limit", defaultValue = "10") Integer limit
     ) {
-        PagedResponse<WishListResponse> pagedResponse = groupBuyService.getGroupBuyWishList(userDetails.getUser(), sort, cursor, limit);
+        PagedResponse<WishListResponse> pagedResponse = groupBuyService.getGroupBuyWishList(userDetails.getUser(), sort, cursorCreatedAt, cursorId, limit);
         return ResponseEntity.ok(
                 WrapperResponse.<PagedResponse<WishListResponse>>builder()
                         .message("관심 공구 리스트를 성공적으로 조회했습니다.")
