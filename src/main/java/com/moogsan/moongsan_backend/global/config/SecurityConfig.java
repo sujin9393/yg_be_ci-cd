@@ -5,6 +5,7 @@ import com.moogsan.moongsan_backend.global.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -35,7 +36,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/users", "/api/users/token", "/api/users/check-nickname",
-                                "/api/group-buys", "/api/group-buys/{postId}", "/uploads/**", "/api/group-buys/generation/description").permitAll() // 해당 위치 외에는 토큰 적용
+                                "/uploads/**", "/api/group-buys/generation/description").permitAll() // 해당 위치 외에는 토큰 적용
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/group-buys",         // 메인
+                                "/api/group-buys/*"        // 상세(한 단계 하위)
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, userDetailsService), UsernamePasswordAuthenticationFilter.class);

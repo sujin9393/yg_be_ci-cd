@@ -27,6 +27,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
+        String path   = request.getRequestURI();
+        String method = request.getMethod();
+
+        // 공개 엔드포인트이면 토큰 검사 없이 바로 통과
+        if ("GET".equals(method) &&
+                (path.equals("/api/group-buys") || path.startsWith("/api/group-buys/"))) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String token = resolveToken(request);
 
         if (token != null && jwtUtil.validateToken(token)) {

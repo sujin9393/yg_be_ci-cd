@@ -19,6 +19,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -41,9 +42,17 @@ public class GroupBuyQueryController {
     /// 공구 게시글 상세 조회 V2 update - wish SUCCESS
     @GetMapping("/{postId}")
     public ResponseEntity<WrapperResponse<DetailResponse>> getGroupBuyDetailInfo(
-        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @AuthenticationPrincipal Optional<CustomUserDetails> userDetails,
         @PathVariable Long postId) {
-        DetailResponse detail = groupBuyService.getGroupBuyDetailInfo(userDetails.getUser().getId(), postId);
+
+        Long userId;
+        if (userDetails == null || userDetails.isEmpty()) {
+            userId = null;
+        } else {
+            userId = userDetails.get().getUser().getId();
+        }
+
+        DetailResponse detail = groupBuyService.getGroupBuyDetailInfo(userId, postId);
         return ResponseEntity.ok(
                 WrapperResponse.<DetailResponse>builder()
                         .message("공구 게시글 상세 정보를 성공적으로 조회했습니다.")
@@ -55,7 +64,7 @@ public class GroupBuyQueryController {
     /// 공구 리스트 조회  V2 update - wish SUCCESS
     @GetMapping
     public ResponseEntity<WrapperResponse<PagedResponse<BasicListResponse>>> getGroupBuyListByCursor(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @AuthenticationPrincipal Optional<CustomUserDetails> userDetails,
             @RequestParam(value = "category", required = false) Long categoryId,
             @RequestParam(value = "sort", defaultValue = "created") String sort,
             @RequestParam(value = "cursorId", required = false) Long cursorId,
@@ -66,8 +75,15 @@ public class GroupBuyQueryController {
             @RequestParam(value = "cursorPrice", required = false) Integer cursorPrice,
             @RequestParam(value = "limit", defaultValue = "10") Integer limit
     ) {
+        Long userId;
+        if (userDetails == null || userDetails.isEmpty()) {
+            userId = null;
+        } else {
+            userId = userDetails.get().getUser().getId();
+        }
+
         PagedResponse<BasicListResponse> pagedResponse =
-                groupBuyService.getGroupBuyListByCursor(userDetails.getUser(), categoryId, sort, cursorId, cursorCreatedAt,
+                groupBuyService.getGroupBuyListByCursor(userId, categoryId, sort, cursorId, cursorCreatedAt,
                         cursorPrice, limit);
         return ResponseEntity.ok(
                 WrapperResponse.<PagedResponse<BasicListResponse>>builder()
