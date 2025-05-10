@@ -79,7 +79,7 @@ public class GroupBuyQueryService {
 
     /// 공구 리스트 조회
     public PagedResponse<BasicListResponse> getGroupBuyListByCursor(
-            User currentUser,
+            Long userId,
             Long categoryId,
             String sort,
             Long cursorId,
@@ -163,7 +163,7 @@ public class GroupBuyQueryService {
         }
 
         // DTO 매핑
-        Map<Long, Boolean> wishMap = fetchWishMap(currentUser.getId(), entities);
+        Map<Long, Boolean> wishMap = fetchWishMap(userId, entities);
 
         // 4) DTO 매핑
         List<BasicListResponse> posts = entities.stream()
