@@ -1,13 +1,13 @@
 package com.moogsan.moongsan_backend.domain.user.dto.request;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class WishRequest {
+public class MyPageImageRequest {
 
-    @NotNull
-    private Long postId; // 공구글 ID
+    @NotBlank
+    private String imageUrl;
 }

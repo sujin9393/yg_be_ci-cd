@@ -42,7 +42,8 @@ public class LoginService {
         if (user.getDeletedAt() != null) {
             user.setDeletedAt(null);
         }
-        user.setLastLoginAt(); // 마지막 로그인 시간 갱신
+        // 마지막 로그인 시간 갱신
+        user.setLastLoginAt();
 
         // 3. JWT 토큰 발급
         String accessToken = jwtUtil.generateAccessToken(user);
@@ -62,7 +63,7 @@ public class LoginService {
         );
         refreshTokenRepository.save(newToken);
 
-        // 쿠키 설정
+        // 6. 쿠키 설정
         Cookie accessTokenCookie = new Cookie("AccessToken", accessToken);
         accessTokenCookie.setHttpOnly(true);
         accessTokenCookie.setSecure(true);

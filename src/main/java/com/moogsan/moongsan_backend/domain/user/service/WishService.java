@@ -21,6 +21,7 @@ public class WishService {
     private final UserRepository userRepository;
     private final GroupBuyRepository groupBuyRepository;
 
+    // 관심 목록 등록
     public void addWish(Long userId, Long postId) {
         boolean exists = wishRepository.existsByUserIdAndGroupBuyId(userId, postId);
         if (exists) {
@@ -41,6 +42,7 @@ public class WishService {
         wishRepository.save(wish);
     }
 
+    // 관심 목록 삭제
     public void removeWish(Long userId, Long postId) {
         Wish wish = wishRepository.findByUserIdAndGroupBuyId(userId, postId)
                 .orElseThrow(() -> new EntityNotFoundException("관심 등록이 존재하지 않습니다."));

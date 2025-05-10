@@ -18,8 +18,8 @@ public class CustomUserDetails implements UserDetails {
     }
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        String role = "ROLE_" + user.getType(); // USER 또는 ADMIN
+    public Collection<? extends GrantedAuthority> getAuthorities() { // 유저 유형 전달
+        String role = "ROLE_" + user.getType(); // USER/ADMIN
         return List.of(new SimpleGrantedAuthority(role));
     }
 
