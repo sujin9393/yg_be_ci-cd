@@ -11,6 +11,7 @@ import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyL
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyUpdate.GroupBuyForUpdateResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.entity.GroupBuy;
 import com.moogsan.moongsan_backend.domain.groupbuy.exception.specific.GroupBuyNotFoundException;
+import com.moogsan.moongsan_backend.domain.groupbuy.exception.specific.GroupBuyNotHostException;
 import com.moogsan.moongsan_backend.domain.groupbuy.mapper.GroupBuyQueryMapper;
 import com.moogsan.moongsan_backend.domain.groupbuy.repository.GroupBuyRepository;
 import com.moogsan.moongsan_backend.domain.order.entity.Order;
@@ -215,7 +216,7 @@ public class GroupBuyQueryService {
 
     /// 관심 공구 리스트 조회: 관심 등록 순으로 커서 적용 필요
     public PagedResponse<WishListResponse> getGroupBuyWishList(
-            User currentUser,
+            Long userId,
             String postStatus,
             LocalDateTime cursorCreatedAt,
             Long cursorId,
@@ -234,14 +235,14 @@ public class GroupBuyQueryService {
         if (cursorId == null) {
             groupBuys = wishRepository
                     .findGroupBuysByUserAndPostStatus (
-                            currentUser.getId(),
+                            userId,
                             status,
                             page
                     );
         } else {
             groupBuys = wishRepository
                     .findGroupBuysByUserAndPostStatusBeforeCursor(
-                            currentUser.getId(),
+                            userId,
                             status,
                             cursorCreatedAt,
                             cursorId,
@@ -271,7 +272,7 @@ public class GroupBuyQueryService {
 
     /// 주최 공구 리스트 조회
     public PagedResponse<HostedListResponse> getGroupBuyHostedList(
-            User currentUser,
+            Long userId,
             String postStatus,
             Long cursorId,
             Integer limit) {
@@ -284,20 +285,20 @@ public class GroupBuyQueryService {
         List<GroupBuy> groupBuys;
         if (cursorId == null) {
             groupBuys = groupBuyRepository.findByUser_IdAndPostStatus (
-                    currentUser.getId(),
+                    userId,
                     status,
                     page
             );
         } else {
             groupBuys = groupBuyRepository.findByUser_IdAndPostStatusAndIdLessThan (
-                    currentUser.getId(),
+                    userId,
                     status,
                     cursorId,
                     page
             );
         }
 
-        Map<Long, Boolean> wishMap = fetchWishMap(currentUser.getId(), groupBuys);
+        Map<Long, Boolean> wishMap = fetchWishMap(userId, groupBuys);
 
         List<HostedListResponse> posts = groupBuys.stream()
                 .map(gb -> {
@@ -329,7 +330,7 @@ public class GroupBuyQueryService {
 
     /// 참여 공구 리스트 조회: 주문 생성 순으로 커서 적용 추가 필요
     public PagedResponse<ParticipatedListResponse> getGroupBuyParticipatedList(
-            User currentUser,
+            Long userId,
             String sort,
             LocalDateTime cursorCreatedAt,
             Long cursorId,
@@ -348,13 +349,13 @@ public class GroupBuyQueryService {
         List<Order> orders;
         if (cursorCreatedAt == null) {
             orders = orderRepository.findByUserAndPostStatusAndNotCanceled(
-                    currentUser.getId(),
+                    userId,
                     status,
                     page
             );
         } else {
             orders = orderRepository.findByUserAndPostStatusAndNotCanceledBeforeCursor(
-                    currentUser.getId(),
+                    userId,
                     status,
                     cursorCreatedAt,
                     cursorId,
@@ -366,7 +367,7 @@ public class GroupBuyQueryService {
         List<GroupBuy> groupBuys = orders.stream()
                 .map(Order::getGroupBuy)
                 .toList();
-        Map<Long, Boolean> wishMap = fetchWishMap(currentUser.getId(), groupBuys);
+        Map<Long, Boolean> wishMap = fetchWishMap(userId, groupBuys);
 
         // DTO 매핑
         List<ParticipatedListResponse> posts = orders.stream()
@@ -391,7 +392,17 @@ public class GroupBuyQueryService {
     }
 
     /// 공구 참여자 조회
-    public ParticipantListResponse getGroupBuyParticipantsInfo(Long postId) {
+    public ParticipantListResponse getGroupBuyParticipantsInfo(Long userId, Long postId) {
+
+        // 해당 공구가 존재하는지 조회 -> 없으면 404
+        GroupBuy groupBuy = groupBuyRepository.findById(postId)
+                .orElseThrow(GroupBuyNotFoundException::new);
+
+        // 해당 공구의 주최자가 해당 유저인지 조회 -> 아니면 403
+        if(!groupBuy.getUser().getId().equals(userId)) {
+            throw new GroupBuyNotHostException("공구 참여자 조회는 공구의 주최자만 요청 가능합니다.");
+        }
+
         List<Order> orders = orderRepository.findByGroupBuyIdAndStatusNot(postId, "canceled");
 
         List<ParticipantResponse> participantList = orders.stream()
