@@ -48,8 +48,8 @@ public class GroupBuyQueryMapper {
     }
 
     // 공구 리스트 조회용 DTO 변환
-    public BasicListResponse toBasicListResponse(GroupBuy g) {
-        List<ImageResponse> imgs = g.getImages().stream()
+    public BasicListResponse toBasicListResponse(GroupBuy g, Boolean isWish) {
+        List<ImageResponse> imageKeys = g.getImages().stream()
                 .map(img -> ImageResponse.builder()
                         .imageKey(img.getImageKey())
                         .imageSeqNo(img.getImageSeqNo())
@@ -62,19 +62,20 @@ public class GroupBuyQueryMapper {
                 .title(g.getTitle())
                 .name(g.getName())
                 .postStatus(g.getPostStatus())
-                .imageKeys(imgs)
+                .imageKeys(imageKeys)
                 .unitPrice(g.getUnitPrice())
                 .unitAmount(g.getUnitAmount())
                 .soldAmount(g.getTotalAmount() - g.getLeftAmount())
                 .totalAmount(g.getTotalAmount())
                 .participantCount(g.getParticipantCount())
                 .dueSoon(g.isDueSoon())
+                .isWish(isWish)
                 .createdAt(g.getCreatedAt())
                 .build();
     }
 
     // 상세 페이지 조회용 DTO
-    public DetailResponse toDetailResponse(GroupBuy gb, Boolean isParticipant) {
+    public DetailResponse toDetailResponse(GroupBuy gb, Boolean isParticipant, Boolean isWish) {
         List<ImageResponse> imageUrls = gb.getImages().stream()
                 .map(img -> ImageResponse.builder()
                         .imageKey(img.getImageKey())
@@ -101,6 +102,7 @@ public class GroupBuyQueryMapper {
                 .pickupDate(gb.getPickupDate())
                 .location(gb.getLocation())
                 .isParticipant(isParticipant)
+                .isWish(isWish)
                 .createdAt(gb.getCreatedAt())
                 .userProfileResponse(toUserProfile(gb.getUser()))
                 .build();
@@ -134,16 +136,17 @@ public class GroupBuyQueryMapper {
                 .postStatus(gb.getPostStatus())
                 .location(gb.getLocation())
                 .imageKey(img)
-                .price(gb.getPrice())
+                .unitPrice(gb.getUnitPrice())
                 .soldAmount(gb.getTotalAmount() - gb.getLeftAmount())
                 .totalAmount(gb.getTotalAmount())
                 .participantCount(gb.getParticipantCount())
+                .isWish(true)
                 .dueSoon(dueSoon)
                 .build();
     }
 
     // 주최 공구 리스트 조회
-    public HostedListResponse toHostedListResponse(GroupBuy gb) {
+    public HostedListResponse toHostedListResponse(GroupBuy gb, Boolean isWish) {
         String img = gb.getImages().stream()
                 .findFirst()
                 .map(Image::getImageKey)
@@ -159,18 +162,19 @@ public class GroupBuyQueryMapper {
                 .postStatus(gb.getPostStatus())
                 .location(gb.getLocation())
                 .imageKey(img)
-                .hostPrice(gb.getUnitPrice() * gb.getHostQuantity())
+                .unitPrice(gb.getUnitPrice())
                 .hostQuantity(gb.getHostQuantity())
                 .soldAmount(gb.getTotalAmount() - gb.getLeftAmount())
                 .totalAmount(gb.getTotalAmount())
                 .participantCount(gb.getParticipantCount())
+                .isWish(isWish)
                 .dueSoon(dueSoon)
                 .build();
     }
 
 
     // 참여 공구 리스트 조회
-    public ParticipatedListResponse toParticipatedListResponse(Order o) {
+    public ParticipatedListResponse toParticipatedListResponse(Order o, boolean isWish) {
         GroupBuy post = o.getGroupBuy();
 
         String img = post.getImages().stream()
@@ -188,12 +192,13 @@ public class GroupBuyQueryMapper {
                 .postStatus(post.getPostStatus())
                 .location(post.getLocation())
                 .imageKey(img)
-                .orderPrice(o.getPrice())
+                .unitPrice(post.getUnitPrice())
                 .orderQuantity(o.getQuantity())
                 .orderStatus(o.getStatus())
                 .soldAmount(post.getTotalAmount() - post.getLeftAmount())
                 .totalAmount(post.getTotalAmount())
                 .participantCount(post.getParticipantCount())
+                .isWish(isWish)
                 .dueSoon(dueSoon)
                 .build();
     }

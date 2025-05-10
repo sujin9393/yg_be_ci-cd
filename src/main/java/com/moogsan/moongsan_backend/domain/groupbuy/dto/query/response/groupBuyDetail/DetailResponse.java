@@ -1,5 +1,6 @@
 package com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyDetail;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.ImageResponse;
 import lombok.Builder;
 import lombok.Getter;
@@ -43,4 +44,14 @@ public class DetailResponse {
 
     // 연관 객체
     private UserProfileResponse userProfileResponse;    // 주최자 정보
+
+    @JsonProperty("isWish")
+    public boolean isWish() {
+        return isWish;
+    }
+
+    @JsonProperty("isParticipant")
+    public boolean isParticipant() {
+        return isParticipant;
+    }
 }

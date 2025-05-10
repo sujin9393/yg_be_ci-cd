@@ -1,5 +1,6 @@
 package com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.ParticipatedList;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -17,7 +18,7 @@ public class ParticipatedListResponse {
     private String imageKey;       // thumbnail 이미지
 
     // 숫자 데이터
-    private int orderPrice;        // 총 상품 가격
+    private int unitPrice;         // 상품 단위 가격
     private int orderQuantity;     // 주문 개수(참여자)
     private int soldAmount;        // 판매 수량(totalAmount - leftAmount)
     private int totalAmount;       // 상품 전체 수량
@@ -28,4 +29,8 @@ public class ParticipatedListResponse {
     private boolean dueSoon;       // 마감 임박 여부
     private boolean isWish;        // 관심 여부
 
+    @JsonProperty("isWish")
+    public boolean isWish() {
+        return isWish;
+    }
 }

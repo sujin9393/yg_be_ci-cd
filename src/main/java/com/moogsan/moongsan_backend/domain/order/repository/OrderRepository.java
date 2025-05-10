@@ -4,7 +4,10 @@ import com.moogsan.moongsan_backend.domain.order.entity.Order;
 import com.moogsan.moongsan_backend.domain.user.entity.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,21 +22,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     // 유저 ID + 공구글 ID + 상태가 아닌 주문 단건 조회
     Optional<Order> findByUserIdAndGroupBuyIdAndStatusNot(Long userId, Long groupBuyId, String status);
 
-    // 특정 유저의 공구 게시글 상태별 참여(주문) 리스트 첫 조회
-    List<Order> findByUserIdAndGroupBuy_PostStatus(
-            Long userId,
-            String postStatus,
-            Pageable pageable
-    );
-
-    // 특정 유저의 공구 게시글 상태별 참여(주문) 리스트 이어서 조회
-    List<Order> findByUserIdAndGroupBuy_PostStatusAndIdLessThan(
-            Long userId,
-            String postStatus,
-            Long cursorId,
-            Pageable pageable
-    );
-
     // 특정 공구의 참여 인원 수 확인
     int countByGroupBuyId(Long postId);
 
@@ -41,5 +29,41 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByGroupBuyIdAndStatusNot(Long groupBuyId, String status);
 
     // 특정 유저의 특정 공구 참여 여부 확인
-    boolean existsByUserIdAndGroupBuyId(Long userId, Long groupBuyId);
+    boolean existsByUserIdAndGroupBuyIdAndStatusNot(Long userId, Long groupBuyId, String status);
+
+    // 특정 유저의 공구 게시글 상태별 참여(주문) 리스트 첫 조회
+    @Query("""
+        SELECT o
+          FROM Order o
+         WHERE o.user.id = :userId
+           AND o.groupBuy.postStatus = :status
+           AND o.status           <> 'CANCELED'
+        ORDER BY o.createdAt DESC, o.id DESC
+    """)
+    List<Order> findByUserAndPostStatusAndNotCanceled(
+            @Param("userId") Long userId,
+            @Param("status") String status,
+            Pageable pageable
+    );
+
+    // // 특정 유저의 공구 게시글 상태별 참여(주문) 리스트 이어서 조회
+    @Query("""
+        SELECT o
+          FROM Order o
+         WHERE o.user.id = :userId
+           AND o.groupBuy.postStatus = :status
+           AND o.status           <> 'CANCELED'
+           AND (
+                o.createdAt < :cursorCreatedAt
+             OR (o.createdAt = :cursorCreatedAt AND o.id < :cursorOrderId)
+           )
+        ORDER BY o.createdAt DESC, o.id DESC
+    """)
+    List<Order> findByUserAndPostStatusAndNotCanceledBeforeCursor(
+            @Param("userId")          Long userId,
+            @Param("status")          String status,
+            @Param("cursorCreatedAt") LocalDateTime cursorCreatedAt,
+            @Param("cursorOrderId")   Long cursorOrderId,
+            Pageable pageable
+    );
 }

@@ -118,7 +118,7 @@ public class GroupBuyCommandController {
     }
 
 
-    // 공구 참여 취소
+    /// 공구 참여 취소 SUCCESS
     @DeleteMapping("/{postId}/participants")
     public ResponseEntity<WrapperResponse<EmptyResponse>> leaveGroupBuy(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -131,12 +131,6 @@ public class GroupBuyCommandController {
                         .build()
         );
     }
-
-    // 관심 공구 추가
-    //  TODO V2
-
-    // 관심 공구 취소
-    //  TODO V2
 
     // 공구 게시글 공구 종료
     @PatchMapping("/{postId}/end")

@@ -1,5 +1,6 @@
 package com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyList.BasicList;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.ImageResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.entity.GroupBuy;
 import lombok.Builder;
@@ -35,9 +36,9 @@ public class BasicListResponse {
     // 날짜
     private LocalDateTime createdAt; // 생성 일시
 
-    public BasicListResponse of(GroupBuy groupBuy) {
-        return BasicListResponse.builder()
-                .build();
+    @JsonProperty("isWish")
+    public boolean isWish() {
+        return isWish;
     }
 
 }
