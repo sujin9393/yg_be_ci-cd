@@ -78,15 +78,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
         String method = request.getMethod();
-
-        return (
-                (path.equals("/api/users") && method.equalsIgnoreCase("POST")) ||
-                    (path.equals("/api/users/token") && method.equalsIgnoreCase("POST")) ||
-                    path.equals("/api/users/check-nickname") ||
-                    (path.equals("/api/group-buys") && method.equalsIgnoreCase("GET")) ||
-                    (path.matches("/api/group-buys/\\d+(/.*)?") && method.equalsIgnoreCase("GET")) ||
-                        path.startsWith("/uploads/") ||
-                        path.equals("/api/group-buys/generation/description")
-        );
+        // Exclude POST /api/users from filtering
+        return path.equals("/api/users") && method.equalsIgnoreCase("POST");
     }
 }
