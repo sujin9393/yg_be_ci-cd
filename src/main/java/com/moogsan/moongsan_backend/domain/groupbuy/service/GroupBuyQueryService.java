@@ -132,16 +132,15 @@ public class GroupBuyQueryService {
                         entities = groupBuyRepository.findByCategoryDueSoonOrder(
                                 categoryId, page);
                     } else {
-                        entities = groupBuyRepository.findAllDueSoonOrder(
-                                page);
+                        entities = groupBuyRepository.findEndingSoon(page);
                     }
                 } else {
                     // 다음 페이지: 마감 임박순 커서
                     if (categoryId != null) {
-                        entities = groupBuyRepository.findByCategoryDueSoonCursor(
+                        entities = groupBuyRepository.findByCategoryEndingSoonCursor(
                                 categoryId, lastCreatedForDue, cursorId, page);
                     } else {
-                        entities = groupBuyRepository.findByDueSoonCursor(
+                        entities = groupBuyRepository.findByEndingSoonCursor(
                                 lastCreatedForDue, cursorId, page);
                     }
                 }

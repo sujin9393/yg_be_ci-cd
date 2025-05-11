@@ -161,7 +161,7 @@ public class GroupBuyCommandService {
 
     }
 
-    ///  공구 모집 마감
+    ///  공구 모집 마감(백그라운드 API)
     public void closePastDueGroupBuys(LocalDateTime now) {
         List<GroupBuy> expired = groupBuyRepository
                 .findByPostStatusAndDueDateBefore("OPEN", now);
@@ -169,6 +169,17 @@ public class GroupBuyCommandService {
             gb.changePostStatus("CLOSED");
         }
         groupBuyRepository.saveAll(expired);
+    }
+
+    /// 공구 종료 (백그라운드 API)
+    public void endPastPickupGroupBuys(LocalDateTime now) {
+        List<GroupBuy> toEnd = groupBuyRepository
+                .findByPostStatusAndPickupDateBefore("CLOSED", now);
+
+        for (GroupBuy gb : toEnd) {
+            gb.changePostStatus("ENDED");
+        }
+        groupBuyRepository.saveAll(toEnd);
     }
 
 
@@ -190,7 +201,7 @@ public class GroupBuyCommandService {
         }
 
         // pickupDate 이후인지 조회 -> 아니면 409
-        if (groupBuy.getDueDate().isAfter(LocalDateTime.now())) {
+        if (groupBuy.getPickupDate().isAfter(LocalDateTime.now())) {
             throw new GroupBuyInvalidStateException("공구 종료는 공구 픽업 일자 이후에만 가능합니다.");
         }
 

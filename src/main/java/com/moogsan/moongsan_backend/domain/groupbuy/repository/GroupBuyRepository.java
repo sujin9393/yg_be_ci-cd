@@ -16,8 +16,11 @@ import java.util.Optional;
 public interface GroupBuyRepository extends JpaRepository<GroupBuy, Long> {
     //Optional<GroupBuy> findById(Long id);
 
-    // 공구 마감 조건 기반 조회
+    // 공구 마감 조건 기반 조회 (백그라운드 API용)
     List<GroupBuy> findByPostStatusAndDueDateBefore(String postStatus, LocalDateTime now);
+
+    // 공구 종료 조건 기반 조회 (백그라운드 API용)
+    List<GroupBuy> findByPostStatusAndPickupDateBefore(String postStatus, LocalDateTime now);
 
     // 공구 주최 리스트 첫 조회
     List<GroupBuy> findByUser_IdAndPostStatus(Long userId, String postStatus, Pageable pageable);
@@ -58,24 +61,25 @@ public interface GroupBuyRepository extends JpaRepository<GroupBuy, Long> {
     List<GroupBuy> findByCategoryCreatedOrder(@Param("categoryId") Long categoryId, Pageable pageable);
 
     /** 0-2) 마감 임박순(dueSoon = true), ENDED 제외 */
-    @Query("""
-       SELECT g
-         FROM GroupBuy g
-        WHERE g.postStatus <> 'ENDED'
-          AND g.dueSoon = true
-        ORDER BY g.createdAt DESC, g.id DESC
-       """)
-    List<GroupBuy> findAllDueSoonOrder(Pageable pageable);
+    @Query(value = """
+       SELECT *
+         FROM group_buy
+        WHERE post_status = 'OPEN'
+        ORDER BY
+          due_soon DESC,
+          created_at DESC,
+          id DESC
+    """, nativeQuery = true)
+    List<GroupBuy> findEndingSoon(Pageable pageable);
 
     /** 0-2-a) + 카테고리 필터 */
     @Query("""
        SELECT g
          FROM GroupBuy g
          JOIN g.groupBuyCategories gbc
-        WHERE g.postStatus <> 'ENDED'
+        WHERE g.postStatus = 'OPEN'
           AND gbc.category.id = :categoryId
-          AND g.dueSoon = true
-        ORDER BY g.createdAt DESC, g.id DESC
+        ORDER BY g.dueSoon DESC, g.createdAt DESC, g.id DESC
        """)
     List<GroupBuy> findByCategoryDueSoonOrder(@Param("categoryId") Long categoryId, Pageable pageable);
 
@@ -128,40 +132,38 @@ public interface GroupBuyRepository extends JpaRepository<GroupBuy, Long> {
     );
 
     // ----------------------------------------------------
-    // 2) 마감 임박순(dueSoon = true) 커서 페이징 (ENDED 제외)
+    // 2) 마감 임박순 (dueSoon DESC, then createdAt/​id DESC) 커서 페이징 (ENDED 제외)
     // ----------------------------------------------------
 
     @Query("""
-       SELECT g
-         FROM GroupBuy g
-        WHERE g.postStatus <> 'ENDED'
-          AND g.dueSoon = true
-          AND (
-                g.createdAt < :lastCreatedAt
-             OR (g.createdAt = :lastCreatedAt AND g.id < :lastId)
+   SELECT g
+     FROM GroupBuy g
+    WHERE g.postStatus = 'OPEN'
+      AND (
+            g.createdAt < :lastCreatedAt
+         OR (g.createdAt = :lastCreatedAt AND g.id < :lastId)
           )
-        ORDER BY g.createdAt DESC, g.id DESC
-       """)
-    List<GroupBuy> findByDueSoonCursor(
+    ORDER BY g.dueSoon DESC, g.createdAt DESC, g.id DESC
+   """)
+    List<GroupBuy> findByEndingSoonCursor(
             @Param("lastCreatedAt") LocalDateTime lastCreatedAt,
             @Param("lastId")        Long lastId,
             Pageable pageable
     );
 
     @Query("""
-       SELECT g
-         FROM GroupBuy g
-         JOIN g.groupBuyCategories gbc
-        WHERE g.postStatus <> 'ENDED'
-          AND gbc.category.id = :categoryId
-          AND g.dueSoon = true
-          AND (
-                g.createdAt < :lastCreatedAt
-             OR (g.createdAt = :lastCreatedAt AND g.id < :lastId)
+   SELECT g
+     FROM GroupBuy g
+     JOIN g.groupBuyCategories gbc
+    WHERE g.postStatus = 'OPEN'
+      AND gbc.category.id = :categoryId
+      AND (
+            g.createdAt < :lastCreatedAt
+         OR (g.createdAt = :lastCreatedAt AND g.id < :lastId)
           )
-        ORDER BY g.createdAt DESC, g.id DESC
-       """)
-    List<GroupBuy> findByCategoryDueSoonCursor(
+    ORDER BY g.dueSoon DESC, g.createdAt DESC, g.id DESC
+   """)
+    List<GroupBuy> findByCategoryEndingSoonCursor(
             @Param("categoryId")    Long categoryId,
             @Param("lastCreatedAt") LocalDateTime lastCreatedAt,
             @Param("lastId")        Long lastId,
