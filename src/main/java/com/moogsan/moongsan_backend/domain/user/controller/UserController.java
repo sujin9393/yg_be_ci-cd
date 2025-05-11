@@ -112,7 +112,11 @@ public class UserController {
     // 유저 프로필 조회 API
     @GetMapping("/users/profile")
     public ResponseEntity<WrapperResponse<UserProfileResponse>> getProfile(
-        @AuthenticationPrincipal CustomUserDetails userDetails) {
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        HttpServletResponse response) {
+
+        response.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+        response.setHeader("Pragma", "no-cache");
 
         UserProfileResponse profile = userProfileService.getUserProfile(userDetails.getUser().getId());
         return ResponseEntity.ok(

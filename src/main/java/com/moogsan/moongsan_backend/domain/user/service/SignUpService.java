@@ -59,7 +59,6 @@ public class SignUpService {
         accessTokenCookie.setSecure(true);
         accessTokenCookie.setPath("/");
         accessTokenCookie.setMaxAge((int) (accessTokenExpireAt / 1000));
-        response.addCookie(accessTokenCookie);
         response.addHeader("Set-Cookie", "AccessToken=" + accessToken + "; HttpOnly; Secure; Path=/; SameSite=None");
 
         // RefreshToken 쿠키로 설정
@@ -68,7 +67,6 @@ public class SignUpService {
         refreshTokenCookie.setSecure(true);
         refreshTokenCookie.setPath("/");
         refreshTokenCookie.setMaxAge((int) (jwtUtil.getRefreshTokenExpireMillis() / 1000));
-        response.addCookie(refreshTokenCookie);
         response.addHeader("Set-Cookie", "RefreshToken=" + refreshToken + "; HttpOnly; Secure; Path=/; SameSite=None");
 
         // Token DB에 저장
