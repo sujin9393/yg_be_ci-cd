@@ -26,12 +26,11 @@ public class FileService {
 
     /**
      * S3에 업로드할 Presigned PUT URL 발급
-     * @param fileName 클라이언트가 전달한 원본 파일명
      * @return key, url 정보가 담긴 PresignResponse
      */
-    public PresignResponse presign(String fileName) {
-        // 1) S3 key 생성 (images/{UUID}-{fileName})
-        String key = "images/" + UUID.randomUUID() + "-" + fileName;
+    public PresignResponse presign() {
+        // 1) S3 key 생성 (images/{UUID})
+        String key = "images/" + UUID.randomUUID();
 
         // 2) Presign 요청 객체 생성
         PutObjectRequest objReq = PutObjectRequest.builder()

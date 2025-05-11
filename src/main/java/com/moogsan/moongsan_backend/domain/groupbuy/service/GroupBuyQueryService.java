@@ -11,6 +11,7 @@ import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyL
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.query.response.groupBuyUpdate.GroupBuyForUpdateResponse;
 import com.moogsan.moongsan_backend.domain.groupbuy.entity.GroupBuy;
 import com.moogsan.moongsan_backend.domain.groupbuy.exception.specific.GroupBuyNotFoundException;
+import com.moogsan.moongsan_backend.domain.groupbuy.exception.specific.GroupBuyNotHostException;
 import com.moogsan.moongsan_backend.domain.groupbuy.mapper.GroupBuyQueryMapper;
 import com.moogsan.moongsan_backend.domain.groupbuy.repository.GroupBuyRepository;
 import com.moogsan.moongsan_backend.domain.order.entity.Order;
@@ -81,7 +82,8 @@ public class GroupBuyQueryService {
     public PagedResponse<BasicListResponse> getGroupBuyListByCursor(
             Long userId,
             Long categoryId,
-            String sort,
+            String orderBy,        // e.g. "latest", "ending_soon", "price_asc"
+            String postStatus,     // e.g. "OPEN", "CLOSED"
             Long cursorId,
             LocalDateTime cursorCreatedAt,
             Integer cursorPrice,
@@ -92,71 +94,78 @@ public class GroupBuyQueryService {
 
         // 각 정렬에 따라 cursor 유무 분기
         List<GroupBuy> entities;
-        switch (sort) {
+        switch (orderBy) {
             case "price_asc":
-                int lastPrice   = (cursorPrice != null)   ? cursorPrice     : 0;
-                LocalDateTime lastCreated = (cursorCreatedAt != null)
+                int lastPrice = (cursorPrice != null) ? cursorPrice : 0;
+                LocalDateTime lastCreatedForPrice = (cursorCreatedAt != null)
                         ? cursorCreatedAt
                         : LocalDateTime.now();
 
                 if (cursorId == null) {
-                    // --- 첫 페이지: 단순 가격 오름차순 ---
+                    // 첫 페이지: 가격 오름차순 + 상태 필터
                     if (categoryId != null) {
-                        entities = groupBuyRepository.findByCategoryPriceOrder(categoryId, page);
+                        entities = groupBuyRepository.findByStatusAndCategoryPriceOrder(
+                                postStatus, categoryId, page);
                     } else {
-                        entities = groupBuyRepository.findAllByPriceOrder(page);
+                        entities = groupBuyRepository.findAllByStatusPriceOrder(
+                                postStatus, page);
                     }
                 } else {
-                    // --- 다음 페이지: unitPrice ASC + createdAt DESC + id DESC cursor ---
+                    // 다음 페이지: 가격 오름차순 커서 + 상태 필터
                     if (categoryId != null) {
-                        entities = groupBuyRepository.findByCategoryAndPriceAscCursor(
-                                categoryId, lastPrice, lastCreated, cursorId, page);
+                        entities = groupBuyRepository.findByStatusAndCategoryPriceAscCursor(
+                                postStatus, categoryId, lastPrice, lastCreatedForPrice, cursorId, page);
                     } else {
-                        entities = groupBuyRepository.findByPriceAscCursor(
-                                lastPrice, lastCreated, cursorId, page);
+                        entities = groupBuyRepository.findByStatusPriceAscCursor(
+                                postStatus, lastPrice, lastCreatedForPrice, cursorId, page);
                     }
                 }
                 break;
 
             case "ending_soon":
-                LocalDateTime lastDueCreated = (cursorCreatedAt != null)
+                LocalDateTime lastCreatedForDue = (cursorCreatedAt != null)
                         ? cursorCreatedAt
                         : LocalDateTime.now();
 
                 if (cursorId == null) {
-                    // --- 첫 페이지: 마감 임박순 ---
+                    // 첫 페이지: 마감 임박순 + 상태 필터
                     if (categoryId != null) {
-                        entities = groupBuyRepository.findByCategoryDueSoonOrder(categoryId, page);
+                        entities = groupBuyRepository.findByStatusAndCategoryDueSoonOrder(
+                                postStatus, categoryId, page);
                     } else {
-                        entities = groupBuyRepository.findAllByDueSoonOrder(page);
+                        entities = groupBuyRepository.findAllByStatusDueSoonOrder(
+                                postStatus, page);
                     }
                 } else {
-                    // --- 다음 페이지: dueSoon cursor (createdAt DESC, id DESC) ---
+                    // 다음 페이지: 마감 임박순 커서 + 상태 필터
                     if (categoryId != null) {
-                        entities = groupBuyRepository.findByCategoryAndDueSoonCursor(
-                                categoryId, lastDueCreated, cursorId, page);
+                        entities = groupBuyRepository.findByStatusAndCategoryDueSoonCursor(
+                                postStatus, categoryId, lastCreatedForDue, cursorId, page);
                     } else {
-                        entities = groupBuyRepository.findByDueSoonCursor(
-                                lastDueCreated, cursorId, page);
+                        entities = groupBuyRepository.findByStatusDueSoonCursor(
+                                postStatus, lastCreatedForDue, cursorId, page);
                     }
                 }
                 break;
 
-            default:  // 최신순 (createdAt DESC, id DESC)
+            default:  // "latest"
                 if (cursorId == null) {
-                    // --- 첫 페이지: 최신순 ---
+                    // 첫 페이지: 최신순 + 상태 필터
                     if (categoryId != null) {
-                        entities = groupBuyRepository.findByCategoryCreatedOrder(categoryId, page);
+                        entities = groupBuyRepository.findByStatusAndCategoryCreatedOrder(
+                                postStatus, categoryId, page);
                     } else {
-                        entities = groupBuyRepository.findAllByCreatedOrder(page);
+                        entities = groupBuyRepository.findAllByStatusCreatedOrder(
+                                postStatus, page);
                     }
                 } else {
-                    // --- 다음 페이지: created cursor ---
+                    // 다음 페이지: 최신순 커서 + 상태 필터
                     if (categoryId != null) {
-                        entities = groupBuyRepository.findByCategoryAndCreatedCursor(
-                                categoryId, cursorId, page);
+                        entities = groupBuyRepository.findByStatusAndCategoryCreatedCursor(
+                                postStatus, categoryId, cursorId, page);
                     } else {
-                        entities = groupBuyRepository.findByCreatedCursor(cursorId, page);
+                        entities = groupBuyRepository.findByStatusCreatedCursor(
+                                postStatus, cursorId, page);
                     }
                 }
                 break;
@@ -186,7 +195,7 @@ public class GroupBuyQueryService {
             BasicListResponse last = posts.getLast();
             nextCursor    = last.getPostId();
             nextCreatedAt = last.getCreatedAt();
-            if ("price_asc".equals(sort)) {
+            if ("price_asc".equals(orderBy)) {
                 nextCursorPrice = last.getUnitPrice();
             }
         }
@@ -215,7 +224,7 @@ public class GroupBuyQueryService {
 
     /// 관심 공구 리스트 조회: 관심 등록 순으로 커서 적용 필요
     public PagedResponse<WishListResponse> getGroupBuyWishList(
-            User currentUser,
+            Long userId,
             String postStatus,
             LocalDateTime cursorCreatedAt,
             Long cursorId,
@@ -234,14 +243,14 @@ public class GroupBuyQueryService {
         if (cursorId == null) {
             groupBuys = wishRepository
                     .findGroupBuysByUserAndPostStatus (
-                            currentUser.getId(),
+                            userId,
                             status,
                             page
                     );
         } else {
             groupBuys = wishRepository
                     .findGroupBuysByUserAndPostStatusBeforeCursor(
-                            currentUser.getId(),
+                            userId,
                             status,
                             cursorCreatedAt,
                             cursorId,
@@ -271,7 +280,7 @@ public class GroupBuyQueryService {
 
     /// 주최 공구 리스트 조회
     public PagedResponse<HostedListResponse> getGroupBuyHostedList(
-            User currentUser,
+            Long userId,
             String postStatus,
             Long cursorId,
             Integer limit) {
@@ -284,20 +293,20 @@ public class GroupBuyQueryService {
         List<GroupBuy> groupBuys;
         if (cursorId == null) {
             groupBuys = groupBuyRepository.findByUser_IdAndPostStatus (
-                    currentUser.getId(),
+                    userId,
                     status,
                     page
             );
         } else {
             groupBuys = groupBuyRepository.findByUser_IdAndPostStatusAndIdLessThan (
-                    currentUser.getId(),
+                    userId,
                     status,
                     cursorId,
                     page
             );
         }
 
-        Map<Long, Boolean> wishMap = fetchWishMap(currentUser.getId(), groupBuys);
+        Map<Long, Boolean> wishMap = fetchWishMap(userId, groupBuys);
 
         List<HostedListResponse> posts = groupBuys.stream()
                 .map(gb -> {
@@ -329,7 +338,7 @@ public class GroupBuyQueryService {
 
     /// 참여 공구 리스트 조회: 주문 생성 순으로 커서 적용 추가 필요
     public PagedResponse<ParticipatedListResponse> getGroupBuyParticipatedList(
-            User currentUser,
+            Long userId,
             String sort,
             LocalDateTime cursorCreatedAt,
             Long cursorId,
@@ -348,13 +357,13 @@ public class GroupBuyQueryService {
         List<Order> orders;
         if (cursorCreatedAt == null) {
             orders = orderRepository.findByUserAndPostStatusAndNotCanceled(
-                    currentUser.getId(),
+                    userId,
                     status,
                     page
             );
         } else {
             orders = orderRepository.findByUserAndPostStatusAndNotCanceledBeforeCursor(
-                    currentUser.getId(),
+                    userId,
                     status,
                     cursorCreatedAt,
                     cursorId,
@@ -366,7 +375,7 @@ public class GroupBuyQueryService {
         List<GroupBuy> groupBuys = orders.stream()
                 .map(Order::getGroupBuy)
                 .toList();
-        Map<Long, Boolean> wishMap = fetchWishMap(currentUser.getId(), groupBuys);
+        Map<Long, Boolean> wishMap = fetchWishMap(userId, groupBuys);
 
         // DTO 매핑
         List<ParticipatedListResponse> posts = orders.stream()
@@ -391,7 +400,17 @@ public class GroupBuyQueryService {
     }
 
     /// 공구 참여자 조회
-    public ParticipantListResponse getGroupBuyParticipantsInfo(Long postId) {
+    public ParticipantListResponse getGroupBuyParticipantsInfo(Long userId, Long postId) {
+
+        // 해당 공구가 존재하는지 조회 -> 없으면 404
+        GroupBuy groupBuy = groupBuyRepository.findById(postId)
+                .orElseThrow(GroupBuyNotFoundException::new);
+
+        // 해당 공구의 주최자가 해당 유저인지 조회 -> 아니면 403
+        if(!groupBuy.getUser().getId().equals(userId)) {
+            throw new GroupBuyNotHostException("공구 참여자 조회는 공구의 주최자만 요청 가능합니다.");
+        }
+
         List<Order> orders = orderRepository.findByGroupBuyIdAndStatusNot(postId, "canceled");
 
         List<ParticipantResponse> participantList = orders.stream()

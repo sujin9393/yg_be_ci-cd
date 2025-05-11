@@ -34,12 +34,22 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        // 에러 핸들러 공개
+                        .requestMatchers("/error", "/error/**").permitAll()
+                        // 인증 필요
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/group-buys/user/wishes",       // 위시 리스트 조회
+                                "/api/group-buys/user/hosts",                  // 주최 리스트 조회
+                                "/api/group-buys/user/participants",           // 참여 리스트 조회
+                                "/api/group-buys/*/participants"        // 공구 참여자 조회
+                        ).authenticated()
                         .requestMatchers(
                                 "/api/users", "/api/users/token", "/api/users/check-nickname",
                                 "/uploads/**", "/api/group-buys/generation/description").permitAll() // 해당 위치 외에는 토큰 적용
+
                         .requestMatchers(HttpMethod.GET,
-                                "/api/group-buys",         // 메인
-                                "/api/group-buys/*"        // 상세(한 단계 하위)
+                                "/api/group-buys",                   // 메인
+                                "/api/group-buys/*"                            // 상세(한 단계 하위)
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

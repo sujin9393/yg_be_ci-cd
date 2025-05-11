@@ -30,11 +30,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String path   = request.getRequestURI();
         String method = request.getMethod();
 
+
         // 공개 엔드포인트이면 토큰 검사 없이 바로 통과
-        if ("GET".equals(method) &&
-                (path.equals("/api/group-buys") || path.startsWith("/api/group-buys/"))) {
+        if (method.equalsIgnoreCase("GET") && path.equals("/api/group-buys")) {
             filterChain.doFilter(request, response);
             return;
+        }
+
+        // GET /api/group-buys/{숫자} (단일 상세) 스킵
+        //    "/api/group-buys/123", "/api/group-buys/456" 만
+        if (method.equalsIgnoreCase("GET") && path.matches("^/api/group-buys/\\d+$")) {
+            filterChain.doFilter(request, response);
+            return ;
         }
 
         String token = resolveToken(request);

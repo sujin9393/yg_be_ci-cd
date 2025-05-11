@@ -66,7 +66,8 @@ public class GroupBuyQueryController {
     public ResponseEntity<WrapperResponse<PagedResponse<BasicListResponse>>> getGroupBuyListByCursor(
             @AuthenticationPrincipal Optional<CustomUserDetails> userDetails,
             @RequestParam(value = "category", required = false) Long categoryId,
-            @RequestParam(value = "sort", defaultValue = "created") String sort,
+            @RequestParam(value = "orderBy", defaultValue = "created") String orderBy,
+            @RequestParam(value = "postStatus") String postStatus,
             @RequestParam(value = "cursorId", required = false) Long cursorId,
             // 커서 페이징용 추가 파라미터들
             @RequestParam(value = "cursorCreatedAt", required = false)
@@ -83,8 +84,8 @@ public class GroupBuyQueryController {
         }
 
         PagedResponse<BasicListResponse> pagedResponse =
-                groupBuyService.getGroupBuyListByCursor(userId, categoryId, sort, cursorId, cursorCreatedAt,
-                        cursorPrice, limit);
+                groupBuyService.getGroupBuyListByCursor(userId, categoryId, orderBy,
+                        postStatus, cursorId, cursorCreatedAt, cursorPrice, limit);
         return ResponseEntity.ok(
                 WrapperResponse.<PagedResponse<BasicListResponse>>builder()
                         .message("전체 리스트를 성공적으로 조회했습니다.")
@@ -104,7 +105,8 @@ public class GroupBuyQueryController {
             @RequestParam(value = "cursorId", required = false) Long cursorId,
             @RequestParam(value = "limit", defaultValue = "10") Integer limit
     ) {
-        PagedResponse<WishListResponse> pagedResponse = groupBuyService.getGroupBuyWishList(userDetails.getUser(), sort, cursorCreatedAt, cursorId, limit);
+        PagedResponse<WishListResponse> pagedResponse = groupBuyService.getGroupBuyWishList(
+                userDetails.getUser().getId(), sort, cursorCreatedAt, cursorId, limit);
         return ResponseEntity.ok(
                 WrapperResponse.<PagedResponse<WishListResponse>>builder()
                         .message("관심 공구 리스트를 성공적으로 조회했습니다.")
@@ -121,7 +123,8 @@ public class GroupBuyQueryController {
             @RequestParam(value = "cursor", required = false) Long cursor,
             @RequestParam(value = "limit", defaultValue = "10") Integer limit
     ) {
-        PagedResponse<HostedListResponse> pagedResponse = groupBuyService.getGroupBuyHostedList(userDetails.getUser(), sort, cursor, limit);
+        PagedResponse<HostedListResponse> pagedResponse = groupBuyService.getGroupBuyHostedList(
+                userDetails.getUser().getId(), sort, cursor, limit);
         return ResponseEntity.ok(
                 WrapperResponse.<PagedResponse<HostedListResponse>>builder()
                         .message("주최 공구 리스트를 성공적으로 조회했습니다.")
@@ -141,7 +144,7 @@ public class GroupBuyQueryController {
             @RequestParam(value = "limit", defaultValue = "10") Integer limit
     ) {
         PagedResponse<ParticipatedListResponse> pagedResponse = groupBuyService.getGroupBuyParticipatedList(
-                userDetails.getUser(), sort, cursorCreatedAt, cursor, limit);
+                userDetails.getUser().getId(), sort, cursorCreatedAt, cursor, limit);
         return ResponseEntity.ok(
                 WrapperResponse.<PagedResponse<ParticipatedListResponse>>builder()
                         .message("참여 공구 리스트를 성공적으로 조회했습니다.")
@@ -153,9 +156,10 @@ public class GroupBuyQueryController {
     /// 공구 참여자 조회 SUCCESS
     @GetMapping("/{postId}/participants")
     public ResponseEntity<WrapperResponse<ParticipantListResponse>> getGroupBuyParticipantsInfo(
-            @AuthenticationPrincipal User currentUser,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long postId) {
-        ParticipantListResponse participantList = groupBuyService.getGroupBuyParticipantsInfo(postId);
+        ParticipantListResponse participantList = groupBuyService.getGroupBuyParticipantsInfo(
+                userDetails.getUser().getId(), postId);
         return ResponseEntity.ok(
                 WrapperResponse.<ParticipantListResponse>builder()
                         .message("공구 참여자 리스트를 성공적으로 조회했습니다.")
