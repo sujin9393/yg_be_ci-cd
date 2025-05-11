@@ -18,13 +18,10 @@ public class FileController {
      * - 이미지 레코드 생성 시점에 imageId와 S3 key를 DB에 저장합니다.
      * - 반환된 URL로 클라이언트가 직접 S3에 업로드할 수 있습니다.
      *
-     * @param fileName 원본 파일명
      */
     @GetMapping("/presign")
-    public ResponseEntity<PresignResponse> presign(
-            @RequestParam String fileName
-    ) {
-        PresignResponse presign = fileService.presign(fileName);
+    public ResponseEntity<PresignResponse> presign() {
+        PresignResponse presign = fileService.presign();
         return ResponseEntity.ok(presign);
     }
 }
