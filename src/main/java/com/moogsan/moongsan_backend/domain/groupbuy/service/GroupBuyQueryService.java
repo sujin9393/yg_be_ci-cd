@@ -83,7 +83,6 @@ public class GroupBuyQueryService {
             Long userId,
             Long categoryId,
             String orderBy,        // e.g. "latest", "ending_soon", "price_asc"
-            String postStatus,     // e.g. "OPEN", "CLOSED"
             Long cursorId,
             LocalDateTime cursorCreatedAt,
             Integer cursorPrice,
@@ -102,22 +101,22 @@ public class GroupBuyQueryService {
                         : LocalDateTime.now();
 
                 if (cursorId == null) {
-                    // 첫 페이지: 가격 오름차순 + 상태 필터
+                    // 첫 페이지: 가격 오름차순
                     if (categoryId != null) {
-                        entities = groupBuyRepository.findByStatusAndCategoryPriceOrder(
-                                postStatus, categoryId, page);
+                        entities = groupBuyRepository.findByCategoryPriceOrder(
+                                categoryId, page);
                     } else {
-                        entities = groupBuyRepository.findAllByStatusPriceOrder(
-                                postStatus, page);
+                        entities = groupBuyRepository.findAllPriceOrder(
+                                page);
                     }
                 } else {
-                    // 다음 페이지: 가격 오름차순 커서 + 상태 필터
+                    // 다음 페이지: 가격 오름차순 커서
                     if (categoryId != null) {
-                        entities = groupBuyRepository.findByStatusAndCategoryPriceAscCursor(
-                                postStatus, categoryId, lastPrice, lastCreatedForPrice, cursorId, page);
+                        entities = groupBuyRepository.findByCategoryPriceAscCursor(
+                                categoryId, lastPrice, lastCreatedForPrice, cursorId, page);
                     } else {
-                        entities = groupBuyRepository.findByStatusPriceAscCursor(
-                                postStatus, lastPrice, lastCreatedForPrice, cursorId, page);
+                        entities = groupBuyRepository.findByPriceAscCursor(
+                                lastPrice, lastCreatedForPrice, cursorId, page);
                     }
                 }
                 break;
@@ -128,48 +127,49 @@ public class GroupBuyQueryService {
                         : LocalDateTime.now();
 
                 if (cursorId == null) {
-                    // 첫 페이지: 마감 임박순 + 상태 필터
+                    // 첫 페이지: 마감 임박순
                     if (categoryId != null) {
-                        entities = groupBuyRepository.findByStatusAndCategoryDueSoonOrder(
-                                postStatus, categoryId, page);
+                        entities = groupBuyRepository.findByCategoryDueSoonOrder(
+                                categoryId, page);
                     } else {
-                        entities = groupBuyRepository.findAllByStatusDueSoonOrder(
-                                postStatus, page);
+                        entities = groupBuyRepository.findAllDueSoonOrder(
+                                page);
                     }
                 } else {
-                    // 다음 페이지: 마감 임박순 커서 + 상태 필터
+                    // 다음 페이지: 마감 임박순 커서
                     if (categoryId != null) {
-                        entities = groupBuyRepository.findByStatusAndCategoryDueSoonCursor(
-                                postStatus, categoryId, lastCreatedForDue, cursorId, page);
+                        entities = groupBuyRepository.findByCategoryDueSoonCursor(
+                                categoryId, lastCreatedForDue, cursorId, page);
                     } else {
-                        entities = groupBuyRepository.findByStatusDueSoonCursor(
-                                postStatus, lastCreatedForDue, cursorId, page);
+                        entities = groupBuyRepository.findByDueSoonCursor(
+                                lastCreatedForDue, cursorId, page);
                     }
                 }
                 break;
 
             default:  // "latest"
                 if (cursorId == null) {
-                    // 첫 페이지: 최신순 + 상태 필터
+                    // 첫 페이지: 최신순
                     if (categoryId != null) {
-                        entities = groupBuyRepository.findByStatusAndCategoryCreatedOrder(
-                                postStatus, categoryId, page);
+                        entities = groupBuyRepository.findByCategoryCreatedOrder(
+                                categoryId, page);
                     } else {
-                        entities = groupBuyRepository.findAllByStatusCreatedOrder(
-                                postStatus, page);
+                        entities = groupBuyRepository.findAllCreatedOrder(
+                                page);
                     }
                 } else {
-                    // 다음 페이지: 최신순 커서 + 상태 필터
+                    // 다음 페이지: 최신순 커서
                     if (categoryId != null) {
-                        entities = groupBuyRepository.findByStatusAndCategoryCreatedCursor(
-                                postStatus, categoryId, cursorId, page);
+                        entities = groupBuyRepository.findByCategoryCreatedCursor(
+                                categoryId, cursorId, page);
                     } else {
-                        entities = groupBuyRepository.findByStatusCreatedCursor(
-                                postStatus, cursorId, page);
+                        entities = groupBuyRepository.findByCreatedCursor(
+                                cursorId, page);
                     }
                 }
                 break;
         }
+
 
         // DTO 매핑
         Map<Long, Boolean> wishMap = fetchWishMap(userId, entities);

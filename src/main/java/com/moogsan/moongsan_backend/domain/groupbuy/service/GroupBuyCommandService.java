@@ -161,7 +161,7 @@ public class GroupBuyCommandService {
 
     }
 
-    ///  공구 마감
+    ///  공구 모집 마감
     public void closePastDueGroupBuys(LocalDateTime now) {
         List<GroupBuy> expired = groupBuyRepository
                 .findByPostStatusAndDueDateBefore("OPEN", now);

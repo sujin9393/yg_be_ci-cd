@@ -65,7 +65,6 @@ public class GroupBuyQueryController {
             @AuthenticationPrincipal Optional<CustomUserDetails> userDetails,
             @RequestParam(value = "category", required = false) Long categoryId,
             @RequestParam(value = "orderBy", defaultValue = "created") String orderBy,
-            @RequestParam(value = "postStatus") String postStatus,
             @RequestParam(value = "cursorId", required = false) Long cursorId,
             // 커서 페이징용 추가 파라미터들
             @RequestParam(value = "cursorCreatedAt", required = false)
@@ -83,7 +82,7 @@ public class GroupBuyQueryController {
 
         PagedResponse<BasicListResponse> pagedResponse =
                 groupBuyService.getGroupBuyListByCursor(userId, categoryId, orderBy,
-                        postStatus, cursorId, cursorCreatedAt, cursorPrice, limit);
+                        cursorId, cursorCreatedAt, cursorPrice, limit);
         return ResponseEntity.ok(
                 WrapperResponse.<PagedResponse<BasicListResponse>>builder()
                         .message("전체 리스트를 성공적으로 조회했습니다.")
