@@ -16,8 +16,11 @@ import java.util.Optional;
 public interface GroupBuyRepository extends JpaRepository<GroupBuy, Long> {
     //Optional<GroupBuy> findById(Long id);
 
-    // 공구 마감 조건 기반 조회
+    // 공구 마감 조건 기반 조회 (백그라운드 API용)
     List<GroupBuy> findByPostStatusAndDueDateBefore(String postStatus, LocalDateTime now);
+
+    // 공구 종료 조건 기반 조회 (백그라운드 API용)
+    List<GroupBuy> findByPostStatusAndPickupDateBefore(String postStatus, LocalDateTime now);
 
     // 공구 주최 리스트 첫 조회
     List<GroupBuy> findByUser_IdAndPostStatus(Long userId, String postStatus, Pageable pageable);
@@ -34,246 +37,183 @@ public interface GroupBuyRepository extends JpaRepository<GroupBuy, Long> {
     Optional<GroupBuy> findWithImagesById(Long id);
 
     // ----------------------------------------------------
-    // 0) Non-Cursor 메서드 (첫 페이지용, postStatus 필터 추가)
+    // 0) Non-Cursor 메서드 (첫 페이지용, ENDED 제외)
     // ----------------------------------------------------
 
-    /**
-     * 0-1) 최신순(createdAt DESC, id DESC), 상태(postStatus) 필터
-     */
+    /** 0-1) 최신순(createdAt DESC, id DESC), ENDED 제외 */
     @Query("""
        SELECT g
          FROM GroupBuy g
-        WHERE g.postStatus = :postStatus
+        WHERE g.postStatus <> 'ENDED'
         ORDER BY g.createdAt DESC, g.id DESC
        """)
-    List<GroupBuy> findAllByStatusCreatedOrder(
-            @Param("postStatus") String postStatus,
-            Pageable pageable
-    );
+    List<GroupBuy> findAllCreatedOrder(Pageable pageable);
 
-    /**
-     * 0-1-a) 최신순 + 카테고리 필터
-     */
+    /** 0-1-a) + 카테고리 필터 */
     @Query("""
        SELECT g
          FROM GroupBuy g
          JOIN g.groupBuyCategories gbc
-        WHERE g.postStatus = :postStatus
+        WHERE g.postStatus <> 'ENDED'
           AND gbc.category.id = :categoryId
         ORDER BY g.createdAt DESC, g.id DESC
        """)
-    List<GroupBuy> findByStatusAndCategoryCreatedOrder(
-            @Param("postStatus") String postStatus,
-            @Param("categoryId") Long categoryId,
-            Pageable pageable
-    );
+    List<GroupBuy> findByCategoryCreatedOrder(@Param("categoryId") Long categoryId, Pageable pageable);
 
-    /**
-     * 0-2) 마감 임박순(dueSoon = true), 상태 필터
-     */
-    @Query("""
-       SELECT g
-         FROM GroupBuy g
-        WHERE g.postStatus = :postStatus
-          AND g.dueSoon = true
-        ORDER BY g.createdAt DESC, g.id DESC
-       """)
-    List<GroupBuy> findAllByStatusDueSoonOrder(
-            @Param("postStatus") String postStatus,
-            Pageable pageable
-    );
+    /** 0-2) 마감 임박순(dueSoon = true), ENDED 제외 */
+    @Query(value = """
+       SELECT *
+         FROM group_buy
+        WHERE post_status = 'OPEN'
+        ORDER BY
+          due_soon DESC,
+          created_at DESC,
+          id DESC
+    """, nativeQuery = true)
+    List<GroupBuy> findEndingSoon(Pageable pageable);
 
-    /**
-     * 0-2-a) 마감 임박순 + 카테고리 필터
-     */
+    /** 0-2-a) + 카테고리 필터 */
     @Query("""
        SELECT g
          FROM GroupBuy g
          JOIN g.groupBuyCategories gbc
-        WHERE g.postStatus = :postStatus
+        WHERE g.postStatus = 'OPEN'
           AND gbc.category.id = :categoryId
-          AND g.dueSoon = true
-        ORDER BY g.createdAt DESC, g.id DESC
+        ORDER BY g.dueSoon DESC, g.createdAt DESC, g.id DESC
        """)
-    List<GroupBuy> findByStatusAndCategoryDueSoonOrder(
-            @Param("postStatus") String postStatus,
-            @Param("categoryId") Long categoryId,
-            Pageable pageable
-    );
+    List<GroupBuy> findByCategoryDueSoonOrder(@Param("categoryId") Long categoryId, Pageable pageable);
 
-    /**
-     * 0-3) 가격 낮은 순(unitPrice ASC), 상태 필터
-     */
+    /** 0-3) 가격 낮은 순(unitPrice ASC), ENDED 제외 */
     @Query("""
        SELECT g
          FROM GroupBuy g
-        WHERE g.postStatus = :postStatus
+        WHERE g.postStatus <> 'ENDED'
         ORDER BY g.unitPrice ASC, g.createdAt DESC, g.id DESC
        """)
-    List<GroupBuy> findAllByStatusPriceOrder(
-            @Param("postStatus") String postStatus,
-            Pageable pageable
-    );
+    List<GroupBuy> findAllPriceOrder(Pageable pageable);
 
-    /**
-     * 0-3-a) 가격 낮은 순 + 카테고리 필터
-     */
+    /** 0-3-a) + 카테고리 필터 */
     @Query("""
        SELECT g
          FROM GroupBuy g
          JOIN g.groupBuyCategories gbc
-        WHERE g.postStatus = :postStatus
+        WHERE g.postStatus <> 'ENDED'
           AND gbc.category.id = :categoryId
         ORDER BY g.unitPrice ASC, g.createdAt DESC, g.id DESC
        """)
-    List<GroupBuy> findByStatusAndCategoryPriceOrder(
-            @Param("postStatus") String postStatus,
-            @Param("categoryId") Long categoryId,
-            Pageable pageable
-    );
+    List<GroupBuy> findByCategoryPriceOrder(@Param("categoryId") Long categoryId, Pageable pageable);
 
     // ----------------------------------------------------
-// 1) 최신순(createdAt DESC, id DESC) 커서 페이징 (postStatus 필터 추가)
-// ----------------------------------------------------
+    // 1) 최신순(createdAt DESC, id DESC) 커서 페이징 (ENDED 제외)
+    // ----------------------------------------------------
 
-    /**
-     * 1-1) 최신순 커서 페이징, 상태 필터
-     */
     @Query("""
-   SELECT g
-     FROM GroupBuy g
-    WHERE g.postStatus = :postStatus
-      AND g.id < :cursorId
-    ORDER BY g.createdAt DESC, g.id DESC
-   """)
-    List<GroupBuy> findByStatusCreatedCursor(
-            @Param("postStatus") String postStatus,
-            @Param("cursorId")   Long cursorId,
-            Pageable pageable
-    );
+       SELECT g
+         FROM GroupBuy g
+        WHERE g.postStatus <> 'ENDED'
+          AND g.id < :cursorId
+        ORDER BY g.createdAt DESC, g.id DESC
+       """)
+    List<GroupBuy> findByCreatedCursor(@Param("cursorId") Long cursorId, Pageable pageable);
 
-    /**
-     * 1-1-a) 최신순 + 카테고리 + 상태 필터
-     */
     @Query("""
-   SELECT g
-     FROM GroupBuy g
-     JOIN g.groupBuyCategories gbc
-    WHERE g.postStatus = :postStatus
-      AND gbc.category.id = :categoryId
-      AND g.id < :cursorId
-    ORDER BY g.createdAt DESC, g.id DESC
-   """)
-    List<GroupBuy> findByStatusAndCategoryCreatedCursor(
-            @Param("postStatus") String postStatus,
+       SELECT g
+         FROM GroupBuy g
+         JOIN g.groupBuyCategories gbc
+        WHERE g.postStatus <> 'ENDED'
+          AND gbc.category.id = :categoryId
+          AND g.id < :cursorId
+        ORDER BY g.createdAt DESC, g.id DESC
+       """)
+    List<GroupBuy> findByCategoryCreatedCursor(
             @Param("categoryId") Long categoryId,
             @Param("cursorId")   Long cursorId,
             Pageable pageable
     );
 
+    // ----------------------------------------------------
+    // 2) 마감 임박순 (dueSoon DESC, then createdAt/​id DESC) 커서 페이징 (ENDED 제외)
+    // ----------------------------------------------------
 
-// ----------------------------------------------------
-// 2) 마감 임박순(dueSoon = true, 최신순) 커서 페이징 (postStatus 필터 추가)
-// ----------------------------------------------------
-
-    /**
-     * 2-1) 마감 임박순 커서 페이징, 상태 필터
-     */
     @Query("""
    SELECT g
      FROM GroupBuy g
-    WHERE g.postStatus = :postStatus
-      AND g.dueSoon = true
+    WHERE g.postStatus = 'OPEN'
       AND (
             g.createdAt < :lastCreatedAt
          OR (g.createdAt = :lastCreatedAt AND g.id < :lastId)
           )
-    ORDER BY g.createdAt DESC, g.id DESC
+    ORDER BY g.dueSoon DESC, g.createdAt DESC, g.id DESC
    """)
-    List<GroupBuy> findByStatusDueSoonCursor(
-            @Param("postStatus")     String postStatus,
+    List<GroupBuy> findByEndingSoonCursor(
             @Param("lastCreatedAt") LocalDateTime lastCreatedAt,
             @Param("lastId")        Long lastId,
             Pageable pageable
     );
 
-    /**
-     * 2-1-a) 마감 임박순 + 카테고리 + 상태 필터
-     */
     @Query("""
    SELECT g
      FROM GroupBuy g
      JOIN g.groupBuyCategories gbc
-    WHERE g.postStatus = :postStatus
+    WHERE g.postStatus = 'OPEN'
       AND gbc.category.id = :categoryId
-      AND g.dueSoon = true
       AND (
             g.createdAt < :lastCreatedAt
          OR (g.createdAt = :lastCreatedAt AND g.id < :lastId)
           )
-    ORDER BY g.createdAt DESC, g.id DESC
+    ORDER BY g.dueSoon DESC, g.createdAt DESC, g.id DESC
    """)
-    List<GroupBuy> findByStatusAndCategoryDueSoonCursor(
-            @Param("postStatus")     String postStatus,
+    List<GroupBuy> findByCategoryEndingSoonCursor(
             @Param("categoryId")    Long categoryId,
             @Param("lastCreatedAt") LocalDateTime lastCreatedAt,
             @Param("lastId")        Long lastId,
             Pageable pageable
     );
 
+    // ----------------------------------------------------
+    // 3) 가격 오름차순(unitPrice ASC) 커서 페이징 (ENDED 제외)
+    // ----------------------------------------------------
 
-// ----------------------------------------------------
-// 3) 가격 낮은 순(unitPrice ASC) 커서 페이징 (postStatus 필터 추가)
-// ----------------------------------------------------
-
-    /**
-     * 3-1) 가격 오름차순 커서 페이징, 상태 필터
-     */
     @Query("""
-   SELECT g
-     FROM GroupBuy g
-    WHERE g.postStatus = :postStatus
-      AND (
-            g.unitPrice > :lastPrice
-         OR (g.unitPrice = :lastPrice
-             AND (
-                g.createdAt < :lastCreatedAt
-             OR (g.createdAt = :lastCreatedAt AND g.id < :lastId)
-             )
-           )
+       SELECT g
+         FROM GroupBuy g
+        WHERE g.postStatus <> 'ENDED'
+          AND (
+                g.unitPrice > :lastPrice
+             OR (g.unitPrice = :lastPrice
+                 AND (
+                   g.createdAt < :lastCreatedAt
+                OR (g.createdAt = :lastCreatedAt AND g.id < :lastId)
+                 )
+               )
           )
-    ORDER BY g.unitPrice ASC, g.createdAt DESC, g.id DESC
-   """)
-    List<GroupBuy> findByStatusPriceAscCursor(
-            @Param("postStatus")     String postStatus,
+        ORDER BY g.unitPrice ASC, g.createdAt DESC, g.id DESC
+       """)
+    List<GroupBuy> findByPriceAscCursor(
             @Param("lastPrice")       Integer lastPrice,
             @Param("lastCreatedAt")   LocalDateTime lastCreatedAt,
             @Param("lastId")          Long lastId,
             Pageable pageable
     );
 
-    /**
-     * 3-1-a) 가격 오름차순 + 카테고리 + 상태 필터
-     */
     @Query("""
-   SELECT g
-     FROM GroupBuy g
-     JOIN g.groupBuyCategories gbc
-    WHERE g.postStatus = :postStatus
-      AND gbc.category.id = :categoryId
-      AND (
-            g.unitPrice > :lastPrice
-         OR (g.unitPrice = :lastPrice
-             AND (
-                g.createdAt < :lastCreatedAt
-             OR (g.createdAt = :lastCreatedAt AND g.id < :lastId)
-             )
-           )
+       SELECT g
+         FROM GroupBuy g
+         JOIN g.groupBuyCategories gbc
+        WHERE g.postStatus <> 'ENDED'
+          AND gbc.category.id = :categoryId
+          AND (
+                g.unitPrice > :lastPrice
+             OR (g.unitPrice = :lastPrice
+                 AND (
+                   g.createdAt < :lastCreatedAt
+                OR (g.createdAt = :lastCreatedAt AND g.id < :lastId)
+                 )
+               )
           )
-    ORDER BY g.unitPrice ASC, g.createdAt DESC, g.id DESC
-   """)
-    List<GroupBuy> findByStatusAndCategoryPriceAscCursor(
-            @Param("postStatus")     String postStatus,
+        ORDER BY g.unitPrice ASC, g.createdAt DESC, g.id DESC
+       """)
+    List<GroupBuy> findByCategoryPriceAscCursor(
             @Param("categoryId")      Long categoryId,
             @Param("lastPrice")       Integer lastPrice,
             @Param("lastCreatedAt")   LocalDateTime lastCreatedAt,

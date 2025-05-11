@@ -15,7 +15,10 @@ import com.moogsan.moongsan_backend.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -42,15 +45,10 @@ public class GroupBuyQueryController {
     /// 공구 게시글 상세 조회 V2 update - wish SUCCESS
     @GetMapping("/{postId}")
     public ResponseEntity<WrapperResponse<DetailResponse>> getGroupBuyDetailInfo(
-        @AuthenticationPrincipal Optional<CustomUserDetails> userDetails,
-        @PathVariable Long postId) {
+        @PathVariable Long postId,
+        @AuthenticationPrincipal CustomUserDetails principal) {
 
-        Long userId;
-        if (userDetails == null || userDetails.isEmpty()) {
-            userId = null;
-        } else {
-            userId = userDetails.get().getUser().getId();
-        }
+        Long userId = (principal != null) ? principal.getUser().getId() : null;
 
         DetailResponse detail = groupBuyService.getGroupBuyDetailInfo(userId, postId);
         return ResponseEntity.ok(
@@ -67,7 +65,6 @@ public class GroupBuyQueryController {
             @AuthenticationPrincipal Optional<CustomUserDetails> userDetails,
             @RequestParam(value = "category", required = false) Long categoryId,
             @RequestParam(value = "orderBy", defaultValue = "created") String orderBy,
-            @RequestParam(value = "postStatus") String postStatus,
             @RequestParam(value = "cursorId", required = false) Long cursorId,
             // 커서 페이징용 추가 파라미터들
             @RequestParam(value = "cursorCreatedAt", required = false)
@@ -85,7 +82,7 @@ public class GroupBuyQueryController {
 
         PagedResponse<BasicListResponse> pagedResponse =
                 groupBuyService.getGroupBuyListByCursor(userId, categoryId, orderBy,
-                        postStatus, cursorId, cursorCreatedAt, cursorPrice, limit);
+                        cursorId, cursorCreatedAt, cursorPrice, limit);
         return ResponseEntity.ok(
                 WrapperResponse.<PagedResponse<BasicListResponse>>builder()
                         .message("전체 리스트를 성공적으로 조회했습니다.")

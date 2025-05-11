@@ -99,6 +99,7 @@ public class GroupBuyQueryMapper {
                 .leftAmount(gb.getLeftAmount())
                 .participantCount(gb.getParticipantCount())
                 .dueDate(gb.getDueDate())
+                .dueSoon(gb.isDueSoon())
                 .pickupDate(gb.getPickupDate())
                 .location(gb.getLocation())
                 .isParticipant(isParticipant)
