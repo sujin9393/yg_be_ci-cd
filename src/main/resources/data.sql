@@ -79,9 +79,9 @@ INSERT INTO group_buy_category (
 
 -- 6) orders
 INSERT INTO orders (
-    id, user_id, post_id, status, price, quantity, name, deleted_count, created_at, deleted_at
+    id, user_id, post_id, status, price, quantity, name, deleted_count, created_at, modified_at, deleted_at
 ) VALUES (
-    1, 1, 1, 'PAID', 3000, 3, '박지은', 0, '2025-05-04 13:00:00', NULL
+    1, 1, 40, 'PAID', 2000, 8, '박지은', 0, '2025-05-04 13:00:00', '2025-05-04 13:00:00', NULL
 );
 
 -- 7) 외래키 제약 ON
