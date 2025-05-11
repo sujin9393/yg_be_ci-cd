@@ -3,6 +3,7 @@ package com.moogsan.moongsan_backend.domain.groupbuy.entity;
 import com.moogsan.moongsan_backend.domain.BaseEntity;
 import com.moogsan.moongsan_backend.domain.groupbuy.dto.command.request.UpdateGroupBuyRequest;
 import com.moogsan.moongsan_backend.domain.groupbuy.exception.specific.GroupBuyInvalidStateException;
+import com.moogsan.moongsan_backend.domain.groupbuy.policy.DueSoonPolicy;
 import com.moogsan.moongsan_backend.domain.image.entity.Image;
 import com.moogsan.moongsan_backend.domain.user.entity.User;
 import jakarta.persistence.*;
@@ -143,6 +144,10 @@ public class GroupBuy extends BaseEntity {
             default:
                 throw new GroupBuyInvalidStateException("공구 진행 상태는 CLOSED 또는 ENDED로만 전환할 수 있습니다.");
         }
+    }
+
+    public void updateDueSoonStatus(DueSoonPolicy policy) {
+        this.dueSoon = policy.isDueSoon(this);
     }
 
     // ===========================================

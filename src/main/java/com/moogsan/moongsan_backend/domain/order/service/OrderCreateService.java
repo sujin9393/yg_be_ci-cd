@@ -1,6 +1,7 @@
 package com.moogsan.moongsan_backend.domain.order.service;
 
 import com.moogsan.moongsan_backend.domain.groupbuy.entity.GroupBuy;
+import com.moogsan.moongsan_backend.domain.groupbuy.policy.DueSoonPolicy;
 import com.moogsan.moongsan_backend.domain.groupbuy.repository.GroupBuyRepository;
 import com.moogsan.moongsan_backend.domain.order.dto.request.OrderCreateRequest;
 import com.moogsan.moongsan_backend.domain.order.entity.Order;
@@ -20,6 +21,7 @@ public class OrderCreateService {
     private final UserRepository userRepository;
     private final GroupBuyRepository groupBuyRepository;
     private final OrderRepository orderRepository;
+    private final DueSoonPolicy dueSoonPolicy;
 
     @Transactional
     public void createOrder(OrderCreateRequest request, Long userId) {
@@ -57,6 +59,13 @@ public class OrderCreateService {
 
         groupBuy.decreaseLeftAmount(request.getQuantity());
         groupBuy.increaseParticipantCount();
+        groupBuy.updateDueSoonStatus(dueSoonPolicy);
+
+        if (groupBuy.getLeftAmount() == 0) {
+            groupBuy.changePostStatus("CLOSED");
+        }
+
+        groupBuyRepository.save(groupBuy);
         orderRepository.save(order);
     }
 }
