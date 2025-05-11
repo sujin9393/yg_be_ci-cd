@@ -199,7 +199,7 @@ public class GroupBuyQueryService {
                 nextCursorPrice = last.getUnitPrice();
             }
         }
-        
+
         return PagedResponse.<BasicListResponse>builder()
                 .count(posts.size())
                 .posts(posts)
@@ -216,7 +216,8 @@ public class GroupBuyQueryService {
         GroupBuy groupBuy = groupBuyRepository.findWithImagesById(postId)
                 .orElseThrow(GroupBuyNotFoundException::new);
 
-        boolean isParticipant = orderRepository.existsByUserIdAndGroupBuyIdAndStatusNot(userId, postId, "CANCELED");
+        //log.info("Checking participant: userId={}, postId={}", userId, postId);
+        boolean isParticipant = orderRepository.existsParticipant(userId, postId, "CANCELED");
         boolean isWish = wishRepository.existsByUserIdAndGroupBuyId(userId, postId);
 
         return groupBuyQueryMapper.toDetailResponse(groupBuy, isParticipant, isWish);

@@ -15,7 +15,10 @@ import com.moogsan.moongsan_backend.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -42,15 +45,10 @@ public class GroupBuyQueryController {
     /// 공구 게시글 상세 조회 V2 update - wish SUCCESS
     @GetMapping("/{postId}")
     public ResponseEntity<WrapperResponse<DetailResponse>> getGroupBuyDetailInfo(
-        @AuthenticationPrincipal Optional<CustomUserDetails> userDetails,
-        @PathVariable Long postId) {
+        @PathVariable Long postId,
+        @AuthenticationPrincipal CustomUserDetails principal) {
 
-        Long userId;
-        if (userDetails == null || userDetails.isEmpty()) {
-            userId = null;
-        } else {
-            userId = userDetails.get().getUser().getId();
-        }
+        Long userId = (principal != null) ? principal.getUser().getId() : null;
 
         DetailResponse detail = groupBuyService.getGroupBuyDetailInfo(userId, postId);
         return ResponseEntity.ok(
