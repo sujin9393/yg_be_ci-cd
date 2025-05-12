@@ -79,6 +79,10 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-webflux")
 }
 
+test {
+	systemProperty "spring.profiles.active", "test"
+}
+
 tasks.named('test') {
 	outputs.dir snippetsDir
 	useJUnitPlatform()
