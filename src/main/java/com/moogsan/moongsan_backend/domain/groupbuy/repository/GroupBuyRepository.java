@@ -32,6 +32,20 @@ public interface GroupBuyRepository extends JpaRepository<GroupBuy, Long> {
             Long cursorId,
             Pageable pageable);
 
+    /** 마감 임박 */
+    @Query("""
+    SELECT g
+    FROM GroupBuy g
+    WHERE g.postStatus = 'OPEN'
+      AND g.dueSoon = true
+    ORDER BY ((g.totalAmount - g.leftAmount) * 100.0 / g.totalAmount) DESC,
+             g.createdAt DESC,
+             g.id DESC
+    """)
+    List<GroupBuy> findDueSoonOnly(Pageable pageable);
+
+
+
     // 게시글 조회 - 공구 게시글 수정 전 정보, 공구 게시글 상세
     @EntityGraph(attributePaths = "images")
     Optional<GroupBuy> findWithImagesById(Long id);
@@ -71,8 +85,6 @@ public interface GroupBuyRepository extends JpaRepository<GroupBuy, Long> {
               id DESC
     """, nativeQuery = true)
     List<GroupBuy> findEndingSoon(Pageable pageable);
-
-
 
 
     /** 0-2-a) + 카테고리 필터 */

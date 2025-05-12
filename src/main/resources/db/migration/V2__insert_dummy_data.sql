@@ -8,20 +8,20 @@ INSERT INTO users (
     type, status, joined_at, modified_at, logout_at, deleted_at
 ) VALUES (
       1,
-      'admin@moongsan.com',      -- 관리자용 이메일
-      'admin1234!',              -- 관리자용 비밀번호 (개발용 평문)
-      'adminmaster',             -- 닉네임
-      '관리자 계정',                -- 실명
-      '01099998888',             -- 전화번호
-      '카카오뱅크',                 -- 관리자 계좌 은행
-      '110123456789',            -- 계좌 번호
-      NULL,                      -- 프로필 이미지 없음
-      'ADMIN',                   -- 사용자 유형
-      'ACTIVE',                  -- 상태
-      '2025-05-01 09:00:00',     -- 가입 시각
-      '2025-05-01 09:00:00',     -- 수정 시각
-      NULL,                      -- 로그아웃 시각 없음
-      NULL                       -- 삭제 시각 없음
+      'admin@moongsan.com',
+      'admin1234!',
+      'adminmaster',
+      '관리자 계정',
+      '01099998888',
+      '카카오뱅크',
+      '110123456789',
+      NULL,
+      'ADMIN',
+      'ACTIVE',
+      '2025-05-01 09:00:00',
+      '2025-05-01 09:00:00',
+      NULL,
+      NULL
 );
 
 -- 2) category
@@ -47,7 +47,7 @@ INSERT INTO group_buy (
    '당류 0g, 칼로리 부담 없이 즐기는 탄산음료의 끝판왕! 다이어터, 건강 챙기는 분들 모두를 위한 선택! 250ml 소용량이라 휴대도 간편하고, 30개 대용량이라 나눠 마시기에도 최고!',
    'https://www.coupang.com/vp/products/2358334844?itemId=20262964509&vendorItemId=72077082095&q=부르르+제로+30&itemsCount=36&searchId=fe6fd7ae2113875&rank=6&searchRank=6&isAddedCart=',
    11700, 390, 30, 10, 20, 10,
-   TRUE, NULL, '2025-05-13 10:00:00','카카오테크 교육장','2025-05-22 17:00:00',
+   FALSE, NULL, '2025-05-13 10:00:00','카카오테크 교육장','2025-05-22 17:00:00',
    0,0,0,'OPEN', NULL, 1,'2025-05-11 10:00:00','2025-05-11 10:00:00'),
 
   (3, '🍜 짜라짜라짜짜짜 짜파게티 정품 🍜', '짜파게티 140g, 40개',
@@ -74,18 +74,9 @@ INSERT INTO image (
   ( 4, 'images/cbdd55d5-507b-4d16-93ba-f4cb924fd4ae', NULL, 0, TRUE,  3),
   ( 5, 'images/42119b97-e59f-491b-8572-c16d673076f6', NULL, 0, TRUE,  4);
 
--- 5) group_buy_category (1만 moongsanPick)
-INSERT INTO group_buy_category (
-    id, group_buy_id, category_id
-) VALUES
-  ( 1,  1, 1);
+-- 5) group_buy_category
+INSERT INTO group_buy_category (id, group_buy_id, category_id) VALUES
+  (1, 1, 1);
 
--- 6) orders
-INSERT INTO orders (
-    id, user_id, post_id, status, price, quantity, name, deleted_count, created_at, modified_at, deleted_at
-) VALUES (
-    1, 1, 40, 'PAID', 2000, 8, '박지은', 0, '2025-05-04 13:00:00', '2025-05-04 13:00:00', NULL
-);
-
--- 7) 외래키 제약 ON
+-- 6) 외래키 제약 ON
 SET FOREIGN_KEY_CHECKS = 1;

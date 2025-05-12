@@ -109,7 +109,7 @@ public class GroupBuy extends BaseEntity {
     }
 
     @Transient
-    public boolean isDueSoon() {
+    public boolean isAlmostSoldOut() {
         return getSoldRatio() >= 0.8;
     }
 

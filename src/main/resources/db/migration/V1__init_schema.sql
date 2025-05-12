@@ -31,14 +31,12 @@ CREATE TABLE users (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- 2. 토큰 테이블
-CREATE TABLE token (
+CREATE TABLE refresh_token (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '토큰 아이디',
     user_id BIGINT UNSIGNED NOT NULL COMMENT '유저 아이디',
     token VARCHAR(2048) NOT NULL COMMENT 'refreshToken 문자열',
     expires DATETIME NOT NULL COMMENT '만료 일시',
-    CONSTRAINT fk_refresh_token_user
-        FOREIGN KEY (user_id) REFERENCES users(id)
-        ON DELETE CASCADE,
+    CONSTRAINT fk_refresh_token_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     INDEX idx_user_id (user_id),
     INDEX idx_token (token(255))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -75,6 +73,7 @@ CREATE TABLE group_buy (
     user_id BIGINT UNSIGNED NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     modified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL DEFAULT NULL COMMENT '삭제 시각 (Soft Delete)',
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -99,17 +98,36 @@ CREATE TABLE image (
     FOREIGN KEY (group_buy_id) REFERENCES group_buy(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 7. 위시(관심) 테이블
+-- 7. 주문 테이블
+CREATE TABLE orders (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '주문 아이디',
+
+    user_id BIGINT UNSIGNED NOT NULL COMMENT '유저 아이디',
+    post_id BIGINT UNSIGNED NOT NULL COMMENT '공구 아이디',
+
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING' COMMENT '주문 상태 (PENDING, PAID, CONFIRMED, CANCELED)',
+    price INT UNSIGNED NOT NULL COMMENT '구매 가격',
+    quantity INT UNSIGNED NOT NULL COMMENT '구매 개수',
+    name VARCHAR(50) NOT NULL COMMENT '입금자명',
+
+    deleted_count INT UNSIGNED DEFAULT 0 COMMENT '취소 횟수',
+
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '주문 시각',
+    modified_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 시각',
+    deleted_at TIMESTAMP NULL DEFAULT NULL COMMENT '취소 시각',
+
+    PRIMARY KEY (id),
+    CONSTRAINT fk_orders_user FOREIGN KEY (user_id) REFERENCES users(id),
+    CONSTRAINT fk_orders_post FOREIGN KEY (post_id) REFERENCES group_buy(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 8. 위시(관심) 테이블
 CREATE TABLE wish (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '관심 아이디',
     user_id BIGINT UNSIGNED NOT NULL COMMENT '유저 아이디',
     post_id BIGINT UNSIGNED NOT NULL COMMENT '공구 아이디',
-    CONSTRAINT fk_wish_user
-        FOREIGN KEY (user_id) REFERENCES users(id)
-        ON DELETE CASCADE,
-    CONSTRAINT fk_wish_post
-        FOREIGN KEY (post_id) REFERENCES group_buy(id)
-        ON DELETE CASCADE,
+    CONSTRAINT fk_wish_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_wish_post FOREIGN KEY (post_id) REFERENCES group_buy(id) ON DELETE CASCADE,
     UNIQUE KEY uq_user_post (user_id, post_id),
     INDEX idx_user_id (user_id),
     INDEX idx_post_id (post_id)
