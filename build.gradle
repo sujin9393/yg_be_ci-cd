@@ -1,8 +1,19 @@
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath "mysql:mysql-connector-java:8.0.33"
+	}
+}
+
+
 plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.4.5'
 	id 'io.spring.dependency-management' version '1.1.7'
 	id 'org.asciidoctor.jvm.convert' version '3.3.2'
+	id 'org.flywaydb.flyway' version '10.20.1'
 }
 
 group = 'com.moogsan'
@@ -34,7 +45,17 @@ dependencyManagement {
 	}
 }
 
+flyway {
+	url = 'jdbc:mysql://localhost:3306/moongsan_local_db'
+	user = 'root'
+	password = 'pass'
+	schemas = ['moongsan_local_db']
+	locations = ['filesystem:src/main/resources/db/migration']
+	driver = 'com.mysql.cj.jdbc.Driver'
+}
+
 dependencies {
+	implementation 'org.flywaydb:flyway-core'
 	implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'

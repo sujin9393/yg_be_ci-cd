@@ -68,7 +68,7 @@ public class GroupBuyQueryMapper {
                 .soldAmount(g.getTotalAmount() - g.getLeftAmount())
                 .totalAmount(g.getTotalAmount())
                 .participantCount(g.getParticipantCount())
-                .dueSoon(g.isDueSoon())
+                .dueSoon(g.isAlmostSoldOut())
                 .isWish(isWish)
                 .createdAt(g.getCreatedAt())
                 .build();
@@ -99,7 +99,7 @@ public class GroupBuyQueryMapper {
                 .leftAmount(gb.getLeftAmount())
                 .participantCount(gb.getParticipantCount())
                 .dueDate(gb.getDueDate())
-                .dueSoon(gb.isDueSoon())
+                .dueSoon(gb.isAlmostSoldOut())
                 .pickupDate(gb.getPickupDate())
                 .location(gb.getLocation())
                 .isParticipant(isParticipant)

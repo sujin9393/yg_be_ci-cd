@@ -82,7 +82,7 @@ public class GroupBuyQueryService {
     public PagedResponse<BasicListResponse> getGroupBuyListByCursor(
             Long userId,
             Long categoryId,
-            String orderBy,        // e.g. "latest", "ending_soon", "price_asc"
+            String orderBy,        // e.g. "latest", "ending_soon", "price_asc", "due_soon_only"
             Long cursorId,
             LocalDateTime cursorCreatedAt,
             Integer cursorPrice,
@@ -94,6 +94,11 @@ public class GroupBuyQueryService {
         // 각 정렬에 따라 cursor 유무 분기
         List<GroupBuy> entities;
         switch (orderBy) {
+            case "due_soon_only":
+                entities = groupBuyRepository.findDueSoonOnly(page);
+
+                break;
+
             case "price_asc":
                 int lastPrice = (cursorPrice != null) ? cursorPrice : 0;
                 LocalDateTime lastCreatedForPrice = (cursorCreatedAt != null)
