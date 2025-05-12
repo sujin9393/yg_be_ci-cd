@@ -1,5 +1,6 @@
 package com.moogsan.moongsan_backend.domain.user.service;
 
+import com.moogsan.moongsan_backend.domain.groupbuy.repository.GroupBuyRepository;
 import com.moogsan.moongsan_backend.domain.user.entity.User;
 import com.moogsan.moongsan_backend.domain.user.repository.UserRepository;
 import com.moogsan.moongsan_backend.domain.user.repository.TokenRepository;
@@ -9,6 +10,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.moogsan.moongsan_backend.domain.order.repository.OrderRepository;
+import com.moogsan.moongsan_backend.domain.groupbuy.repository.GroupBuyRepository;
 
 import java.time.LocalDateTime;
 
@@ -18,15 +21,23 @@ public class WithdrawService {
 
     private final UserRepository userRepository;
     private final TokenRepository tokenRepository;
+    private final OrderRepository orderRepository;
+    private final GroupBuyRepository groupBuyRepository;
 
     @Transactional
     public void withdraw(Long userId, HttpServletResponse response) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserException(UserErrorCode.NOT_FOUND, "존재하지 않는 사용자입니다."));
 
-        user.setDeletedAt(LocalDateTime.now());
+        boolean hasActiveOrders = orderRepository.existsByUserIdAndStatusNot(userId, "CANCELED");
+        boolean hasActiveGroupBuys = groupBuyRepository.existsGroupBuyByUserIdAndPostStatusNot(userId, "ENDED");
 
-        tokenRepository.deleteByUserId(userId); // 리프레시 토큰 삭제
+        if (hasActiveOrders || hasActiveGroupBuys) {
+            throw new UserException(UserErrorCode.DUPLICATE_VALUE, "진행 중인 공구 또는 주문이 있습니다.");
+        }
+
+        tokenRepository.deleteByUserId(userId);
+        userRepository.deleteById(userId);
 
         jakarta.servlet.http.Cookie accessTokenCookie = new jakarta.servlet.http.Cookie("AccessToken", null);
         accessTokenCookie.setMaxAge(0);
