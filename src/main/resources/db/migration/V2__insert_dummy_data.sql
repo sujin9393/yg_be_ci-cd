@@ -7,21 +7,21 @@ INSERT INTO users (
     phone_number, account_bank, account_number, image_key,
     type, status, joined_at, modified_at, logout_at, deleted_at
 ) VALUES (
-    1,
-    'test@example.com',
-    'test1234',
-    'testnick',
-    '테스트 유저',
-    '01012345678',
-    '국민은행',
-    '12345678901234',
-    NULL,
-    'USER',
-    'ACTIVE',
-    '2025-05-01 09:00:00',
-    '2025-05-01 09:00:00',
-    NULL,
-    NULL
+      1,
+      'admin@moongsan.com',      -- 관리자용 이메일
+      'admin1234!',              -- 관리자용 비밀번호 (개발용 평문)
+      'adminmaster',             -- 닉네임
+      '관리자 계정',                -- 실명
+      '01099998888',             -- 전화번호
+      '카카오뱅크',                 -- 관리자 계좌 은행
+      '110123456789',            -- 계좌 번호
+      NULL,                      -- 프로필 이미지 없음
+      'ADMIN',                   -- 사용자 유형
+      'ACTIVE',                  -- 상태
+      '2025-05-01 09:00:00',     -- 가입 시각
+      '2025-05-01 09:00:00',     -- 수정 시각
+      NULL,                      -- 로그아웃 시각 없음
+      NULL                       -- 삭제 시각 없음
 );
 
 -- 2) category
