@@ -26,6 +26,7 @@ public class UserProfileService {
                 .phoneNumber(user.getPhoneNumber())
                 .accountBank(user.getAccountBank())
                 .accountNumber(user.getAccountNumber())
+                .type(user.getType())
                 .build();
     }
 }

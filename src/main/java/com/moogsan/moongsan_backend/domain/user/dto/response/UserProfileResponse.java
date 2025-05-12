@@ -15,4 +15,5 @@ public class UserProfileResponse {
     private String phoneNumber; // 전화번호
     private String accountBank; // 은행명
     private String accountNumber;   // 계좌번호
+    private String type;        // 유저유형
 }
