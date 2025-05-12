@@ -32,6 +32,8 @@ public interface GroupBuyRepository extends JpaRepository<GroupBuy, Long> {
             Long cursorId,
             Pageable pageable);
 
+    boolean existsGroupBuyByUserIdAndPostStatusNot(Long userId, String postStatus);
+
     /** 마감 임박 */
     @Query("""
     SELECT g
