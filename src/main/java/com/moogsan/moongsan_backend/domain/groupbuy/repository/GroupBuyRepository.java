@@ -60,17 +60,20 @@ public interface GroupBuyRepository extends JpaRepository<GroupBuy, Long> {
        """)
     List<GroupBuy> findByCategoryCreatedOrder(@Param("categoryId") Long categoryId, Pageable pageable);
 
-    /** 0-2) 마감 임박순(dueSoon = true), ENDED 제외 */
+    /** 0-2) 마감 임박순 정렬 (판매율 높은 순), ENDED 제외 */
     @Query(value = """
-       SELECT *
-         FROM group_buy
-        WHERE post_status = 'OPEN'
-        ORDER BY
-          due_soon DESC,
-          created_at DESC,
-          id DESC
+    SELECT *,
+           (total_amount - left_amount) * 100 / total_amount AS sell_ratio
+      FROM group_buy
+     WHERE post_status = 'OPEN'
+     ORDER BY sell_ratio DESC,
+              created_at DESC,
+              id DESC
     """, nativeQuery = true)
     List<GroupBuy> findEndingSoon(Pageable pageable);
+
+
+
 
     /** 0-2-a) + 카테고리 필터 */
     @Query("""
