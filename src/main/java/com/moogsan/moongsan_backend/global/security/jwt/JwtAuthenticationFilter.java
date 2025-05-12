@@ -8,10 +8,13 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
+import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
@@ -27,37 +30,38 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        String path   = request.getRequestURI();
-        String method = request.getMethod();
-
-
-        // 공개 엔드포인트이면 토큰 검사 없이 바로 통과
-        if (method.equalsIgnoreCase("GET") && path.equals("/api/group-buys")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        // GET /api/group-buys/{숫자} (단일 상세) 스킵
-        //    "/api/group-buys/123", "/api/group-buys/456" 만
-        if (method.equalsIgnoreCase("GET") && path.matches("^/api/group-buys/\\d+$")) {
-            filterChain.doFilter(request, response);
-            return ;
-        }
-
+        //log.debug("▶ JwtFilter start: {} {}", request.getMethod(), request.getRequestURI());
         String token = resolveToken(request);
+        //log.debug("   token={}", token);
 
-        if (token != null && jwtUtil.validateToken(token)) {
+        boolean valid = false;
+        try {
+            valid = (token != null && jwtUtil.validateToken(token));
+        } catch (Exception e) {
+            //log.debug("    token validation threw: {}", e.getMessage());
+        }
+        //log.debug("    token valid? {}", valid);
+
+        if (valid) {
             Long userId = jwtUtil.getUserIdFromToken(token);
+            //log.debug("    token userId={}", userId);
 
-            UserDetails userDetails = userDetailsService.loadUserByUsername(String.valueOf(userId));
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            try {
+                UserDetails userDetails =
+                        userDetailsService.loadUserByUsername(String.valueOf(userId));
+                var auth = new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities()
+                );
+                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-            authentication.setDetails(
-                    new WebAuthenticationDetailsSource().buildDetails(request)
-            );
-
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+                SecurityContextHolder.getContext().setAuthentication(auth);
+                //log.debug("JwtFilter set Authentication for userId={}", userId);
+            } catch (UsernameNotFoundException ex) {
+                // DB에 없는 userId인 경우엔 로그만 남기고 익명 상태 유지
+                //log.warn("토큰의 userId={} 를 DB에서 찾을 수 없어 익명 처리합니다.", userId);
+            }
         }
 
         filterChain.doFilter(request, response);

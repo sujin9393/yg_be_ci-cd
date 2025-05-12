@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -36,6 +37,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // 에러 핸들러 공개
                         .requestMatchers("/error", "/error/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/group-buys",                   // 메인
+                                "/api/group-buys/*"                            // 상세(한 단계 하위)
+                        ).permitAll()
                         // 인증 필요
                         .requestMatchers(HttpMethod.GET,
                                 "/api/group-buys/user/wishes",       // 위시 리스트 조회
@@ -46,14 +51,12 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/users", "/api/users/token", "/api/users/check-nickname", "/api/users/check-email",
                                 "/uploads/**", "/api/group-buys/generation/description").permitAll() // 해당 위치 외에는 토큰 적용
-
-                        .requestMatchers(HttpMethod.GET,
-                                "/api/group-buys",                   // 메인
-                                "/api/group-buys/*"                            // 상세(한 단계 하위)
-                        ).permitAll()
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, userDetailsService), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(
+                        new JwtAuthenticationFilter(jwtUtil, userDetailsService),
+                        AnonymousAuthenticationFilter.class
+                );
 
         return http.build();
     }

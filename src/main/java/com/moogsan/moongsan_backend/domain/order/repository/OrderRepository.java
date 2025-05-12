@@ -29,7 +29,17 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByGroupBuyIdAndStatusNot(Long groupBuyId, String status);
 
     // 특정 유저의 특정 공구 참여 여부 확인
-    boolean existsByUserIdAndGroupBuyIdAndStatusNot(Long userId, Long groupBuyId, String status);
+    @Query("""
+      SELECT CASE WHEN COUNT(o) > 0 THEN TRUE ELSE FALSE END
+        FROM Order o
+       WHERE o.user.id      = :userId
+         AND o.groupBuy.id  = :groupBuyId
+         AND o.status      <> 'CANCELED'
+    """)
+    boolean existsParticipant(
+            @Param("userId") Long userId,
+            @Param("groupBuyId") Long groupBuyId,
+            @Param("status") String status);
 
     // 특정 유저의 공구 게시글 상태별 참여(주문) 리스트 첫 조회
     @Query("""
