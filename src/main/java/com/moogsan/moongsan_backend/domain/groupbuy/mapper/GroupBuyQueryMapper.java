@@ -114,6 +114,7 @@ public class GroupBuyQueryMapper {
         return UserProfileResponse.builder()
                 .authorId(u.getId())
                 .nickname(u.getNickname())
+                .name(u.getName())
                 .accountNumber(u.getAccountNumber())
                 .accountBank(u.getAccountBank())
                 .profileImageUrl(u.getImageKey())
