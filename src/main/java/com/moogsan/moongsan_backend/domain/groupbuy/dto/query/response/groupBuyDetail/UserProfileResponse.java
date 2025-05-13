@@ -12,6 +12,7 @@ public class UserProfileResponse {
     private String nickname;              // 닉네임
 
     // 본문
+    private String name;                  // 실명
     private String accountNumber;         // 계좌 번호
     private String accountBank;           // 은행
     private String profileImageUrl;       // 프로필 이미지
