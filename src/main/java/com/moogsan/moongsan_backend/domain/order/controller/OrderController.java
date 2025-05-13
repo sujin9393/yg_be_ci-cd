@@ -1,5 +1,6 @@
 package com.moogsan.moongsan_backend.domain.order.controller;
 
+import com.moogsan.moongsan_backend.domain.order.dto.response.OrderCreateResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,11 +27,10 @@ public class OrderController {
             @Valid @RequestBody OrderCreateRequest orderCreateRequest,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        orderCreateService.createOrder(orderCreateRequest, Long.valueOf(String.valueOf(userDetails.getUser().getId())));
-//        orderCreateService.changePostStatus(orderCreateRequest.getPostId()); // 남은 수량 0일시 공구 종료
+        OrderCreateResponse responseData = orderCreateService.createOrder(orderCreateRequest, userDetails.getUser().getId());
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("message", "주문이 성공적으로 등록되었습니다.");
-        response.put("data", null);
+        response.put("data", responseData);
         return ResponseEntity.status(201).body(response);
     }
 }

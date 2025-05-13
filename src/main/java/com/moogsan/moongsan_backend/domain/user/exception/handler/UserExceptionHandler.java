@@ -12,23 +12,19 @@ public class UserExceptionHandler {
 
     @ExceptionHandler(UserException.class)
     public ResponseEntity<ErrorResponse> handleUserException(UserException e) {
-        UserErrorCode errorCode = e.getErrorCode();
-        String message = e.getMessage(); // 커스텀 메세지 미제공 시, 기본 메세지 사용
-
         return ResponseEntity
-                .status(errorCode.getStatus())
-                .body(new ErrorResponse(errorCode.getCode(), message));
+                .status(e.getErrorCode().getStatus())
+                .body(new ErrorResponse(e.getMessage(), e.getData()));
     }
 
     @Getter
     public static class ErrorResponse {
-        private final String code;
         private final String message;
+        private final Object data;
 
-        public ErrorResponse(String code, String message) {
-            this.code = code;
+        public ErrorResponse(String message, Object data) {
             this.message = message;
+            this.data = data;
         }
-
     }
 }
