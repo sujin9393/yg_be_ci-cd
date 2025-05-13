@@ -39,7 +39,7 @@ public class CreateGroupBuyRequest {
     private Integer unitAmount;
 
     @NotNull(message = "주최자 주문 수량은 필수 입력 항목입니다.")
-    @Min(value = 1, message = "주최자 주문 수량은 1 이상이어야 합니다.")
+    @Min(value = 0, message = "주최자 주문 수량은 0 이상이어야 합니다.")  /// 이후 1로 수정 필요
     private Integer hostQuantity;
 
     @NotBlank(message = "상품 상세 설명은 필수 입력 항목입니다.")
