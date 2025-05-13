@@ -4,6 +4,7 @@ import com.moogsan.moongsan_backend.domain.groupbuy.entity.GroupBuy;
 import com.moogsan.moongsan_backend.domain.groupbuy.policy.DueSoonPolicy;
 import com.moogsan.moongsan_backend.domain.groupbuy.repository.GroupBuyRepository;
 import com.moogsan.moongsan_backend.domain.order.dto.request.OrderCreateRequest;
+import com.moogsan.moongsan_backend.domain.order.dto.response.OrderCreateResponse;
 import com.moogsan.moongsan_backend.domain.order.entity.Order;
 import com.moogsan.moongsan_backend.domain.order.repository.OrderRepository;
 import com.moogsan.moongsan_backend.domain.user.entity.User;
@@ -24,7 +25,7 @@ public class OrderCreateService {
     private final DueSoonPolicy dueSoonPolicy;
 
     @Transactional
-    public void createOrder(OrderCreateRequest request, Long userId) {
+    public OrderCreateResponse createOrder(OrderCreateRequest request, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "유저 정보를 찾을 수 없습니다."));
 
@@ -67,5 +68,14 @@ public class OrderCreateService {
 
         groupBuyRepository.save(groupBuy);
         orderRepository.save(order);
+
+        return OrderCreateResponse.builder()
+            .productName(groupBuy.getName())
+            .quantity(order.getQuantity())
+            .price(order.getPrice())
+            .hostName(groupBuy.getUser().getName())
+            .hostAccountBank(groupBuy.getUser().getAccountBank())
+            .hostAccountNumber(groupBuy.getUser().getAccountNumber())
+            .build();
     }
 }
