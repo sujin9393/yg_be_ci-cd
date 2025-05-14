@@ -1,8 +1,19 @@
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath "mysql:mysql-connector-java:8.0.33"
+	}
+}
+
+
 plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.4.5'
 	id 'io.spring.dependency-management' version '1.1.7'
 	id 'org.asciidoctor.jvm.convert' version '3.3.2'
+	id 'org.flywaydb.flyway' version '10.20.1'
 }
 
 group = 'com.moogsan'
@@ -28,14 +39,32 @@ ext {
 	set('snippetsDir', file("build/generated-snippets"))
 }
 
+dependencyManagement {
+	imports {
+		mavenBom "software.amazon.awssdk:bom:2.20.0"
+	}
+}
+
+flyway {
+	url = 'jdbc:mysql://localhost:3306/moongsan_local_db'
+	user = 'root'
+	password = 'pass'
+	schemas = ['moongsan_local_db']
+	locations = ['filesystem:src/main/resources/db/migration']
+	driver = 'com.mysql.cj.jdbc.Driver'
+}
+
 dependencies {
+	implementation 'org.flywaydb:flyway-core'
 	implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation "software.amazon.awssdk:s3"
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	implementation 'org.flywaydb:flyway-mysql'
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.h2database:h2'
 	runtimeOnly 'com.mysql:mysql-connector-j'
@@ -44,6 +73,14 @@ dependencies {
 	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5' // or jjwt-gson
+	implementation("org.springframework.boot:spring-boot-starter-webflux")
+}
+
+test {
+	systemProperty "spring.profiles.active", "test"
 }
 
 tasks.named('test') {
