@@ -1,6 +1,7 @@
 package com.moogsan.moongsan_backend.domain.groupbuy.dto.command.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.Lob;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import org.hibernate.validator.constraints.URL;
