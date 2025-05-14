@@ -195,6 +195,11 @@ public class GroupBuyCommandService {
             throw new GroupBuyInvalidStateException("공구 종료는 모집 마감 이후에만 가능합니다.");
         }
 
+        // 해당 공구가 ENDED인지 조회 -> 맞으면 409
+        if (groupBuy.getPostStatus().equals("ENDED")) {
+            throw new GroupBuyInvalidStateException("이미 종료된 공구입니다.");
+        }
+
         // dueDate 이후인지 조회 -> 아니면 409
         if (groupBuy.getDueDate().isAfter(LocalDateTime.now())) {
             throw new GroupBuyInvalidStateException("공구 종료는 공구 마감 일자 이후에만 가능합니다.");
