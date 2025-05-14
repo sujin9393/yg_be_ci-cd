@@ -131,7 +131,7 @@ public class GroupBuyQueryController {
     }
 
     /// 참여 공구 리스트 조회 SUCCESS V2 update - wish SUCCESS, 커서 적용 필요
-    @GetMapping("/users/me/participants")
+    @GetMapping("/user/participants")  // /users/me/participants
     public ResponseEntity<WrapperResponse<PagedResponse<ParticipatedListResponse>>> getGroupBuyParticipatedList(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(value = "sort") String sort,
