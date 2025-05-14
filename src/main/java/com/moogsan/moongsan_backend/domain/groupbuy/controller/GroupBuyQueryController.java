@@ -93,7 +93,7 @@ public class GroupBuyQueryController {
 
 
     /// 관심 공구 리스트 조회 SUCCESS, 커서 적용 완료
-    @GetMapping("/user/wishes")
+    @GetMapping("/users/me/wishes")
     public ResponseEntity<WrapperResponse<PagedResponse<WishListResponse>>> getGroupBuyWishList(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(value = "sort") String sort,
@@ -113,7 +113,7 @@ public class GroupBuyQueryController {
     }
 
     /// 주최 공구 리스트 조회 SUCCESS
-    @GetMapping("/user/hosts")
+    @GetMapping("/users/me/hosts")
     public ResponseEntity<WrapperResponse<PagedResponse<HostedListResponse>>> getGroupBuyHostedList(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(value = "sort") String sort,
@@ -131,7 +131,7 @@ public class GroupBuyQueryController {
     }
 
     /// 참여 공구 리스트 조회 SUCCESS V2 update - wish SUCCESS, 커서 적용 필요
-    @GetMapping("/user/participants")
+    @GetMapping("/users/me/participants")
     public ResponseEntity<WrapperResponse<PagedResponse<ParticipatedListResponse>>> getGroupBuyParticipatedList(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(value = "sort") String sort,
