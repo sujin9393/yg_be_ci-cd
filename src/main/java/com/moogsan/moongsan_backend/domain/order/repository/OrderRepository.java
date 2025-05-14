@@ -23,7 +23,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Optional<Order> findByUserIdAndGroupBuyIdAndStatusNot(Long userId, Long groupBuyId, String status);
 
     // 유저 ID + 상태가 아닌 주문 단건 조희
-    boolean existsByUserIdAndStatusNot(Long userId, String status);
+    boolean existsByUserIdAndStatusNotIn(Long userId, List<String> statuses);
 
     // 특정 공구의 참여 인원 수 확인
     int countByGroupBuyId(Long postId);

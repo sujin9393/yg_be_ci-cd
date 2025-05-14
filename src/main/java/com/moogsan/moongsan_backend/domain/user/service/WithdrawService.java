@@ -14,6 +14,7 @@ import com.moogsan.moongsan_backend.domain.order.repository.OrderRepository;
 import com.moogsan.moongsan_backend.domain.groupbuy.repository.GroupBuyRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +30,7 @@ public class WithdrawService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserException(UserErrorCode.NOT_FOUND, "존재하지 않는 사용자입니다."));
 
-        boolean hasActiveOrders = orderRepository.existsByUserIdAndStatusNot(userId, "CANCELED");
+        boolean hasActiveOrders = orderRepository.existsByUserIdAndStatusNotIn(userId, List.of("CANCELED", "CONFIRMED"));
         boolean hasActiveGroupBuys = groupBuyRepository.existsGroupBuyByUserIdAndPostStatusNot(userId, "ENDED");
 
         if (hasActiveOrders || hasActiveGroupBuys) {
