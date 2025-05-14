@@ -71,7 +71,7 @@ public class GroupBuyQueryController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
             LocalDateTime cursorCreatedAt,
             @RequestParam(value = "cursorPrice", required = false) Integer cursorPrice,
-            @RequestParam(value = "limit", defaultValue = "10") Integer limit
+            @RequestParam(value = "limit", defaultValue = "2147483647") Integer limit // defaultValue = "10" 변경 필요
     ) {
         Long userId;
         if (userDetails == null || userDetails.isEmpty()) {
@@ -138,7 +138,7 @@ public class GroupBuyQueryController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
             LocalDateTime cursorCreatedAt,
             @RequestParam(value = "cursor", required = false) Long cursor,
-            @RequestParam(value = "limit", defaultValue = "10") Integer limit
+            @RequestParam(value = "limit", defaultValue = "2147483647") Integer limit // defaultValue = "10" 추가 필요
     ) {
         PagedResponse<ParticipatedListResponse> pagedResponse = groupBuyService.getGroupBuyParticipatedList(
                 userDetails.getUser().getId(), sort, cursorCreatedAt, cursor, limit);
