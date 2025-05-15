@@ -10,6 +10,7 @@ import com.moogsan.moongsan_backend.domain.groupbuy.exception.specific.GroupBuyN
 import com.moogsan.moongsan_backend.domain.groupbuy.exception.specific.GroupBuyNotHostException;
 import com.moogsan.moongsan_backend.domain.groupbuy.mapper.GroupBuyCommandMapper;
 import com.moogsan.moongsan_backend.domain.groupbuy.mapper.ImageMapper;
+import com.moogsan.moongsan_backend.domain.groupbuy.policy.DueSoonPolicy;
 import com.moogsan.moongsan_backend.domain.groupbuy.repository.GroupBuyRepository;
 import com.moogsan.moongsan_backend.domain.order.entity.Order;
 import com.moogsan.moongsan_backend.domain.order.exception.specific.OrderInvalidStateException;
@@ -34,6 +35,7 @@ public class GroupBuyCommandService {
     private final GroupBuyCommandMapper groupBuyCommandMapper;
     private final OrderRepository orderRepository;
     private final AiClient aiClient;
+    private final DueSoonPolicy dueSoonPolicy;
 
     /// 공구 게시글 작성
     public Long createGroupBuy(User currentUser, CreateGroupBuyRequest createGroupBuyRequest) {
@@ -156,6 +158,8 @@ public class GroupBuyCommandService {
 
         // 해당 유저의 주문을 취소
         order.setStatus("CANCELED");
+
+        groupBuy.updateDueSoonStatus(dueSoonPolicy);
 
         orderRepository.save(order);
 
