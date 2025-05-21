@@ -1,0 +1,45 @@
+name: Backend CI/CD
+
+on:
+  push: 
+    branches: [dev] # dev 브랜치에 push되었을 때 실행
+  pull_request:
+    branches: [dev] # dev 브랜치로 pull request 생성될 때 실행
+  workflow_dispatch: # 수동 실행 허용
+
+env:
+  IMAGE_NAME: sally2020s/yg-be  # 도커 이미지 이름 (DockerHub용)
+  CONTAINER_NAME: yg-backend # 컨테이너 이름 (서버에서 구동될 이름)
+
+jobs:
+  ci:
+    name: "[CI] Build and Save Docker Image"
+    runs-on: ubuntu-latest # GitHub Actions에서 실행될 OS 환경
+
+    steps:
+	    # 1. 현재 GitHub 레포지토리 코드 체크아웃
+      - name: Checkout source     
+        uses: actions/checkout@v3
+      
+      # 2. 도커 빌드를 위한 buildx 세팅
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+			# 3. 도커 이미지 빌드
+      #    - Dockerfile 기준으로 build
+      #    - gradle bootJar로 만든 JAR 파일을 포함하는 이미지 생성
+      - name: Build Docker image with JAR
+        run: docker build -t $IMAGE_NAME .
+
+			# 4. 빌드된 이미지를 .tar 아카이브로 저장 (서버에 복사하기 위함)
+      - name: Save Docker image as tar file
+        run: docker save $IMAGE_NAME > app.tar
+
+			# CD job에서 사용할 수 있도록 Docker image (app.tar)를 artifact로 저장
+      - name: Upload image artifact to pass to CD 
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-image # 저장될 아티팩트 이름 (CD job에서 사용할 이름)
+          path: app.tar # 업로드할 실제 파일 경로
+
+  
