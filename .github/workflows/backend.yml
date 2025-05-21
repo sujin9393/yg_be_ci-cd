@@ -13,7 +13,7 @@ env:
 
 jobs:
   ci:
-    name: [CI] Build and Save Docker Image
+    name: CI
     runs-on: ubuntu-latest # GitHub Actions에서 실행될 OS 환경
 
     steps:
@@ -43,7 +43,7 @@ jobs:
           path: app.tar # 업로드할 실제 파일 경로
 
   cd:
-    name: [CD] Deploy to GCP Server
+    name: CD
     runs-on: ubuntu-latest
     needs: ci
 
