@@ -8,13 +8,13 @@ on:
   workflow_dispatch: # 수동 실행 허용
 
 env:
-  IMAGE_NAME: sally2020s/yg-be  # 도커 이미지 이름 (DockerHub용)
-  CONTAINER_NAME: yg-backend # 컨테이너 이름 (서버에서 구동될 이름)
+  IMAGE_NAME: sally2020s/yg-be  #도커 이미지 이름 (DockerHub용)
+  CONTAINER_NAME: yg-backend #컨테이너 이름 (서버에서 구동될 이름)
 
 jobs:
   ci:
     name: [CI] Build and Save Docker Image
-    runs-on: ubuntu-latest # GitHub Actions에서 실행될 OS 환경
+    runs-on: ubuntu-latest  #GitHub Actions에서 실행될 OS 환경
 
     steps:
 	    # 1. 현재 GitHub 레포지토리 코드 체크아웃
