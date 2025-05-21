@@ -24,7 +24,7 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       - name: Build Docker image with JAR
-        run: docker build -t $IMAGE_NAkdME .
+        run: docker build -t $IMAGE_NAME .
 
       - name: Save Docker image as tar file
         run: docker save $IMAGE_NAME > app.tar
