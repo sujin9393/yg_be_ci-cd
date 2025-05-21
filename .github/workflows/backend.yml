@@ -13,7 +13,7 @@ env:
 
 jobs:
   ci:
-    name: "[CI] Build and Save Docker Image"
+    name: [CI] Build and Save Docker Image
     runs-on: ubuntu-latest # GitHub Actions에서 실행될 OS 환경
 
     steps:
