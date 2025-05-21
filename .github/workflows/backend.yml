@@ -2,24 +2,24 @@ name: Backend CI/CD
 
 on:
   push: 
-    branches: [dev] # dev 브랜치에 push되었을 때 실행
+    branches: [dev]
   pull_request:
-    branches: [dev] # dev 브랜치로 pull request 생성될 때 실행
-  workflow_dispatch: # 수동 실행 허용
+    branches: [dev]
+  workflow_dispatch:
 
 env:
-  IMAGE_NAME: sally2020s/yg-be  # 도커 이미지 이름 (DockerHub용)
-  CONTAINER_NAME: yg-backend # 컨테이너 이름 (서버에서 구동될 이름)
+  IMAGE_NAME: sally2020s/yg-be
+  CONTAINER_NAME: yg-backend
 
 jobs:
   ci:
     name: CI
-    runs-on: ubuntu-latest # GitHub Actions에서 실행될 OS 환경
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout source     
+      - name: Checkout source
         uses: actions/checkout@v3
-      
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
@@ -29,11 +29,11 @@ jobs:
       - name: Save Docker image as tar file
         run: docker save $IMAGE_NAME > app.tar
 
-      - name: Upload image artifact to pass to CD 
+      - name: Upload image artifact to pass to CD
         uses: actions/upload-artifact@v3
         with:
-          name: backend-image # 저장될 아티팩트 이름 (CD job에서 사용할 이름)
-          path: app.tar # 업로드할 실제 파일 경로
+          name: backend-image
+          path: app.tar
 
   cd:
     name: CD
@@ -47,12 +47,10 @@ jobs:
           name: backend-image
 
       - name: Copy Docker image to GCP VM
-        uses: appleboy/scp-action@v0.1.4 
+        uses: appleboy/scp-action@v0.1.4
         with:
-          host: ${{ secrets.GCP_HOST }} # GCP VM의 공인 IP 또는 호스트명
-          username: ${{ secrets.GCP_USERNAME }} # GCP VM의 리눅스 사용자명 (예: ubuntu)
-          key: ${{ secrets.GCP_SSH_KEY }}  # GCP VM에 접근하기 위한 SSH 개인 키
-          source: "app.tar" # 로컬에서 보낼 파일
-          target: "~/backend" # GCP 서버의 목적지 디렉토리
-
-	
+          host: ${{ secrets.GCP_HOST }}
+          username: ${{ secrets.GCP_USERNAME }}
+          key: ${{ secrets.GCP_SSH_KEY }}
+          source: "app.tar"
+          target: "~/backend"
